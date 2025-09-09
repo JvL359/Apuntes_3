@@ -1,13 +1,9 @@
 ---
-title: Primer Cuatri
+title: Apuntes 3º
 ---
-Bienvenido a los apuntes de Jorge González (puto)
+Bienvenido a los apuntes de Jorge González 
+[[Primer Cuatri]]
 
-[[Big Data]]
-[[Computer Vision]]
-[[ForeCasting]]
-[[Geometría Computacional]]
-[[Optimización y Simulación]]
-[[Paradigmas de Programación]]
-[[Sistemas Dinámicos]]
+
+
 
