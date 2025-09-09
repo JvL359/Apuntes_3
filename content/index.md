@@ -1,7 +1,7 @@
 ---
 title: Primer Cuatri
 ---
-
+Bienvenido a los apuntes de Jorge González (puto)
 
 [[Big Data]]
 [[Computer Vision]]
