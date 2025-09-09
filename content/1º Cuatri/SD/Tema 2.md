@@ -83,7 +83,7 @@ Estas funciones serán la base de todas las entradas que estudiemos.
 ## 5) Resolución de ecuaciones diferenciales con Laplace
 
    Dado un modelo LTI: 
-	$a_n y^{(n)}(t)+\dots+a_0 y(t) = b_m u^{(m)}(t)+\dots+b_0 u(t)$
+			$a_n y^{(n)}(t)+\dots+a_0 y(t) = b_m u^{(m)}(t)+\dots+b_0 u(t)$
 
 1. Aplicar Laplace: se convierten derivadas en polinomios de s más condiciones iniciales.
 
@@ -100,15 +100,15 @@ Estas funciones serán la base de todas las entradas que estudiemos.
 # Ejemplo ilustrativo
 
    Ecuación de un circuito RC:
-	$\dot y(t)+\frac{1}{RC}y(t)=\frac{1}{RC}u(t), \quad y(0)=y_0$
+			$\dot y(t)+\frac{1}{RC}y(t)=\frac{1}{RC}u(t), \quad y(0)=y_0$
 
 1. Aplicamos Laplace: 
-	$sY(s)-y(0)+\frac{1}{RC}Y(s)=\frac{1}{RC}U(s)$
+			$sY(s)-y(0)+\frac{1}{RC}Y(s)=\frac{1}{RC}U(s)$
 
 2. Reordenamos:
-	$Y(s)=\frac{1}{RC}\frac{U(s)}{s+1/RC} + \frac{y(0)}{s+1/RC}$​
-	 - Primer término → **respuesta forzada**.
-	 - Segundo término → **respuesta libre**.
+			$Y(s)=\frac{1}{RC}\frac{U(s)}{s+1/RC} + \frac{y(0)}{s+1/RC}$​
+		- Primer término → **respuesta forzada**.
+		- Segundo término → **respuesta libre**.
 
 3. La antitransformada da la clásica respuesta exponencial.
 
