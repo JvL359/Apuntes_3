@@ -37,9 +37,9 @@
 ## 2) Cómo modelaremos: ecuaciones diferenciales LTI
 
 En el curso trabajaremos con **modelos lineales e invariantes en el tiempo (LTI)** descritos por ecuaciones diferenciales lineales con coeficientes constantes:
-$$
-\sum_{i=0}^{n} a_i \frac{d^i y(t)}{dt^i} \;=\; \sum_{j=0}^{m} b_j \frac{d^j u(t)}{dt^j}, 
-\qquad a_n \neq 0,$$
+
+			$\sum_{i=0}^{n} a_i \frac{d^i y(t)}{dt^i} \;=\; \sum_{j=0}^{m} b_j \frac{d^j u(t)}{dt^j}, \qquad a_n \neq 0,$
+
 o, con notación compacta (y la notación de puntos para derivadas: $\dot{y}, \ddot{y}, \ldots$) cuando no haya ambigüedad. Estas ecuaciones aparecen de forma natural al **linealizar** modelos físicos y al aplicar leyes básicas (Kirchhoff en eléctricos; Newton en mecánicos) más **componentes almacenadores** (condensadores, bobinas; masas, resortes, etc.).
 
 - **Linealidad** significa que rige el **principio de superposición** (suma de efectos).
@@ -73,7 +73,9 @@ Usaremos complejos para: (i) representar senoidales de forma compacta, (ii) trab
 - **Operaciones**
     - Sumas/restas: cómodas en **cartesiana**.
     
-    - Productos/cocientes/potencias/raíces: cómodos en **polar**: $$z_1 z_2 = (r_1 r_2)e^{j(\theta_1+\theta_2)}, \quad \frac{z_1}{z_2} = \frac{r_1}{r_2} e^{j(\theta_1-\theta_2)}, \quad z^n = r^n e^{jn\theta}.$$        Para **raíces n-ésimas**: $z_k^{1/n} = r^{1/n} e^{j\frac{\theta + 2\pi k}{n}}, \quad k = 0, \ldots, n-1.$
+    - Productos/cocientes/potencias/raíces: cómodos en **polar**: 
+		    $z_1 z_2 = (r_1 r_2)e^{j(\theta_1+\theta_2)}, \quad \frac{z_1}{z_2} = \frac{r_1}{r_2} e^{j(\theta_1-\theta_2)}, \quad z^n = r^n e^{jn\theta}.$        
+		    Para **raíces n-ésimas**: $z_k^{1/n} = r^{1/n} e^{j\frac{\theta + 2\pi k}{n}}, \quad k = 0, \ldots, n-1.$
     
     - **Desigualdad triangular**: $|z_1 + z_2| \leq |z_1| + |z_2|.$ (Recordatorio útil al acotar magnitudes).
 

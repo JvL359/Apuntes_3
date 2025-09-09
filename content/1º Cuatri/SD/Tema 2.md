@@ -35,30 +35,30 @@ Para una señal $x(t)$, su transformada de Laplace es: $$X(s) = \mathcal{L}\{x(t
             $\mathcal{L}\{Ax_1(t)+Bx_2(t)\} = A X_1(s)+B X_2(s)$
 
 - **Derivadas** (clave para transformar ecuaciones diferenciales):
-    $\mathcal{L}\{\dot x(t)\} = sX(s) - x(0^-)$
-    $\mathcal{L}\{x^{(n)}(t)\} = s^n X(s) - s^{n-1}x(0^-) - \dots - x^{(n-1)}(0^-)$
-    ⇒ Las derivadas se convierten en **potencias de s** más **condiciones iniciales**.
+		    $\mathcal{L}\{\dot x(t)\} = sX(s) - x(0^-)$
+		    $\mathcal{L}\{x^{(n)}(t)\} = s^n X(s) - s^{n-1}x(0^-) - \dots - x^{(n-1)}(0^-)$
+			Las derivadas se convierten en **potencias de s** más **condiciones iniciales**.
 
 - **Integral**: 
-	$\mathcal{L}\left\{ \int_0^t x(\tau)\,d\tau \right\} = \frac{X(s)}{s}$
+			$\mathcal{L}\left\{ \int_0^t x(\tau)\,d\tau \right\} = \frac{X(s)}{s}$
 
 - **Retardo**: 
-	$\mathcal{L}\{x(t-t_0)\} = e^{-st_0}X(s), \quad t_0>0$
+			$\mathcal{L}\{x(t-t_0)\} = e^{-st_0}X(s), \quad t_0>0$
 
 - **Multiplicación por t**: 
-	$\mathcal{L}\{t x(t)\} = -\frac{dX(s)}{ds}$
-    Generalización: $\mathcal{L}\{t^n x(t)\} = (-1)^n \frac{d^n X(s)}{ds^n}$.
+			$\mathcal{L}\{t x(t)\} = -\frac{dX(s)}{ds}$
+		    Generalización: $\mathcal{L}\{t^n x(t)\} = (-1)^n \frac{d^n X(s)}{ds^n}$.
 
 ---
 
 ## 3) Teoremas de valores
 
 - **Valor inicial**: 
-	$x(0^+) = \lim_{s\to\infty} \ sX(s)$.
-    Útil para comprobar condiciones iniciales.
+			$x(0^+) = \lim_{s\to\infty} \ sX(s)$.
+		    Útil para comprobar condiciones iniciales.
 
 - **Valor final** (solo si el límite existe y el sistema es estable): 
-	$x(\infty) = \lim_{s\to 0} \ sX(s)$
+			$x(\infty) = \lim_{s\to 0} \ sX(s)$
 
 Estos teoremas conectan directamente el comportamiento en tiempo con la expresión en s.
 
