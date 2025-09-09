@@ -16,9 +16,9 @@
 
 ## 1) Sistema, señal y modelo (definiciones operativas)
 
-- **Sistema**: cualquier realidad física de interés (eléctrico, mecánico, térmico, hidráulico, biológico, económico…). Trabajaremos con sistemas de muy distinta escala, desde un circuito hasta una red eléctrica. Las variables físicas (tensión, corriente; posición, velocidad; temperatura, etc.) se describen mediante **señales** x(t)x(t)x(t) (funciones del tiempo).
+- **Sistema**: cualquier realidad física de interés (eléctrico, mecánico, térmico, hidráulico, biológico, económico…). Trabajaremos con sistemas de muy distinta escala, desde un circuito hasta una red eléctrica. Las variables físicas (tensión, corriente; posición, velocidad; temperatura, etc.) se describen mediante **señales** $x(t)$ (funciones del tiempo).
 
-- **Entrada** u(t)u(t)u(t) y **salida** y(t)y(t)y(t): clasificamos las señales por su papel causa–efecto. La **entrada** es la excitación impuesta; la **salida** es lo que queremos observar/controlar. Pueden existir **variables internas** (estados) de menor interés directo.
+- **Entrada** $u(t)$ y **salida** $y(t)$: clasificamos las señales por su papel causa–efecto. La **entrada** es la excitación impuesta; la **salida** es lo que queremos observar/controlar. Pueden existir **variables internas** (estados) de menor interés directo.
 
 - **Señales típicas**: constantes, exponenciales, senoidales (a veces amortiguadas) y combinaciones lineales; serán nuestras “piezas de LEGO” para construir respuestas.
 
@@ -26,9 +26,9 @@
 
 ### Estáticos vs. dinámicos
 
-- **Estático**: la salida depende solo del **valor actual** de la entrada. No almacena energía (no hay “memoria”). Ej.: resistor puro (circuito puramente resistivo).
+- **Estático**: la salida depende solo del **valor actual** de la entrada. No almacena energía (no hay “memoria”). Ej: resistor puro (circuito puramente resistivo).
 
-- **Dinámico**: la salida depende de **valores previos** de la entrada (porque hay almacenamiento de energía). Ej.: circuito **RC**: la corriente y la tensión del condensador dependen de cómo venía cambiando la señal (derivadas), no solo de su valor actual. Por eso “recuerda” el pasado reciente.
+- **Dinámico**: la salida depende de **valores previos** de la entrada (porque hay almacenamiento de energía). Ej: circuito **RC**: la corriente y la tensión del condensador dependen de cómo venía cambiando la señal (derivadas), no solo de su valor actual. Por eso “recuerda” el pasado reciente.
 
 > **Ejemplo ilustrativo**: RC serie con entrada $v_i(t)$ y salida $v_o(t)$ en el condensador. Aparecen una resistencia $R$ (disipa) y un condensador $C$ (almacena energía eléctrica). La presencia de $C$ confiere **dinámica**.
 
@@ -50,9 +50,7 @@ o, con notación compacta (y la notación de puntos para derivadas: $\dot{y}, \d
 
 - **Condiciones iniciales** $y(0^-), \dot y(0^-), \ldots$ fijan la **respuesta libre** (debida a energía almacenada), mientras que la **respuesta forzada** viene de la entrada $u(t)$. (La separación libre/forzada se usará continuamente a partir del Tema 2 y 3).
 
-> **Ejemplo RC** (continuación): aplicando leyes de circuito se obtiene un modelo de **primer orden** del tipo 
->      $\tau \dot y(t)+(t)=K u(t), \ \ \tau=RC,  K=1,$
-> cuya solución total es “libre + forzada”. (Veremos su análisis detallado en Tema 5.)
+> **Ejemplo RC** (continuación): aplicando leyes de circuito se obtiene un modelo de **primer orden** del tipo  $\tau \dot y(t)+(t)=K u(t), \ \ \tau=RC,  K=1,$  cuya solución total es “libre + forzada”. (Veremos su análisis detallado en Tema 5.)
 
 ---
 
@@ -65,7 +63,9 @@ Usaremos complejos para: (i) representar senoidales de forma compacta, (ii) trab
     
     - **Polar (módulo–argumento)**: $z=r e^{j\theta}=r(cos⁡\theta+jsin⁡\theta)$
     
-    - **Parte real/imaginaria, módulo y argumento**:  $\operatorname{Re}\{z\}=x,\;\operatorname{Im}\{z\}=y,\; r=|z|=\sqrt{x^2+y^2},\; \theta=\arg z$
+    - **Parte real/imaginaria, módulo y argumento**:  $\operatorname{Re}\{z\}=x,\;\operatorname{Im}\{z\}=y$
+    
+    - **Módulo y argumento**: $r=|z|=\sqrt{x^2+y^2},\; \theta=\arg z$
 
 - **Valores principales**  
     El argumento no es único: $\theta + 2k\pi$. Usamos **valor principal** en $(-\pi,\pi]$ y, en aplicaciones de control, es común preferir fases negativas para evitar saltos aparentes en $\pm\pi$. **Cuidado frecuente**: no usar $arctan⁡(y/x)$ a ciegas; emplear **atan2(y,x)** para obtener el cuadrante correcto.
@@ -73,9 +73,7 @@ Usaremos complejos para: (i) representar senoidales de forma compacta, (ii) trab
 - **Operaciones**
     - Sumas/restas: cómodas en **cartesiana**.
     
-    - Productos/cocientes/potencias/raíces: cómodos en **polar**: $z_1 z_2 = (r_1 r_2)e^{j(\theta_1+\theta_2)}, \quad \frac{z_1}{z_2} = \frac{r_1}{r_2} e^{j(\theta_1-\theta_2)}, \quad z^n = r^n e^{jn\theta}.$
-    
-        Para **raíces n-ésimas**: $z_k^{1/n} = r^{1/n} e^{j\frac{\theta + 2\pi k}{n}}, \quad k = 0, \ldots, n-1.$
+    - Productos/cocientes/potencias/raíces: cómodos en **polar**: $$z_1 z_2 = (r_1 r_2)e^{j(\theta_1+\theta_2)}, \quad \frac{z_1}{z_2} = \frac{r_1}{r_2} e^{j(\theta_1-\theta_2)}, \quad z^n = r^n e^{jn\theta}.$$        Para **raíces n-ésimas**: $z_k^{1/n} = r^{1/n} e^{j\frac{\theta + 2\pi k}{n}}, \quad k = 0, \ldots, n-1.$
     
     - **Desigualdad triangular**: $|z_1 + z_2| \leq |z_1| + |z_2|.$ (Recordatorio útil al acotar magnitudes).
 
@@ -125,7 +123,7 @@ En el **Tema 1** fijamos el idioma de todo el curso:
 
 - qué **modelo LTI** usaremos (ecuaciones diferenciales lineales con coeficientes constantes),
 
-- y el **kit de herramientas complejas** imprescindible para analizar senoidales, polos/ceros y trabajar en el plano $s$.
+- y el **kit de herramientas complejas** imprescindible para analizar senoidales, polos/ceros y trabajar en el plano s.
 
 Esto nos prepara para introducir la **Transformada de Laplace** (Tema 2), la **Función de Transferencia** (Tema 3) y el análisis de **primer/segundo orden** (Temas 5 y 6).
 

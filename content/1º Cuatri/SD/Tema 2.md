@@ -6,7 +6,7 @@
 
 2. Explicar cómo convierte derivadas/condiciones iniciales en términos algebraicos.
  
-3. Exponer las **propiedades fundamentales** (linealidad, derivadas, integrales, retardos, multiplicación por $t$).
+3. Exponer las **propiedades fundamentales** (linealidad, derivadas, integrales, retardos, multiplicación por t).
 
 4. Estudiar los **teoremas del valor inicial y final**.
 
@@ -18,9 +18,7 @@
 
 ## 1) Definición de Transformada de Laplace
 
-Para una señal $x(t)$, su transformada de Laplace es: 
-	$X(s) = \mathcal{L}\{x(t)\} = \int_{0^-}^{\infty} x(t) e^{-st}\, dt$
-
+Para una señal $x(t)$, su transformada de Laplace es: $$X(s) = \mathcal{L}\{x(t)\} = \int_{0^-}^{\infty} x(t) e^{-st}\, dt$$
 - Se pasa del dominio temporal $t$ al dominio complejo $s = \sigma + j\omega$.
 
 - La integral empieza en $0^-$ para incluir condiciones iniciales (valores justo antes de $t=0$).
@@ -34,7 +32,7 @@ Para una señal $x(t)$, su transformada de Laplace es:
 ## 2) Propiedades básicas
 
 - **Linealidad**: 
-	$\mathcal{L}\{Ax_1(t)+Bx_2(t)\} = A X_1(s)+B X_2(s)$
+            $\mathcal{L}\{Ax_1(t)+Bx_2(t)\} = A X_1(s)+B X_2(s)$
 
 - **Derivadas** (clave para transformar ecuaciones diferenciales):
     $\mathcal{L}\{\dot x(t)\} = sX(s) - x(0^-)$
