@@ -61,7 +61,6 @@ o, con notación compacta (y la notación de puntos para derivadas: $\dot{y}, \d
 Usaremos complejos para: (i) representar senoidales de forma compacta, (ii) trabajar con **polos** y **ceros** en el plano complejo, (iii) manejar exponenciales complejas $e^{st}$ (Laplace), fasores y respuestas en frecuencia.
 
 - **Formas**
-    
     - **Cartesiana/binómica**: $z=x+j y$.
     
     - **Polar (módulo–argumento)**: $z=r e^{j\theta}=r(cos⁡\theta+jsin⁡\theta)$
@@ -69,19 +68,15 @@ Usaremos complejos para: (i) representar senoidales de forma compacta, (ii) trab
     - **Parte real/imaginaria, módulo y argumento**:  $\operatorname{Re}\{z\}=x,\;\operatorname{Im}\{z\}=y,\; r=|z|=\sqrt{x^2+y^2},\; \theta=\arg z$
 
 - **Valores principales**  
-    
     El argumento no es único: $\theta + 2k\pi$. Usamos **valor principal** en $(-\pi,\pi]$ y, en aplicaciones de control, es común preferir fases negativas para evitar saltos aparentes en $\pm\pi$. **Cuidado frecuente**: no usar $arctan⁡(y/x)$ a ciegas; emplear **atan2(y,x)** para obtener el cuadrante correcto.
 
 - **Operaciones**
-    
     - Sumas/restas: cómodas en **cartesiana**.
-        
-    - Productos/cocientes/potencias/raíces: cómodos en **polar**:
-        $z_1 z_2 = (r_1 r_2)e^{j(\theta_1+\theta_2)}, \quad \frac{z_1}{z_2} = \frac{r_1}{r_2} e^{j(\theta_1-\theta_2)}, \quad z^n = r^n e^{jn\theta}.$
-        
-        Para **raíces n-ésimas**:
-        $z_k^{1/n} = r^{1/n} e^{j\frac{\theta + 2\pi k}{n}}, \quad k = 0, \ldots, n-1.$
-        
+    
+    - Productos/cocientes/potencias/raíces: cómodos en **polar**: $z_1 z_2 = (r_1 r_2)e^{j(\theta_1+\theta_2)}, \quad \frac{z_1}{z_2} = \frac{r_1}{r_2} e^{j(\theta_1-\theta_2)}, \quad z^n = r^n e^{jn\theta}.$
+    
+        Para **raíces n-ésimas**: $z_k^{1/n} = r^{1/n} e^{j\frac{\theta + 2\pi k}{n}}, \quad k = 0, \ldots, n-1.$
+    
     - **Desigualdad triangular**: $|z_1 + z_2| \leq |z_1| + |z_2|.$ (Recordatorio útil al acotar magnitudes).
 
 > **Interpretación geométrica**: los complejos viven en el **plano complejo** (eje real y eje imaginario). La **suma** se entiende como suma de vectores; el **producto** rota y escala (suma de argumentos y producto de módulos). Esto es clave al interpretar **polos/ceros** en el plano $s = \sigma+j\omega$
@@ -139,9 +134,12 @@ Esto nos prepara para introducir la **Transformada de Laplace** (Tema 2), la **F
 # Qué queda establecido
 
 - **Sistema/Señal/Modelo**: definiciones, roles de **entrada/salida** y existencia de **variables internas**.
-    
+
 - **Dinámico ≠ estático**: el primero **almacena energía** y su salida depende del pasado (ejemplos RC/elementos C,L); el segundo no.
-    
+
 - **Modelo base del curso**: ecuaciones diferenciales **LTI** (linealidad + invariancia temporal), orden, condiciones iniciales y separación **libre/forzada**.
-    
+
 - **Complejos**: formas, módulo, **argumento principal**, uso de **atan2**, operaciones (producto/cociente/potencias/raíces) y lectura geométrica en el plano complejo.
+
+
+Siguiente tema en [[Tema 2]]
