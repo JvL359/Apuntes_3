@@ -104,13 +104,12 @@ Si pongo $U=0$, queda la **libre**; si pongo $C=0$, queda la **forzada**. Cuadra
 
 2. **Valor final** (entrada constante, sistema estable)  
     $\displaystyle y(\infty)=\lim_{s\to 0} s\,Y(s)=\lim_{s\to 0} s\,G(s)\frac{U_0}{s}=G(0)\,U_0$
-	
+
 3. **Estabilidad**  
-    El RC tiene polo en −1/τ<0-1/\tau<0−1/τ<0 ⇒ estable. Si un diagrama en realimentación mueve polos al semiplano derecho, lazo cerrado **inestable**. ✔️
+    El RC tiene polo en $-1/\tau<0$⇒ estable. Si un diagrama en realimentación mueve polos al semiplano derecho, lazo cerrado **inestable**. ✔️
 
 4. **Cancelación**  
-    Si interconecto un bloque con cero en −1/τ-1/\tau−1/τ en **serie** con el RC (polo −1/τ-1/\tau−1/τ), ese modo puede **cancelarse** en GeqG_{\text{eq}}Geq​. Según el caso, puede desaparecer del término forzado, pero **no necesariamente** de la respuesta libre. ✔️
-    
+    Si interconecto un bloque con cero en $-1/\tau$ en **serie** con el RC (polo $-1/\tau$), ese modo puede **cancelarse** en $G_{\text{eq}}$. Según el caso, puede desaparecer del término forzado, pero **no necesariamente** de la respuesta libre. ✔️
 
 ---
 
