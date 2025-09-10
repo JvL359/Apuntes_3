@@ -115,25 +115,24 @@ Si pongo $U=0$, queda la **libre**; si pongo $C=0$, queda la **forzada**. Cuadra
 
 # Conclusión
 
-- G(s)=B(s)A(s)G(s)=\dfrac{B(s)}{A(s)}G(s)=A(s)B(s)​ modela la relación **entrada–salida** con C.I. nulas; en general Y=G U+C/AY=G\,U+C/AY=GU+C/A.
-    
+- $G(s)=\dfrac{B(s)}{A(s)}$ modela la relación **entrada–salida** con C.I. nulas; en general $Y=G\,U+C/A$.
+
 - **Polos** dictan la **dinámica** (modos), **ceros** moldean la forzada y pueden producir **derivaciones** y **cancelaciones**.
-    
-- El **régimen permanente** con entrada constante y senoidal se lee de G(0)G(0)G(0) y G(jω)G(j\omega)G(jω).
-    
+
+- El **régimen permanente** con entrada constante y senoidal se lee de $G(0)$ y $G(j\omega)$.
+
 - Los **diagramas de bloques** permiten sintetizar y simplificar sistemas complejos y estudiar la **realimentación**.
-    
 
 ---
 
 # Qué queda establecido
 
-- **Definición operativa** de **función de transferencia** G(s)G(s)G(s) y su derivación desde la E.D. LTI.
-    
+- **Definición operativa** de **función de transferencia** $G(s)$ y su derivación desde la E.D. LTI.
+
 - **Descomposición** de la respuesta en **libre** y **forzada**.
-    
-- **Polos, ceros y estabilidad**; lectura del régimen permanente (constante y senoidal) vía G(0)G(0)G(0) y G(jω)G(j\omega)G(jω).
-    
-- **Álgebra de bloques** (serie, paralelo, realimentación) para obtener GeqG_{\text{eq}}Geq​.
-    
+
+- **Polos, ceros y estabilidad**; lectura del régimen permanente (constante y senoidal) vía $G(0)$ y $G(j\omega)$.
+
+- **Álgebra de bloques** (serie, paralelo, realimentación) para obtener $G_{\text{eq}}$.
+
 - **Cancelaciones** y “casualidades” (qué términos desaparecen o se refuerzan y en qué condiciones).
