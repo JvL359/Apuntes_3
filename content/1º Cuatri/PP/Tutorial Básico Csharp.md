@@ -377,7 +377,7 @@ string texto = null;
 if (texto == null)
     Console.WriteLine("Está vacío");
 ```
-###### 7.13. None (Null vs Null-able)
+###### 7.13. None (Null vs Nullable)
 > Los **tipos de valor** (como `int`, `double` o `bool`) normalmente no aceptan `null`. Para permitirlo, se usa el modificador `?`, lo que los convierte en **nullable types**. Esto resulta útil cuando un dato puede ser opcional o desconocido. Ejemplo: `int? edad = null;`. De esta forma podemos representar “sin valor” en un tipo que normalmente no lo permite.
 ```cs
 using System;

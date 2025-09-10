@@ -170,7 +170,6 @@ class Program
 > - **Interfaces**, que definen contratos para garantizar que diferentes clases implementen ciertos métodos.
 > - **Clases genéricas**, que permiten escribir código reutilizable para distintos tipos de datos.
 > Estas herramientas enriquecen el diseño y hacen que el código sea más escalable y mantenible.
-
 ###### 2.1. Propiedades: Getters y Setter modernos
 > Las **propiedades** son una forma moderna y segura de exponer campos privados de una clase. Reemplazan a los antiguos _getters_ y _setters_, permitiendo leer (`get`) o modificar (`set`) un valor de forma controlada. Pueden ser automáticas (sin lógica extra) o personalizadas (con validaciones). Mejoran la **encapsulación** y la legibilidad del código.
 ```cs
@@ -302,4 +301,90 @@ class Program
 }
 ```
 
+3. Otros Conceptos: 
+> Además de las estructuras básicas y la programación orientada a objetos, C# incluye características esenciales para escribir programas más robustos y seguros. Entre ellas están las **conversiones de tipos (casting)**, necesarias para trabajar con diferentes tipos de datos; el **manejo de excepciones**, que permite controlar errores sin que el programa se detenga inesperadamente; y los **tipos anulables (nullable types)**, que amplían la flexibilidad de los tipos de valor permitiendo que también puedan representar la ausencia de dato. Estos conceptos son claves para desarrollar aplicaciones reales de manera estable y confiable.
+###### 3.1. Casting: Conversión de tipos
+> El **casting** es el proceso de convertir un valor de un tipo de dato a otro. En C# puede ser:
+> - **Implícito**, cuando la conversión es segura (ejemplo: de `int` a `double`).
+> - **Explícito**, cuando existe riesgo de pérdida de información y se requiere indicar el tipo con paréntesis (ejemplo: de `double` a `int`).  
+    También existen métodos de conversión como `int.Parse()` o `Convert.ToInt32()` para transformar datos entre tipos incompatibles, como texto a número.
+```cs
+using System;
 
+class Program
+{
+    static void Main()
+    {
+        // Conversión implícita (de menor a mayor precisión)
+        int numero = 100;
+        double numeroGrande = numero;
+        Console.WriteLine("Conversión implícita: " + numeroGrande);
+
+        // Conversión explícita (necesita casting)
+        double decimalGrande = 9.8;
+        int entero = (int)decimalGrande; // pierde decimales
+        Console.WriteLine("Conversión explícita: " + entero);
+
+        // Conversión con métodos
+        string texto = "123";
+        int convertido = int.Parse(texto);
+        Console.WriteLine("De texto a entero: " + convertido);
+    }
+}
+```
+###### 3.2. Excepciones: Try-Catch-Finally
+> Las **excepciones** permiten manejar errores de forma controlada. En C# se usa un bloque `try` para ejecutar código que puede fallar, `catch` para capturar el error y reaccionar ante él, y `finally` para ejecutar instrucciones que deben realizarse siempre, ocurra o no un error. Esto hace que el programa no se detenga bruscamente y que podamos dar mensajes claros al usuario o tomar medidas de recuperación.
+```cs
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            Console.Write("Introduce un número: ");
+            int numero = int.Parse(Console.ReadLine());
+            Console.WriteLine("Número ingresado: " + numero);
+        }
+        catch (FormatException)
+        {
+            Console.WriteLine("Error: No ingresaste un número válido.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error inesperado: " + ex.Message);
+        }
+        finally
+        {
+            Console.WriteLine("Bloque finally ejecutado siempre.");
+        }
+    }
+}
+```
+###### 3.3. Nullables
+> Los **tipos de valor** (como `int`, `double` o `bool`) normalmente no aceptan `null`. Para permitirlo, se usa el modificador `?`, convirtiéndolos en **nullable types** (ejemplo: `int?`). Estos permiten representar la ausencia de valor en tipos que normalmente siempre tienen uno. Además, C# ofrece el operador `??` (_null-coalescing_), que permite asignar un valor alternativo cuando la variable es `null`.
+```cs
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int? edad = null; // Nullable int
+
+        if (edad.HasValue)
+        {
+            Console.WriteLine("Edad: " + edad.Value);
+        }
+        else
+        {
+            Console.WriteLine("Edad no especificada.");
+        }
+
+        // Operador null-coalescing (??)
+        int edadDefinitiva = edad ?? 18; // Si es null, toma 18
+        Console.WriteLine("Edad final: " + edadDefinitiva);
+    }
+}
+```
