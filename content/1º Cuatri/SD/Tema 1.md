@@ -38,7 +38,7 @@
 
 En el curso trabajaremos con **modelos lineales e invariantes en el tiempo (LTI)** descritos por ecuaciones diferenciales lineales con coeficientes constantes:
 
-			$\sum_{i=0}^{n} a_i \frac{d^i y(t)}{dt^i} \;=\; \sum_{j=0}^{m} b_j \frac{d^j u(t)}{dt^j}, \qquad a_n \neq 0,$
+$\sum_{i=0}^{n} a_i \frac{d^i y(t)}{dt^i} \;=\; \sum_{j=0}^{m} b_j \frac{d^j u(t)}{dt^j}, \qquad a_n \neq 0,$
 
 o, con notación compacta (y la notación de puntos para derivadas: $\dot{y}, \ddot{y}, \ldots$) cuando no haya ambigüedad. Estas ecuaciones aparecen de forma natural al **linealizar** modelos físicos y al aplicar leyes básicas (Kirchhoff en eléctricos; Newton en mecánicos) más **componentes almacenadores** (condensadores, bobinas; masas, resortes, etc.).
 
