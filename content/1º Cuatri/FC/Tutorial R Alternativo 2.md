@@ -36,7 +36,6 @@ help(package = "forecast")
 ### II. Fundamentos básicos de R
 
 2. Primeros pasos con R
-    
 
 > Antes de entrar en forecasting, repasamos operaciones básicas, vectores y estructuras de datos simples que luego aplicaremos en análisis de series.
 
@@ -64,7 +63,6 @@ df |> mutate(mes = month(fecha, label = TRUE))
 ### III. Importación y series temporales
 
 3. Lectura de datos y creación de series
-    
 
 > El primer paso es importar datos desde Excel o CSV y convertirlos en objetos `ts`, que guardan frecuencia (mensual, trimestral, etc.) y fecha de inicio.
 
@@ -92,7 +90,6 @@ autoplot(y) +
 ### IV. Métodos de descomposición
 
 4. Descomponer una serie
-    
 
 > La descomposición separa la serie en **tendencia**, **estacionalidad** y **residuos**. Es una forma exploratoria de analizar patrones antes de modelar.
 
@@ -128,7 +125,6 @@ ggsubseriesplot(y)
 ### V. Modelos ARMA y ARIMA
 
 5. Identificación y ajuste de modelos
-    
 
 > Los modelos ARMA/ARIMA son fundamentales. Se identifican con ACF/PACF y se ajustan con `Arima()` o `auto.arima()`.
 
@@ -164,7 +160,6 @@ checkresiduals(fit_arima)
 ### VI. Pronósticos y validación
 
 6. Generar y evaluar pronósticos
-    
 
 > Una vez ajustado el modelo, se generan pronósticos y se comparan con los datos reales mediante métricas de error.
 
@@ -186,9 +181,9 @@ accuracy(fc)
 ## Siguientes pasos
 
 - Repite los ejemplos con tus propios datasets (Unemployment, ARMA_series).
-    
+
 - Practica descomposición aditiva vs. multiplicativa y compara con SEATS.
-    
+
 - Ajusta modelos ARMA/ARIMA cambiando el orden y revisa los residuales.
-    
+
 - Avanza a SARIMA y modelos de regresión dinámica según tu plan de clases.

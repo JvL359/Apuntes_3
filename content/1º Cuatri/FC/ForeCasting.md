@@ -1,2 +1,4 @@
 - [[Tutorial R Básico]]
+- [[Tutorial R Avanzado]]
 - [[Tutorial R alternativo 1]]
+- [[Tutorial R Alternativo 2]]
