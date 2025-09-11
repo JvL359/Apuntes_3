@@ -1,4 +1,3 @@
-# Transformada de Laplace
 
 # Enfoque
 

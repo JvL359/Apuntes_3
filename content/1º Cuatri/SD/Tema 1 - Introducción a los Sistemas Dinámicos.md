@@ -1,4 +1,3 @@
-# Introducción a los Sistemas Dinámicos
 
 # Enfoque
 
@@ -142,4 +141,4 @@ Esto nos prepara para introducir la **Transformada de Laplace** (Tema 2), la **F
 - **Complejos**: formas, módulo, **argumento principal**, uso de **atan2**, operaciones (producto/cociente/potencias/raíces) y lectura geométrica en el plano complejo.
 
 
-Siguiente tema en [[Tema 2]]
+Siguiente tema en [[Tema 2 - Transformada de Laplace]]
