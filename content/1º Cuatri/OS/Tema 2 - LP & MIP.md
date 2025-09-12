@@ -98,9 +98,62 @@ Teniendo $x = y_0 + 2y_1 + 4y_2,$ donde cada $y_i \in \{0,1\}$.
 
 > Es un **problema continuo** (LP). Muy útil para introducir el concepto de **mínimo coste bajo restricciones**.
 
+2. Task assignment problem
+**Objetivo:** asignar $n$ agentes a $n$ tareas, de modo que cada agente realice exactamente una tarea y se minimice el coste total.
 
+- **Conjuntos**  
+    $i \in I = \{1,2,\dots,n\}$→ agentes.  
+    $j \in J = \{1,2,\dots,n\}$ → tareas.
 
+- **Parámetros**  
+    $C_{i,j}$: coste de que el agente $i$ realice la tarea $j$.
 
+- **Variables**  
+    $x_{i,j} \in \{0,1\}$: vale 1 si el agente $i$ realiza la tarea $j$, 0 en caso contrario.
+
+- **Modelo matemático**
+$\text{min } \sum_{i=1}^{n} \sum_{j=1}^{n} C_{i,j} x_{i,j}$  s.a.  $\sum_{j=1}^{n} x_{i,j} = 1 \quad \forall i, \quad$ $\sum_{i=1}^{n} x_{i,j} = 1, \quad \forall j$  $x_{i,j} \in \{0,1\}$
+
+> Este es un **problema de asignación** → caso especial del **problema de transporte**.  
+> Es **binario** y por tanto entra dentro de los **MILP**.
+
+3. Knapsack problem
+**Objetivo:** seleccionar items para maximizar valor total sin superar un presupuesto o capacidad.
+
+- **Conjuntos**  
+    $i \in I = \{1,2,\dots,n\}$ → items.
+
+- **Parámetros**
+    - $C_i$​: coste/peso del item $i$.
+    - $V_i$​: valor del item $i$.
+    - $B$: presupuesto o capacidad total.
+
+- **Variables**  
+    $x_i \in \{0,1\}$: 1 si seleccionamos el item $i$, 0 en caso contrario.
+
+- **Modelo matemático**
+$\text{max } \sum_{i=1}^{n} V_i x_i$  s.a.  $\sum_{i=1}^{n} C_i x_i \leq B, \quad x_i \in \{0,1\}$
+
+> Es un **problema combinatorio clásico**, muy usado en logística, selección de proyectos o inversiones.
+
+4. Fixed cost problem
+**Objetivo:** modelar la existencia de **costes fijos de activación** que aparecen al producir una cantidad positiva de algo.
+
+- **Parámetros**
+    - $k$: coste fijo si se produce.
+    - $c$: coste variable por unidad.
+    - $M$: cota superior grande (“big M”).
+
+- **Variables**
+    - $x \geq 0$: cantidad producida.
+    - $y \in \{0,1\}$: decisión de activar o no la producción.
+
+- **Modelo matemático**
+$\text{min } k y + c x$  s.a.  $x \leq M y, \quad x \geq 0, \quad y \in \{0,1\}$
+
+> Esta formulación permite **vincular una decisión binaria (abrir una planta, lanzar un producto, invertir en una línea)** con una variable continua (nivel de producción).
+
+### III. 
 
 > [!tip] **Resumen práctico**
 
