@@ -153,7 +153,70 @@ $\text{min } k y + c x$  s.a.  $x \leq M y, \quad x \geq 0, \quad y \in \{0,1\}$
 
 > Esta formulación permite **vincular una decisión binaria (abrir una planta, lanzar un producto, invertir en una línea)** con una variable continua (nivel de producción).
 
-### III. 
+### III. Proposiciones Lógicas
+> En la vida real, muchas decisiones no son simplemente “cantidades continuas”, sino que implican **reglas condicionales o disyuntivas**.  
+
+ Ejemplos:
+- _“Si fabrico producto A, también debo fabricar producto B”_.
+- _“Elijo al menos una de estas rutas”_.
+- _“Exactamente una máquina debe estar activa”_.
+
+> Para modelarlas en MILP se usan dos herramientas clave:
+> - **Variables binarias** (0-1).
+> - **Técnica del Big M**: introducir una constante suficientemente grande que “relaja” una restricción cuando la binaria está en cierto valor.
+
+1. If–then (implicaciones lógicas)
+> Queremos modelar:  $x_A \geq 1 \implies x_B \geq 1$
+	- No podemos usar la flecha directamente, porque no es lineal.
+	- Solución: introducir una variable binaria $\delta$ y un $Big \ M$.
+> Ejemplo general:
+	$x \leq M \cdot \delta$
+	- Si $\delta = 0$ → obliga a que $x \leq 0$.
+    - Si $\delta = 1$ → la restricción queda relajada, $x \leq M$.
+> De esta forma, controlamos cuándo una condición debe cumplirse.
+
+2. Disjunctive propositions (OR)
+> Queremos modelar: $f(x) \leq 0 \quad \text{OR} \quad g(x) \leq 0$ 
+> 	Estrategia con $Big \ M$ y binaria $\delta$:
+> 	$f(x) \leq M \cdot \delta$  $g(x) \leq M \cdot (1-\delta)$
+> 	- Si $\delta = 0$, se relaja la primera y se fuerza la segunda.
+> 	- Si $\delta = 1$, se relaja la segunda y se fuerza la primera.
+>  Así conseguimos que al menos una de las dos restricciones se cumpla.
+
+3. Cumplir k de N restricciones
+> Queremos que de un conjunto de restricciones, al menos $k$ se cumplan.
+> 	Se introducen $\delta_i$ binarias que indican si la restricción $i$ se relaja:
+> 	$f_i(x) \leq a_i + M \cdot \delta_i \quad \forall i$  
+> 	 $\sum_{i=1}^{N} \delta_i = N - k$
+> Esto garantiza que exactamente $k$ restricciones deben cumplirse de forma estricta.
+
+4. Selección de un valor entre N posibles
+> Queremos forzar que una expresión $f(x)$ tome exactamente uno de los valores $\{a_1, a_2, …, a_N\}$.
+	Usamos binarias $\delta_i$:
+	$f(x) = \sum_{i=1}^N a_i \cdot \delta_i$
+	$\sum_{i=1}^N \delta_i = 1$  $\delta_i \in \{0,1\}$
+> Ejemplo: elegir la localización de una planta entre 3 posibles ciudades.
+
+5. Proposiciones sobre desigualdades (≤, ≥, =)
+> Queremos modelar expresiones del tipo: “$\delta = 1$, entonces $\sum a_j x_j \leq b$”.
+    Se formula como:
+	$\sum a_j x_j \leq b + M (1-\delta)$
+	- Si $\delta=1$, la restricción se cumple tal cual.
+	- Si $\delta=0$, la restricción se relaja con el $Big M$.
+> De manera análoga se hacen para ≥ y =, combinando dos desigualdades.
+
+6. Proposiciones dobles (⟺)
+> Queremos modelar: $\delta = 1 \iff \sum a_j x_j \leq b$
+	Se descompone en dos implicaciones:
+	1. $\delta = 1 \implies \sum a_j x_j \leq b$
+    $\sum a_j x_j \leq b \implies \delta = 1$
+> Esto posteriormente se dividirá como dos implicaciones lógicas con $Big M$.
+
+### IV. Chati
+
+
+### V. Chati
+
 
 > [!tip] **Resumen práctico**
 
