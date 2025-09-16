@@ -1,4 +1,3 @@
-
 ### I. ¿Qué es la Geometría Computacional?
 
 1. Definición 
@@ -50,7 +49,8 @@
 ###### 1.4. Polígono P 
 > Es el conjunto del **interior** más la **poligonal cerrada**. Se usan:   
 > 	$\mathrm{Int}(P)$ (interior), $\mathrm{Fr}(P)=\partial P$ (frontera), $\mathrm{Ext}(P)$ (exterior).  
-> 	**Nota de orientación**: salvo indicación en contra, $P$ viene dado por la lista cíclica $(v_1,\dots,v_n)$ **con orientación positiva** (antihoraria). Tras $v_n$​ sigue $v_1.$ 
+> 	**Vértices:** un vértice es convexo si su ángulo interior es $\leq 180$ y es cóncavo si este es $>180.$
+> 	**Nota de orientación:** salvo indicación en contra, $P$ viene dado por la lista cíclica $(v_1,\dots,v_n)$ **con orientación positiva** (antihoraria). Tras $v_n$​ sigue $v_1.$ 
 
 2. Familias Notables de Polígonos
 ###### 2.1. Convexo
