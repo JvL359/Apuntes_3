@@ -91,6 +91,50 @@
 > **Área de un polígono**
     Para $P=(v_0,v_1,...,v_{n-1}):$ $Área(P) = \frac{1}{2} \sum_{i=0}^{n-1} \Delta(v_0, v_i, v_{i+1})$
 
+### IV. Complejidad
+> Cuando tenemos un problema geométrico, **pueden existir varios algoritmos distintos para resolverlo**. La _complejidad algorítmica_ es la herramienta que usamos para **compararlos objetivamente**, midiendo cuántos recursos consumen:
+> 	- **Tiempo**: número de operaciones elementales.
+> 	- **Espacio**: memoria usada.
+> El interés está en el comportamiento cuando el tamaño de entrada n es grande → **análisis asintótico**.
+
+1. Notación y definiciones
+> Se define $T(n)$: tiempo de ejecución en función del tamaño de entrada n.
+> 	- **O(f(n))**: cota superior (en el peor caso).
+> 	- **Ω(f(n))**: cota inferior (mejor caso).
+> 	- **Θ(f(n))**: orden exacto (cuando O y Ω coinciden).
+> Ejemplo:  Si $T(n)=3n^2+5n$, entonces $T(n)=Θ(n^2).$
+
+2. Tipos de análisis
+> - **Peor caso:** entrada más desfavorable → garantiza que el algoritmo nunca será peor que eso.    
+> - **Caso medio (esperado):** promedio sobre todas las entradas posibles, considerando probabilidades.
+> En este curso, casi siempre se usa **peor caso** por ser más seguro.
+
+3. Reglas Prácticas
+###### 3.1. Suma de fragmentos:  
+> Si $T_1(n)=O(f(n))$  y  $T_2(n)=O(g(n))$, entonces  $T(n)=T_1(n)+T_2(n)=O(\max(f(n),g(n)))$
+    Nos quedamos con el dominante
+    
+###### 3.2. Constantes:  
+> $O(c\cdot f(n))=O(f(n))$.
+    
+###### 3.3. Operaciones básicas (asignación, suma, comparación):  
+> $O(1)$.
+    
+###### 3.4. Condicional:
+> $O(\max(f(n),g(n)))$  porque solo se ejecuta una rama.
+###### 3.5. Recursividad:
+> - Ejemplo 1: $T(n)=c+T(n-1)$ → expansión → $O(n)$.
+> - Ejemplo 2 (divide y vencerás): $T(n)=2T(n/2)+cn$  que se resuelve en $O(n\log n)$.
+
+### V. Operaciones Básicas
+> a
+
+1. Intersección de Segmentos
+> a
 
 
+2. Cálculo de Diagonales
+> a
 
+3. Cálculo de Tangentes
+> a
