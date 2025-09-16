@@ -76,12 +76,13 @@
 3. Area Signada de un Triángulo
 ###### 3.1. Definición
 > Dados 3 puntos $p_1=(x_1,y_1), p_2=(x_2,y_2), p_3=(x_3,y_3),$ definimos $\Delta(p_1,p_2,p_3) = \frac{1}{2} \cdot \begin{vmatrix} x_1 & y_1 & 1 \\ x_2 & y_2 & 1 \\ x_3 & y_3 & 1 \end{vmatrix}.$
+> Respecto de la recta $p_1p_2$ el punto $p_3$ se encuentra:
 > - Si $\Delta > 0$ → orientación positiva (contraria al reloj).
 > - Si $\Delta < 0$→ orientación negativa (sentido horario).
 > - Si $\Delta = 0$ → puntos alineados.
 ###### 3.2. Aplicaciones
 > **Localización de un punto respecto a una recta**
-    Con $\Delta(p_1,p_2,q)$sabemos si $q$ está a la izquierda, derecha o sobre la recta.
+    Con $\Delta(p_1,p_2,q)$ sabemos si $q$ está a la izquierda, derecha o sobre la recta.
 > **Comparación de ángulos con π**
 	Evita cálculos trigonométricos aproximados.      
 >**Clasificación de vértices en un polígono**
