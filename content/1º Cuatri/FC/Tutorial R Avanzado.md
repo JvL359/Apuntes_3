@@ -1,13 +1,17 @@
 
 ### II. Avanzado
 
-1. Introducción a Series Temporales
-> Una **serie temporal** es una secuencia de observaciones tomadas en intervalos regulares de tiempo (diarios, mensuales, trimestrales, etc.). El forecasting se centra en analizar patrones como **tendencia, estacionalidad, ciclos y ruido** para predecir valores futuros.  
-> En R, las series temporales se pueden manejar principalmente con dos tipos de objetos:
-> - `ts` → series regulares (misma frecuencia).
-> - `xts` → series irregulares (ejemplo: datos financieros con fechas específicas).
+1. Introducción a Series Temporales en R
+> Una **serie temporal** es un conjunto de observaciones recogidas en intervalos regulares de tiempo (diarios, mensuales, trimestrales, anuales, etc.). El análisis de series temporales busca identificar patrones como **tendencia**, **estacionalidad** y **ciclos**, además de la parte aleatoria. En R, trabajaremos principalmente con los objetos `ts` (base R) y `xts`/`zoo` (paquetes especializados), que permiten estructurar los datos de forma temporal y aplicar métodos de análisis y pronóstico.  
+> Esta sección introduce cómo **crear**, **visualizar** y **descomponer** series temporales, lo cual es el primer paso antes de aplicar modelos como ARMA o ARIMA.
 ###### 1.1. Creación de Series Temporales
-> Podemos crear series temporales a partir de vectores numéricos o datos financieros descargados con `quantmod`.
+> El objeto **`ts`** es el más utilizado en forecasting. Necesita:
+> 	- **datos numéricos**
+> 	- **inicio** (`start`) → año y período inicial
+> 	- **frecuencia** (`frequency`) → nº de observaciones por unidad de tiempo
+> 		- `12` = mensual
+> 		- `4` = trimestral
+> 		- `1` = anual
 ```r
 library(quantmod)
 library(xts)
