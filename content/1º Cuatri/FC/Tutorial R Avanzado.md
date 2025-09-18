@@ -5,62 +5,90 @@
 > Una **serie temporal** es un conjunto de observaciones recogidas en intervalos regulares de tiempo (diarios, mensuales, trimestrales, anuales, etc.). El análisis de series temporales busca identificar patrones como **tendencia**, **estacionalidad** y **ciclos**, además de la parte aleatoria. En R, trabajaremos principalmente con los objetos `ts` (base R) y `xts`/`zoo` (paquetes especializados), que permiten estructurar los datos de forma temporal y aplicar métodos de análisis y pronóstico.  
 > Esta sección introduce cómo **crear**, **visualizar** y **descomponer** series temporales, lo cual es el primer paso antes de aplicar modelos como ARMA o ARIMA.
 ###### 1.1. Creación de Series Temporales
-> El objeto **`ts`** es el más utilizado en forecasting. Necesita:
-> 	- **datos numéricos**
-> 	- **inicio** (`start`) → año y período inicial
-> 	- **frecuencia** (`frequency`) → nº de observaciones por unidad de tiempo
-> 		- `12` = mensual
-> 		- `4` = trimestral
-> 		- `1` = anual
+> En R, una tarea inicial con series temporales es convertir los datos en objetos que respeten la dimensión temporal. El formato básico es **ts**, que define inicio y frecuencia (ej. 12 mensual, 4 trimestral, 1 anual) y sirve de base para modelos como ARIMA o suavizamiento exponencial. Para datos con fechas irregulares o huecos, son más útiles **xts** o **zoo**, que trabajan con índices Date o POSIXct. Zoo amplió el manejo de series temporales y xts lo perfecciona para análisis financieros y uso con quantmod. En la práctica, **ts** basta con datos regulares, mientras que **xts** y zoo son preferibles en contextos financieros o económicos.
 ```r
-library(quantmod)
+## Ejemplo de creación de series temporales en R
+
+# Cargar librerías necesarias
 library(xts)
+library(zoo)
 
-# Serie temporal regular con ts()
-ventas <- c(120, 135, 128, 142, 138, 155, 162, 148, 158, 165, 172, 180)
-ts_ventas <- ts(ventas, start = c(2023, 1), frequency = 12)  # Mensual
+## 1. Objeto ts (base R)
+# Serie mensual de desempleo desde enero 2010
+# (ejemplo similar al usado en clase con datos de España)
+y <- ts(fdata$TOTAL, start = c(2010,1), frequency = 12)
 
-# Serie temporal irregular con xts()
-fechas <- as.Date(c("2024-01-01", "2024-01-05", "2024-01-10"))
-valores <- c(100, 105, 98)
-ts_irregular <- xts(valores, order.by = fechas)
+# Serie trimestral ficticia desde 2005
+z <- ts(c(5,6,7,8,9,10), start = c(2005,1), frequency = 4)
 
-# Descargar datos de PIB de EE.UU. desde FRED
-getSymbols("GDP", src = "FRED")
-head(GDP)
+## 2. Objeto zoo
+# Creamos una serie con fechas exactas como índice
+fechas <- as.Date(c("2020-01-01","2020-02-01","2020-03-01"))
+valores <- c(100, 120, 110)
+serie_zoo <- zoo(valores, fechas)
+
+## 3. Objeto xts
+# Similar a zoo, pero optimizado para análisis financiero
+serie_xts <- xts(valores, order.by = fechas)
+
+## Visualización rápida
+plot(y, main="Serie ts: mensual", ylab="Valor")
+plot(serie_zoo, main="Serie zoo: índice de fechas")
+plot(serie_xts, main="Serie xts: datos financieros")
 ```
 ###### 1.2. Componentes de una serie temporal
-> Una serie temporal puede descomponerse en:
-> 1. **Tendencia** → dirección a largo plazo (crecimiento o decrecimiento).
-> 2. **Estacionalidad** → patrones que se repiten en periodos fijos (ejemplo: ventas navideñas).
-> 3. **Ciclos** → fluctuaciones irregulares ligadas a la economía.
-> 4. **Ruido** → variaciones aleatorias.
+> Una serie temporal combina varios componentes clave para describir sus patrones: **tendencia** (movimiento de largo plazo), **estacionalidad** (repetición regular en intervalos fijos), **ciclos** (fluctuaciones más largas e irregulares) y **ruido** (parte aleatoria no explicada). Estos pueden representarse en un modelo **aditivo** (los efectos se suman) o **multiplicativo** (los efectos se combinan proporcionalmente). Normalmente, series con variabilidad constante se tratan de forma aditiva, mientras que aquellas con variabilidad creciente se modelan multiplicativamente.
 ```r
-library(ggplot2)
-library(forecast)
+## Ejemplo conceptual de descomposición en R
 
-# Visualizar la serie de ventas
-autoplot(ts_ventas) +
-  ggtitle("Serie Temporal de Ventas") +
-  xlab("Tiempo") + ylab("Unidades")
+library(fpp2)
 
-# Descomposición clásica (aditiva)
-descomp <- decompose(ts_ventas, type = "additive")
-autoplot(descomp)
+# Usamos datos de pasajeros aéreos (AirPassengers)
+y <- AirPassengers
+
+# Descomposición aditiva
+y_add <- decompose(y, type = "additive")
+
+# Descomposición multiplicativa
+y_mult <- decompose(y, type = "multiplicative")
+
+# Visualización de componentes
+autoplot(y_add) + ggtitle("Descomposición aditiva")
+autoplot(y_mult) + ggtitle("Descomposición multiplicativa")
 ```
-###### 1.3. Exploración Inicial de Series
-> Antes de modelar, conviene **inspeccionar propiedades básicas** de la serie: inicio, fin, frecuencia, longitud y resumen estadístico. Estas funciones te permiten confirmar que la serie está correctamente definida antes de pasar a métodos de forecasting.
+###### 1.3. Visualización inicial
+> Antes de aplicar modelos, siempre conviene **graficar la serie temporal**. Las visualizaciones permiten identificar rápidamente si existen **tendencias, estacionalidad o cambios de nivel**. En R se puede usar tanto la función base `plot.ts()` como `autoplot()` del paquete **fpp2/ggplot2**, que ofrece mayor personalización y mejor estética.
 ```r
-# Información de la serie ts
-start(ts_ventas)     # Fecha de inicio
-end(ts_ventas)       # Fecha final
-frequency(ts_ventas) # Frecuencia temporal
-length(ts_ventas)    # Número de observaciones
-summary(ts_ventas)   # Resumen estadístico
+library(fpp2)
 
-# Visualización interactiva
-library(dygraphs)
-dygraph(ts_ventas, main = "Ventas mensuales (2023)") 
+# Serie de desempleo en España (ejemplo)
+y <- ts(fdata$TOTAL, start = c(2010,1), frequency = 12)
+
+# Visualización con autoplot
+autoplot(y) +
+  ggtitle("Unemployment in Spain") +
+  xlab("Year") + ylab("Number unemployed")
+
+# Alternativa base R
+plot.ts(y, main="Unemployment in Spain",
+        xlab="Year", ylab="Number unemployed")
+```
+###### 1.4. Selección de Intervalos (window)
+> Muchas veces no interesa analizar toda la serie disponible, sino un período específico. Con la función `window()` podemos extraer un subconjunto temporal de un objeto `ts`, indicando la fecha de inicio y fin. Esto resulta útil, por ejemplo, para centrarse en los últimos años de datos antes de ajustar un modelo de pronóstico.
+```r
+library(fpp2)
+
+# Serie completa de desempleo mensual desde 2010
+y <- ts(fdata$TOTAL, start = c(2010,1), frequency = 12)
+
+# Extraer sólo el periodo 2015-2019
+y_sub <- window(y, start = c(2015,1), end = c(2019,12))
+
+# Comparación visual
+autoplot(y, series = "Serie completa") +
+  forecast::autolayer(y_sub, series = "2015-2019") +
+  ggtitle("Selección de intervalos con window()") +
+  xlab("Year") + ylab("Number unemployed")
 ```
 
 2. Métodos de Descomposición
@@ -68,12 +96,9 @@ dygraph(ts_ventas, main = "Ventas mensuales (2023)")
 > - **Tendencia (τ)** → movimiento de largo plazo.
 > - **Estacionalidad (σ)** → patrones repetitivos en intervalos regulares.
 > - **Irregularidad (e)** → ruido aleatorio.
-> Existen varios métodos de descomposición:
-> 1. **Clásicos (aditivo y multiplicativo).**
-> 2. **SEATS (basado en modelos ARIMA).**
-> 3. **X11/X13 (métodos Census, comunes en datos económicos).**
+> Esto facilita entender cómo evoluciona la serie y preparar los datos para el modelado. Existen distintos enfoques: la **descomposición clásica** (aditiva o multiplicativa), el método **STL** (Seasonal-Trend decomposition using Loess) y procedimientos más avanzados como **X-13ARIMA-SEATS** implementados en el paquete `seasonal`. Cada uno ofrece distintas ventajas en cuanto a flexibilidad y robustez frente a cambios estructurales.
 ###### 2.1. Descomposición Clásica
-> La **descomposición clásica** usa medias móviles para estimar la tendencia y luego extraer los componentes. 
+> La descomposición clásica es el enfoque más sencillo y se basa en separar una serie temporal en **tendencia, estacionalidad y residuo**. Se aplica bajo dos supuestos:
 > - **Aditiva:** $y(t) = \tau(t) + \sigma(t) + e(t)$
 > 	 Si la estacionalidad es **constante en magnitud**.
 > - **Multiplicativa:** $y(t) = \tau(t) \times \sigma(t) \times e(t)$
