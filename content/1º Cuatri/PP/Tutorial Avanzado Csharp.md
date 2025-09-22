@@ -389,4 +389,4 @@ class Program
 }
 ```
 
-El tutorial sigue en [Tutorial Extra]
+El tutorial sigue en [[Tutorial Extra]]
