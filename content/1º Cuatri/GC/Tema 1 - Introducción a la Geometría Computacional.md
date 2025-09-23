@@ -130,11 +130,33 @@
 > a
 
 1. Intersección de Segmentos
-> a
-
+> Dados dos segmentos $ab$ y $cd$, queremos saber si se cortan en algún punto (intersección **propia**) o si comparten un extremo (intersección **impropia**).
+> Para que $ab$ y $cd$ se corten:
+> 	1. Los puntos no deben ser **colineales**.
+> 	2. $d$ debe estar a la **izquierda** de $ab$ y $c$ a la **derecha** (o al revés).
+> 	3. Simétricamente, $a$ debe estar a la **derecha** de $cd$  y $b$ a la **izquierda** (o al revés).
+> **Casos borde:**
+> 	- Intersección impropia: ocurre cuando un extremo coincide con un punto del otro segmento.
+> 	- Segmentos colineales solapados requieren un test adicional de proyección.
 
 2. Cálculo de Diagonales
-> a
+> Una **diagonal interna** conecta dos vértices del polígono y queda completamente en el interior. Es fundamental para **triangulación**.
+> 1. En un **vértice convexo**: la diagonal es interna si:
+    - $v_{i-1}$​ está a la izquierda de $v_i v_j$  y  $v_{i+1}$​ está a la derecha de $v_i v_j$​.
+> 2. En un **vértice cóncavo**: la diagonal es interna si **no** ocurre que:
+    - $v_{i-1}$​ está a la derecha de $v_i v_j$ ​ y  $v_{i+1}$​ está a la izquierda de $v_i v_j$​.
+> Además, hay que comprobar que la diagonal **no interseca con ninguna arista del polígono**.
 
 3. Cálculo de Tangentes
-> a
+###### 3.1. Tangente desde un punto a un polígono convexo
+> Dado un punto exterior $q$ y un vértice $v_i$​:  
+> El segmento $qv_i$​ es tangente a $P$ si se cumple la condición XOR:
+> 	- $q$ está a la izquierda de $v_{i-1}v_i$.
+> 	- $q$ está a la izquierda de $v_iv_{i+1}$​.
+###### 3.2. Tangentes comunes a dos polígonos convexos
+> **Problema**: hallar las dos rectas tangentes que tocan ambos polígonos y no cortan sus interiores.
+> **Algoritmo** (esquemático):
+> 	1. Escoger el vértice más a la derecha de $A$ y el más a la izquierda de $B$.
+> 	2. Ajustar hasta encontrar las tangentes comunes con pruebas de orientación.
+> 	3. Complejidad: **O(n+m)**.
+
