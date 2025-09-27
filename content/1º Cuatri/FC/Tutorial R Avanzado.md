@@ -1,4 +1,3 @@
-
 ### II. Avanzado
 
 1. Introducción a Series Temporales en R

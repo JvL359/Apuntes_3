@@ -1,4 +1,5 @@
 - [[Tutorial R Básico]]
 - [[Tutorial R Avanzado]]
-- [[Tutorial R alternativo 1]]
+- [[Tutorial R Alternativo 1]]
 - [[Tutorial R Alternativo 2]]
+- [[Week 1 - Decomposition Methods]]

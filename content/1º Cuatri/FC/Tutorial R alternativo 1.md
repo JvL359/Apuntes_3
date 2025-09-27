@@ -1,4 +1,3 @@
-
 # 1) Preparación del entorno (R, RStudio y paquetes)
 
 **Descripción general** → En esta sección instalaremos y configuraremos todo para trabajar con R en pronósticos. Verás qué son R y RStudio, cómo instalar paquetes y dónde encontrar ayuda. Al final tendrás tu entorno listo para cargar datos, analizarlos y crear tus primeros modelos de forecasting.
