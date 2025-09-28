@@ -175,5 +175,5 @@ autoplot(seasadj(y_dec_add), series = "Additive") +
   forecast::autolayer(seasadj(y_dec_seas),series = "SEATS")
 ```
 
-Los apuntes continúan en [[Week 2 -]]
+Los apuntes continúan en [[Week 2 - Stochastic Processes]]
 
