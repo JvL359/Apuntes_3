@@ -239,7 +239,6 @@ y_est <- forecast::forecast(arima.fit, h=5)
 autoplot(y_est)
 ```
 
-
-
+Los apuntes continúan en [[Week 3 -]]
 
 
