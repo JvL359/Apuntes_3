@@ -19,9 +19,9 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ### II. Datos
 #### 1. Lectura y Carga de Datos
 > Cargar un dataset de diferentes tipos de archivos
-> 	- **`read.table`**: forma general de leer cualquier archivo que tenga forma de tabla, pudiendo elegir su separador con `sep` y avisar de un posible encabezado con `header`.
-> 	- **`read.csv`**: especializado para archivos *.csv*; también cuenta con el separador y el encabezado.
-> 	- **`read_excel`**: especializado para archivos *.xls* y *.xlsx*; pudiendo elegir la hoja que cargar como datos con `sheet`.
+> 	- **`read.table`**: forma general de leer cualquier archivo que tenga forma de tabla, pudiendo elegir su separador con *`sep`* y avisar de un posible encabezado con *`header`*.
+> 	- **`read.csv`**: especializado para archivos `.csv`; también cuenta con el separador y el encabezado.
+> 	- **`read_excel`**: especializado para archivos `.xls` y `.xlsx`; pudiendo elegir la hoja que cargar como datos con *`sheet`*.
 ```r
 # 1. Forma General
 fdata <- read.table("Unemployment.dat", sep = ",", header = TRUE)
