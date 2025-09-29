@@ -40,7 +40,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ###### 2.2. Punto de Inicio
 > En este caso el punto de inicio será Ruido Blanco Gaussiano.
 ```r
-# Creación de Ruido Blanco Gaussiano como Serie Temporal
+# Creación de Ruido Blanco Gaussiano
 n <- 500
 set.seed(42)
 w <- ts(rnorm(n, mean = 0, sd = 1))
@@ -139,7 +139,7 @@ autoplot(y, series = "Real") +
 ###### 2.2. Punto de Inicio
 > En este caso el punto de inicio será Ruido Blanco Gaussiano.
 ```r
-# Creación de Ruido Blanco Gaussiano como Serie Temporal
+# Creación de Ruido Blanco Gaussiano
 set.seed(42)
 n <- 1000
 w <- rnorm(n)
@@ -181,7 +181,7 @@ autoplot(head(y, 100))
 ggtsdisplay(y, lag.max = min(n/5, 30))
 ```
 #### 4. Entrenamiento del Modelo
-> a
+> Suponiendo que sabemos que la serie fue generada mediante un $MA(2)$, pero no conocemos los coeficientes $\theta_1, \theta_2$​. Podemos entrenar un modelo ARIMA sobre la serie de datos, escogiendo los parámetros (p,d,q) como (0,0,2).
 ```r
 # 1. Entrenamiento con un Orden de un MA(2)
 arima.fit <- Arima(y, order=c(0, 0, 2), include.mean = FALSE)
@@ -193,7 +193,7 @@ summary(arima.fit)
 coeftest(arima.fit)
 ```
 #### 5. Visualización del Modelo
-> a
+> Nos sirve para analizar gráficamente los resultados del modelo ARIMA ajustado. Se incluyen representaciones del modelo; la validación de residuos, que se definen como $e_t = \hat{y}_t - y_t$ y deberían comportarse como Ruido Blanco Gaussiano; y la comparación entre valores reales y ajustados.
 ```r
 # 1. Estacionariedad
 autoplot(arima.fit)
@@ -209,7 +209,78 @@ ggtsdisplay(residuals(arima.fit), lag.max = 20)
 autoplot(y, series = "Real") +
   forecast::autolayer(arima.fit$fitted, series = "Fitted")
 ```
+
 ### IV. ARMA Processes
+#### 1. Definición
+> Un proceso estocástico $Y_t$ se considera AutoRegresivo y MovingAverage si satisface la ecuación: 
+> 	$Y_t = \phi_1 Y_{t-1} + \dots + \phi_p Y_{t-p} + \theta_1 \varepsilon_{t-1} + \dots + \theta_q \varepsilon_{t-q}$
+> 	Que es una combinación de la ecuación de AR y de MA.
+#### 2. Characteristic Polynomial
+> La expresión en términos del polinomio característico de un proceso $ARMA(p, q)$ es la siguiente:
+> 	$\Phi(B) Y_t = \Theta(B) \varepsilon_t$
+#### 3. Estacionariedad e Invertibilidad
+> Un proceso $ARMA(p , q)$ es estacionario e invertible al mismo tiempo si las raíces de los dos polinomios $\Phi(B)$ y $\Theta(B)$ están fuera del círculo unitario.
+#### 4. Serie Temporal Generada por un ARMA(p, q)
+> Ecuación Inicial: $Y_t = \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \varepsilon_t + \theta_1 \varepsilon_{t-1} + \theta_2 \varepsilon_{t-2}$
+```r
+# 1. Creación de Ruido Blanco Gaussiano
+set.seed(42)
+n <- 1000
+w <- rnorm(n)
 
+# 2. Vectores de Coeficientes Aleatoriosx
+phi <- c(runif(1, -1, 1), 0)
+theta <- c(runif(1, -1, 1), 0)
 
-Los apuntes continúan en [[Week 4 -]]
+# 3. Vector Nulo de Longitud n
+y <- rep(0, n)
+
+# 3. Primeros Valores
+y[1] <- w[1]
+y[2] <- phi[1] * y[1] + w[2] + theta[1] * w[1] 
+
+# 4. Bucle de Simulación de la Serie
+for (t in 3:n){
+  y[t] <- phi[1] * y[t - 1] + phi[2] * y[t - 2] + w[t] + theta[1] * w[t - 1] + theta[2] * w[t - 2]
+}
+
+# 5. Objeto Serie Temporal
+y <- ts(y)
+
+# 6. Plot de la Serie
+autoplot(y)
+```
+#### 5. ACF y PACF de un Modelo ARMA(p, q)
+> Como podemos ver, los patrones en la ACF y la PACF son más difíciles de analizar, y básicamente nos dicen que esto no es un proceso AR o MA puro. Pero encontrar el orden puede ser complicado, y a menudo es cuestión de prueba y error, guiándose por las herramientas de diagnóstico que ya hemos visto.
+> Nuestro objetivo será llegar a un modelo con coeficientes significativos y residuos que se comporten como ruido blanco.
+> Una regla básica es mantener las cosas simples. A veces puede ser tentador empezar con un modelo bastante complejo, como un $ARMA(2,2)$, y luego eliminar los coeficientes no significativos, pero esto no es una buena idea.
+> Repetimos una vez más: la ACF y la PACF deben considerarse conjuntamente. En particular, es un error pensar algo como: “obtienes $p$ mirando la PACF y $q$ mirando la ACF”.
+> En resumen: en ARMA la identificación no es tan directa como en AR o MA puros, y lo importante es simplicidad, significancia de coeficientes y residuos tipo ruido blanco.
+```r
+# Plot Triple de la ARMA, su ACF y su PACF
+ggtsdisplay(y, lag.max = min(n/5, 30))
+```
+
+### V. Extra: Convertir fechas del último al primer día del mes
+> Algunos conjuntos de datos mensuales guardan la fecha como último día del mes (31/01/2023).  
+> Sin embargo, para análisis exploratorio (EDA) y ciertas funciones de R, es más conveniente trabajar con el primer día del mes (01/01/2023).
+> Este apartado muestra cómo hacer esa conversión.
+```r
+# 1. Cargar los Datos con los Últimos Días de cada Mes
+fdata <- read.table("month_final_day.csv", header = TRUE, sep = ",")
+head(fdata)
+
+# 2. Convertir la Columna al Formato Date
+fdata$date <- as.Date(fdata$date, format = "%Y-%m-%d")
+head(fdata)
+
+# 3. Formatear el Día de la Fecha
+fdata$date <- format(fdata$date, format = "%Y-%m-01")
+head(fdata)
+
+# 4. Pasar de String a Date (otra vez)
+fdata$date <- as.Date(fdata$date, format = "%Y-%m-%d")
+head(fdata)
+```
+
+Los apuntes continúan en [[Week 4 - ARIMA Processes]]
