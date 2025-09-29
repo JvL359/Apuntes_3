@@ -1,5 +1,5 @@
 ### I. Previos
-#### 1. Carga de librerías 
+#### 1. Carga de Librerías 
 > En este caso añadiremos la librería ML-Tools a través de un .zip seleccionando esa opción en `Install Packages`.
 > Aparte, importaremos la librería *`lmtest`*, esta se usa para aplicar pruebas estadísticas que ayudan a evaluar y diagnosticar modelos de regresión y series temporales. En concreto, la función *`coeftest()`* nos servirá para contrastar la significancia estadística de los coeficientes de un modelo, mostrando sus estimaciones junto con errores estándar, valores t y p-valores.
 ```r
@@ -239,6 +239,6 @@ y_est <- forecast::forecast(arima.fit, h=5)
 autoplot(y_est)
 ```
 
-Los apuntes continúan en [[Week 3 -]]
+Los apuntes continúan en [[Week 3 - ARMA Processes]]
 
 
