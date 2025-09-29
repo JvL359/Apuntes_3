@@ -218,7 +218,7 @@ summary(arima.fit)
 coeftest(arima.fit)
 ```
 #### 3. Visualización del Modelo
-> Nos sirve para analizar gráficamente los resultados del modelo ARIMA ajustado. Se incluyen representaciones del modelo, la validación de residuos, la comparación entre valores reales y ajustados, la simulación de series con parámetros dados y la proyección de pronósticos.
+> Nos sirve para analizar gráficamente los resultados del modelo ARIMA ajustado. Se incluyen representaciones del modelo, la validación de residuos, la comparación entre valores reales y ajustados, la simulación de series con parámetros dados, y la proyección de pronósticos.
 ```r
 # 1. Plot Modelo Ajustado
 autoplot(arima.fit)  

@@ -31,9 +31,9 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 > 	$\Phi(B)Y_t = (1- \phi_1B - \dots - phi_pB^p)Y_t = \varepsilon_t$
 > 	donde $\Phi(B) = (1- \phi_1B - \dots - phi_pB^p)$ es el polinomio característico del proceso.
 ###### 1.3. Estacionariedad de un AR
-> No todos los procesos AR son estacionarios:  un random walk es un ejemplo de proceso AR(1), pero sabemos que no es estacionario. Un proceso autorregresivo AR(p) es estacionario si y solo si las raíces del polinomio característico están fuera del círculo unitario.
+> No todos los procesos AR son estacionarios:  un random walk es un ejemplo de proceso $AR(1)$, pero sabemos que no es estacionario. Un proceso autorregresivo $AR(p)$ es estacionario si y solo si las raíces del polinomio característico están fuera del círculo unitario.
 > 	Nota: círculo de radio 1 centrado en el (0,0) en el plano complejo.
-#### 2. Generación de una Serie Temporal AR(2) Pura
+#### 2. Serie Temporal Generada por un AR(2) Puro
 ###### 2.1. Ecuación Inicial
 > Usando la notación del Polinomio Característico:
 > 	$(1 - (1/3)B - (1/2)B^2)Y_t = \varepsilon_t$
@@ -68,12 +68,108 @@ for (t in 3:n){
 y <- ts(y)
 ```
 ###### 2.4. Gráficas de la Serie
-> Podemos graficar tanto la serie misma, como su autocorrelación (ACF y PACF).
+> Podemos graficar la serie para ver el comportamiento obtenido tras aplicar esta lógica.
 ```r
-# 1. Plot de la Serie
+# Plot de la Serie
 autoplot(head(y, 100))
-
-# 2. Plot Triple de la Serie AutoRegresiva, su ACF y su PACF
+```
+#### 3. ACF y PACF de un Modelo AR(p) Puro
+> Dada una serie temporal generada por un proceso $AR(p)$ puro, tratar de identificar el valor de $p$ a partir de la ACF no es sencillo. La ACF teórica de un proceso AutoRegresivo puro decae exponencialmente. Sin embargo, el patrón de ese decaimiento puede ser complejo y, además, en la práctica solo tenemos acceso a valores estimados de la ACF.
+> Esa es la razón por la que se utiliza la PACF. La autocorrelación parcial mide la correlación entre valores rezagados (lags) en una serie temporal cuando eliminamos la influencia de los rezagos intermedios que también están correlacionados.
+> La PACF (teórica) de un proceso autorregresivo puro $AR(p)$ es igual a 0 para rezagos mayores que $p$. En la práctica, esto significa que en los gráficos de PACF (estimada) esperamos que solo los primeros $p$ rezagos sean significativamente distintos de 0.
+> Sin embargo, es importante recordar que la ACF y la PACF deben considerarse siempre conjuntamente para identificar la estructura del proceso.
+```r
+# Plot Triple de la Serie AutoRegresiva, su ACF y su PACF
 ggtsdisplay(y, lag.max = min(n/5, 50))
 ```
+#### 4. Entrenamiento del Modelo
+> Suponiendo que sabemos que la serie fue generada mediante un $AR(2)$, pero no sabemos los coeficientes $\phi_1, \phi_2$. Podemos entrenar un modelo ARIMA sobre la serie de datos, escogiendo los parámetros (p,d,q) como (2,0,0).
+```r
+# 1. Entrenamiento con un Orden de un AR(2)
+arima.fit <- Arima(y, order=c(2, 0, 0), include.mean = FALSE)
 
+# 2. Resumen de los Errores de Training y Coeficientes Estimados
+summary(arima.fit) 
+
+# 3. Significancia Estadística de los Coeficientes Estimados
+coeftest(arima.fit)
+```
+#### 5. Visualización del Modelo
+> Nos sirve para analizar gráficamente los resultados del modelo ARIMA ajustado. Se incluyen representaciones del modelo; la validación de residuos, que se definen como $e_t = \hat{y}_t - y_t$ y deberían comportarse como Ruido Blanco Gaussiano; y la comparación entre valores reales y ajustados.
+```r
+# 1. Estacionariedad
+autoplot(arima.fit)
+
+# 2. Diagnóstico de Residuos (Se comporta como ruido blanco?)
+CheckResiduals.ICAI(arima.fit, bins = 100, lags = 20)
+
+# 3. ACF y PACF de los Residuos (Adecuación del modelo)
+ggtsdisplay(residuals(arima.fit), lag.max = 20)
+# Si los residuos no son ruido blanco, cambiar el orden del ARMA
+
+# 4. Comparativa Serie Real y los Valores Ajustados
+autoplot(y, series = "Real") +
+  forecast::autolayer(arima.fit$fitted, series = "Fitted")
+```
+
+### III. MA Processes
+#### 1. Caso No Estacional
+###### 1.1. Definición
+> A
+###### 1.2. Characteristic Polynomial
+> A
+###### 1.3. Invertibilidad
+> A
+#### 2. Serie Temporal Generada por un MA(2) Puro
+###### 2.1. Ecuación Inicial
+> Usando la notación del Polinomio Característico:
+> 	$(1 - (1/3)B - (1/2)B^2)Y_t = \varepsilon_t$
+###### 2.2. Punto de Inicio
+> En este caso el punto de inicio será Ruido Blanco Gaussiano.
+```r
+# Creación de RBG como Serie Temporal
+n <- 500
+set.seed(42)
+w <- ts(rnorm(n, mean = 0, sd = 1))
+head(w, 25)
+```
+###### 2.3. Serie AutoRegresiva
+> Con un bucle vamos generando la serie.
+```r
+# 1. Vector de Coeficientes
+phi <- c(1/3, 1/2)
+
+# 2. Vector Nulo de Longitud n
+y <- rep(0, n)
+
+# 3. Primeros Valores
+y[1] <- w[1]
+y[2] <- -phi[1] * y[1] + w[2]
+
+# 4. Bucle de Simulación de la Serie
+for (t in 3:n){
+  y[t] <- phi[1] * y[t - 1] + phi[2] * y[t - 2] + w[t]
+}
+
+# 5. Objeto Serie Temporal
+y <- ts(y)
+```
+###### 2.4. Gráficas de la Serie
+> Podemos graficar la serie para ver el comportamiento obtenido tras aplicar esta lógica.
+```r
+# Plot de la Serie
+autoplot(head(y, 100))
+```
+#### 3. ACF y PACF de un Modelo MA(p) Puro
+> A
+#### 4. Entrenamiento del Modelo
+> a
+```r
+
+```
+#### 5. Visualización del Modelo
+> a
+```r
+
+```
+### IV. ARMA Processes
