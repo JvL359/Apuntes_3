@@ -17,7 +17,8 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 ### II. AR Processes
-#### 1. Definición en el Caso No Estacional
+#### 1. Caso No Estacional
+###### 1.1. Definición
 > Un proceso estocástico $Y_t$ se considera AutoRegresivo si satisface la siguiente ecuación:
 > 	$Y_t = \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \dots + \phi_p Y_{t-p} + \varepsilon_t$ 
 > 	- $\varepsilon_t$ es Ruido Blanco Gaussiano.
@@ -25,7 +26,54 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 > 	- $p$ es el orden del proceso, que este es llamado $AR(p)$.
 > Una serie temporal que proviene de un proceso AR se denomina *serie temporal autorregresiva*.
 > Este tipo de proceso puede entenderse como análogo a un *modelo de regresión lineal múltiple*, con la diferencia de que las variables explicativas no son externas, sino que son los lags recientes de la propia serie. En otras palabras, la predicción de $Y_t$​ se hace usando como predictores los valores anteriores de la misma serie. Así, la serie se “regresa sobre sí misma”.
-#### 2. BackShift Operator
+###### 1.2. BackShift Operator y Characteristic Polynomial
 > Usando un Operador de Retroceso  $B(Y_t) = Y_{t-1}$  podemos reescribir el proceso como:
 > 	$\Phi(B)Y_t = (1- \phi_1B - \dots - phi_pB^p)Y_t = \varepsilon_t$
 > 	donde $\Phi(B) = (1- \phi_1B - \dots - phi_pB^p)$ es el polinomio característico del proceso.
+###### 1.3. Estacionariedad de un AR
+> No todos los procesos AR son estacionarios:  un random walk es un ejemplo de proceso AR(1), pero sabemos que no es estacionario. Un proceso autorregresivo AR(p) es estacionario si y solo si las raíces del polinomio característico están fuera del círculo unitario.
+> 	Nota: círculo de radio 1 centrado en el (0,0) en el plano complejo.
+#### 2. Generación de una Serie Temporal AR(2) Pura
+###### 2.1. Ecuación Inicial
+> Usando la notación del Polinomio Característico:
+> 	$(1 - (1/3)B - (1/2)B^2)Y_t = \varepsilon_t$
+###### 2.2. Punto de Inicio
+> En este caso el punto de inicio será Ruido Blanco Gaussiano.
+```r
+# Creación de RBG como Serie Temporal
+n <- 500
+set.seed(42)
+w <- ts(rnorm(n, mean = 0, sd = 1))
+head(w, 25)
+```
+###### 2.3. Serie AutoRegresiva
+> Con un bucle vamos generando la serie.
+```r
+# 1. Vector de Coeficientes
+phi <- c(1/3, 1/2)
+
+# 2. Vector Nulo de Longitud n
+y <- rep(0, n)
+
+# 3. Primeros Valores
+y[1] <- w[1]
+y[2] <- -phi[1] * y[1] + w[2]
+
+# 4. Bucle de Simulación de la Serie
+for (t in 3:n){
+  y[t] <- phi[1] * y[t - 1] + phi[2] * y[t - 2] + w[t]
+}
+
+# 5. Objeto Serie Temporal
+y <- ts(y)
+```
+###### 2.4. Gráficas de la Serie
+> Podemos graficar tanto la serie misma, como su autocorrelación (ACF y PACF).
+```r
+# 1. Plot de la Serie
+autoplot(head(y, 100))
+
+# 2. Plot Triple de la Serie AutoRegresiva, su ACF y su PACF
+ggtsdisplay(y, lag.max = min(n/5, 50))
+```
+

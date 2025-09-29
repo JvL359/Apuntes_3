@@ -18,11 +18,16 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 ### II. Ruido Blanco
+> [!note] 
+> Para esta asignatura es muy importante distinguir entre los términos:
+> 	- Estacionario (Stationary), sus propiedades estadísticas (media, varianza, autocorrelaciones) **no dependen del tiempo**.
+> 	- Estacional (Seasonal), se refiere a patrones que se repiten en **periodos de tiempo fijos**.
 #### 1. Definición
 > Un **Proceso de Ruido Blanco** es una secuencia de variables aleatorias:
 > 	- No correlacionadas entre sí (no hay memoria, cada valor es independiente de los anteriores).
-> 	- Con media cero.
-> 	- Con varianza constante (homocedasticidad).
+> 	- Con media cero. \*
+> 	- Con varianza constante (homocedasticidad). \*
+> 		\* Esto hace que un proceso de Ruido Blanco sea *estacionario* 
 > 	- Si además cada valor sigue una distribución normal, hablamos de ruido blanco gaussiano.
 > Formalmente:
 > 	$\{ \varepsilon_t \} \sim WN(0, \sigma^2) \quad \text{con} \quad E[\varepsilon_t] = 0, \quad Var(\varepsilon_t) = \sigma^2, \quad Cov(\varepsilon_t, \varepsilon_{t'} ) = 0 \ \forall t \neq t'$
@@ -49,7 +54,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 #### 3. Creación
 > Para crear una serie temporal de ruido blanco gaussiano obtenemos una muestra de n valores aleatorios de una distribución normal estándar, y se lo asignamos a un objeto ts.
 ```r
-# 1. N muestras normales estándar
+# 1. Muestra Aleatoria
 n <- 150
 z <- rnorm(n, mean = 0, sd = 1) 
 
@@ -59,10 +64,10 @@ w <- ts(z)
 #### 4. Visualización 
 > Nos sirve para comprobar que no hay patrones ni correlaciones, confirmando que se trata solo de fluctuaciones aleatorias.
 ```r
-# 1. Solo valores numéricos
+# 1. Solo Valores Numéricos
 head(w, 25)
 
-# 2. Gráfica de la serie
+# 2. Gráfica de la Serie
 autoplot(w) +
   ggtitle("White noise") + 
   geom_point(aes(x = 1:n, y = z), size=1.5, col="blue")
@@ -80,7 +85,7 @@ autoplot(w) +
 > 		- Y así sucesivamente.
 > 	El `lag 0` es la serie comparada consigo misma, que por definición la correlación siempre es 1.
 ```r
-# Plot triple de la serie del ruido, su ACF y su PACF
+# Plot Triple de la Serie del Ruido, su ACF y su PACF
 ggtsdisplay(w, lag.max = 20)
 ```
 
@@ -104,7 +109,7 @@ ggtsdisplay(w, lag.max = 20)
 #### 3. Creación
 > Para crear una serie temporal de ruido blanco gaussiano obtenemos la suma acumulada de una muestra de n valores aleatorios de una distribución normal estándar (con o sin constante de drift), y se lo asignamos a un objeto ts. Usaremos `set.seed` para que cada vez que ejecutemos el código obtengamos el mismo resultado, esto es imprescindible para la reproducibilidad.
 ```r
-# 1. Muestra aleatoria
+# 1. Muestra Aleatoria
 n = 1000
 set.seed(2024)
 w = 10 * rnorm(n)
@@ -118,7 +123,7 @@ rw_ts = ts(k * (1:n)  + cumsum(w))
 #### 4. Visualización
 > Nos sirve para apreciar cómo los shocks aleatorios acumulados generan trayectorias con tendencia aparente y varianza creciente, a diferencia del ruido blanco.
 ```r
-# Gráfica de la serie
+# Gráfica de la Serie
 autoplot(rw_ts) +
   ggtitle("Random walk with drift") 
 ```
@@ -128,7 +133,7 @@ autoplot(rw_ts) +
 > - **`PACF`**: suele tener un pico muy alto en el `lag 1` (ya que cada valor depende directamente del anterior), pero después las correlaciones parciales se reducen rápidamente.
 > 	*`Idea clave`*: Mientras que el ruido blanco tiene una ACF y PACF planas, el random walk presenta autocorrelaciones persistentes en la ACF y un corte claro en el primer lag de la PACF.
 ```r
-# Plot triple de la serie del random walk, su ACF y su PACF
+# Plot Triple de la Serie del Random Walk, su ACF y su PACF
 ggtsdisplay(rw_ts, lag.max = 50)
 ```
 
@@ -140,13 +145,13 @@ ggtsdisplay(rw_ts, lag.max = 50)
 ###### 2.1. Graficar la Serie Temporal
 > Se ve la tendencia creciente de la serie y los posibles picos repetidos cada periodo estacional.
 ```r
-# PLot
+# PLot de la Serie
 autoplot(AirPassengers)
 ```
 ###### 2.2. Graficar el ACF y PACF
 > Usamos `ggtsdisplay` para obtener el gráfico de la serie con su ACF y PACF.
 ```r
-# Plot triple de la serie del random walk, su ACF y su PACF
+# Plot Triple de la Serie del Random Walk, su ACF y su PACF
 ggtsdisplay(AirPassengers)
 ```
 ###### 2.3. Valores Individuales

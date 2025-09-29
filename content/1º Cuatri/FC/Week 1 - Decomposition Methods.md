@@ -59,7 +59,7 @@ glimpse(fdata)
 # 1. Convertir a Date
 fdata$DATE <- as.Date(fdata$DATE, format = "%d/%m/%Y")
 
-# 2. Ordenar fechas
+# 2. Ordenar Fechas
 fdata <- arrange(fdata, DATE)
 
 # 3. Identifiación
@@ -69,12 +69,12 @@ glimpse(fdata)
 > - **`Mínimo y Máximo Valor`**: Para establecer una secuencia de fechas y compararla con la serie. Esta secuencia hay que ordenarla por la frecuencia de la serie obtenida en 
 > - **`Comparación`**: Si la longitud es 0 significa que no hay ningún gap.
 ```r
-# 1. Secuencia de Fechas entre la mínima y la máxima de la serie temporal
+# 1. Secuencia de Fechas entre la Mínima y la Máxima de la Serie Temporal
 valMin <- min(fdata$Data)
 valMax <- min(fdata$Data)
 date_range <- seq.Date(valMin, valMax, by = "months")
 
-# 2. Comparación de la secuencia con la propia serie temporal
+# 2. Comparación de la Secuencia con la Propia Serie Temporal
 setdiff(date_range, fdata$DATE)
 ```
 
@@ -94,7 +94,7 @@ y <- ts(fdata$TOTAL, start = c(2010, 1), frequency = 12)
 ###### 2.1. Visualización Inicial Completa
 > Representa la serie temporal completa de inicio a fin.
 ```r
-# Se puede añadir título y labels
+# Se Puede Añadir Título y Labels
 autoplot(y) +
   ggtitle("Unemployment in Spain") +
   xlab("Year") + ylab("Number unemployed")
@@ -107,7 +107,7 @@ y_a <- window(y, end = c(2019, 12))
 y_b <- window(y, start = c(2020, 1))
 y_c <- window(y, start = c(2015, 1), end = c(2017, 12))
 
-# 2. Gráfica conjunta de los Intervalos
+# 2. Gráfica Conjunta de los Intervalos
 autoplot(y_a, color="orange") +
   autolayer(y_b, color = "blue") +
   autolayer(y_c, color = "red") +
@@ -126,7 +126,7 @@ autoplot(y_a, color="orange") +
 # Descomposición
 y_dec_add <- decompose(y, type="additive")
 
-# 2. Gráfica de la descomposición
+# 2. Gráfica de la Descomposición
 autoplot(y_dec_add) + xlab("Year") +
   ggtitle("Classical additive decomposition")
 ```
@@ -139,7 +139,7 @@ autoplot(y_dec_add) + xlab("Year") +
 # 1. Descomposición
 y_dec_mult <- decompose(y, type="multiplicative")
 
-# 2. Gráfica de la descomposición
+# 2. Gráfica de la Descomposición
 autoplot(y_dec_mult) + xlab("Year") +
   ggtitle("Classical multiplicative decomposition")
 ```
@@ -156,7 +156,7 @@ library(seasonal)
 # 1. Descomposición
 y_dec_seas <- seas(y)
 
-# 2. Gráfica de la descomposición
+# 2. Gráfica de la Descomposición
 autoplot(y_dec_seas) + xlab("Year") +
   ggtitle("SEATS decomposition")
 ```
@@ -165,11 +165,11 @@ autoplot(y_dec_seas) + xlab("Year") +
 > Comparar **componentes estacionales** permite verificar si el patrón de estacionalidad es estable a lo largo del tiempo o si ha cambiado (por ejemplo, si la estacionalidad de las ventas de verano ahora empieza antes o es más intensa que antes).
 > **Ajustar los componentes estacionales** consiste en eliminar ese efecto estacional de la serie, de modo que se pueda analizar mejor la tendencia y el ciclo subyacente sin que los picos y valles regulares confundan el análisis.
 ```r
-# 1. Comparación de componentes estacionales
+# 1. Comparación de Componentes Estacionales
 autoplot(seasonal(y_dec_mult), series = "Multiplicative") +
   forecast::autolayer(seasonal(y_dec_seas), series = "SEATS")
   
-# 2. Comparación del ajuste de componentes estacionales
+# 2. Comparación del Ajuste de Componentes Estacionales
 autoplot(seasadj(y_dec_add), series = "Additive") +
   forecast::autolayer(seasadj(y_dec_mult), series = "Multiplicative") +
   forecast::autolayer(seasadj(y_dec_seas),series = "SEATS")
