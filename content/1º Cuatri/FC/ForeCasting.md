@@ -3,3 +3,6 @@
 - [[Tutorial R Alternativo 1]]
 - [[Tutorial R Alternativo 2]]
 - [[Week 1 - Decomposition Methods]]
+- [[Week 2 - Stochastic Processes]]
+- [[Week 3 - ARMA Processes]]
+- [[Week 4 -]]
