@@ -283,4 +283,4 @@ fdata$date <- as.Date(fdata$date, format = "%Y-%m-%d")
 head(fdata)
 ```
 
-Los apuntes continúan en [[Week 4 - ARIMA Processes]]
+Los apuntes continúan en [[Week 4 - ARIMA Processes & Metodología Box-Jenkins]]
