@@ -110,11 +110,11 @@ ndiffs(usgdp)
 ```
 #### 2. Nota: Diferenciar con diff
 > Hay que tener cuidado porque una diferencia regular de segundo orden es:
-> 	$\nabla(\nabla Y_t) = \nabla^2 Y_t = \nabla(Y_t - Y_{t-1}) = (Y_t - Y_{t-1}) - (Y_{t-1} - Y_{t-2}) = Y_t - 2Y_{t-1} + Y_{t-2}$
+> 	*$\nabla(\nabla Y_t) = \nabla^2 Y_t = \nabla(Y_t - Y_{t-1}) = (Y_t - Y_{t-1}) - (Y_{t-1} - Y_{t-2}) = Y_t - 2Y_{t-1} + Y_{t-2}$*
 > Esto es muy diferente de calcular simplemente $Y_t - Y_{t-2}$​.
 > Sin embargo, la función `diff` se puede usar para calcular ambas operaciones, y necesitas saber cuál estás utilizando. 
 > Los argumentos *`lag`* y *`differences`* son los que debemos entender.
-> En caso de duda, si necesitásemos una diferencia de segundo orden $\nabla^2 Y_t$​, siempre se puede aplicar `diff` dos veces.
+> En caso de duda, si necesitásemos una diferencia de segundo orden *$\nabla^2 Y_t$* siempre se puede aplicar `diff` dos veces.
 ```r
 # 1. lag = 2 calcula y_t - y_{t-2}
 diff(y, lag = 2)
@@ -125,3 +125,5 @@ diff(y, differences = 2)
 # 3. diff dos veces es equivalente a differences = 2
 diff(diff(y))
 ```
+
+Los apuntes continúan en [[Week 5 - SARIMA Processes]]

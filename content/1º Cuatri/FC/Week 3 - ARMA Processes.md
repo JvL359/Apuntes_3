@@ -284,3 +284,4 @@ head(fdata)
 ```
 
 Los apuntes continúan en [[Week 4 - ARIMA Processes & Metodología Box-Jenkins]]
+
