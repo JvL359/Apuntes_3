@@ -270,7 +270,7 @@ coeftest(arima.fit)
 autoplot(arima.fit)
 
 # 4. Diagnóstico de Residuos (¿se comportan como ruido blanco?)
-CheckResiduals.ICAI(arima.fit, bins = 100, lag = 100)
+CheckResiduals.ICAI(arima.fit, bins = 100, lags = 100)
 
 # 5. Comparación Entre Valores Reales y Ajustados en Entrenamiento
 autoplot(y_TR, series = "Real") +
@@ -329,5 +329,5 @@ autoplot(subset(y, start = length(y_TR) - 24, end = length(y_TR) + 12)) +
 accuracy(subset(y_TV_est, start = length(y_TR) + 1), y)
 
 # 4. RMSE Directo
-sqrt(mean((y_TV.est - y_TV)^2))
+sqrt(mean((y_TV_est - y_TV)^2))
 ```
