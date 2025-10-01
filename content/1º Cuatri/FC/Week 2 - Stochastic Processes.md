@@ -11,7 +11,7 @@ library(readxl)
 library(lmtest) 
 ```
 #### 2. Directorio
-> Igual que en [[Week 1 - Decomposition Methods]]
+> Paso idéntico al de la clase anterior.
 ```r
 # Setear el Directorio
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))

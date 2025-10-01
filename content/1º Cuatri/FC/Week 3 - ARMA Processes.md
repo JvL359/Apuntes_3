@@ -10,7 +10,7 @@ library(readxl)
 library(lmtest) 
 ```
 #### 2. Directorio
-> Paso idéntico al de la clase anterior.
+> Paso idéntico al de las clases anteriores.
 ```r
 # Setear el Directorio
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))

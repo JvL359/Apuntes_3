@@ -71,7 +71,7 @@ glimpse(fdata)
 ```r
 # 1. Secuencia de Fechas entre la Mínima y la Máxima de la Serie Temporal
 valMin <- min(fdata$Data)
-valMax <- min(fdata$Data)
+valMax <- max(fdata$Data)
 date_range <- seq.Date(valMin, valMax, by = "months")
 
 # 2. Comparación de la Secuencia con la Propia Serie Temporal
