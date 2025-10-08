@@ -244,7 +244,7 @@ Q <- 1  # MA estacional
 > 	- Ponemos `include.constant = FALSE` porque al aplicar diferenciación ya no se necesita intercepto en el modelo (evita redundancia).  
 > Este ajuste nos permitirá obtener los coeficientes estimados y pasar a la fase de diagnóstico de residuos.
 ```r
-# 'Rellenar aquí'
+# Ajuste del modelo SARIMA con los órdenes estimados
 arima.fit <- Arima(y_TR,
                    order=c(p, d, q),
                    seasonal = list(order=c(P, D, Q), period=freq),
