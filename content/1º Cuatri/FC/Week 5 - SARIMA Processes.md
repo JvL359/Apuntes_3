@@ -331,3 +331,25 @@ accuracy(subset(y_TV_est, start = length(y_TR) + 1), y)
 # 4. RMSE Directo
 sqrt(mean((y_TV_est - y_TV)^2))
 ```
+
+> [!attention]  GUÍA DE INTERPRETACIÓN ACF / PACF DE COEFICIENTES NO ESTACIONALES
+> #### Órdenes **p, q**
+
+| Tipo de modelo | Qué mirar                      | Dónde (gráfico) | Patrón típico                                                             |
+| -------------- | ------------------------------ | --------------- | ------------------------------------------------------------------------- |
+| **AR(p)**      | picos en lags pequeños (1, 2…) | **PACF**        | pocos lags significativos (p) y luego corte brusco; ACF decae lentamente  |
+| **MA(q)**      | picos en lags pequeños (1, 2…) | **ACF**         | pocos lags significativos (q) y luego corte brusco; PACF decae lentamente |
+| **ARMA(p,q)**  | mezcla                         | **ACF y PACF**  | ambas decaen gradualmente, sin corte claro                                |
+> [!attention]  GUÍA DE INTERPRETACIÓN ACF / PACF DE COEFICIENTES ESTACIONALES
+> ####  Órdenes **P, Q**
+
+| Tipo de modelo | Qué mirar                | Dónde (gráfico) | Patrón típico (lags 12, 24, 36…)                                                                |
+| -------------- | ------------------------ | --------------- | ----------------------------------------------------------------------------------------------- |
+| **AR(P)**      | picos en múltiplos de 12 | **PACF**        | 1 o 2 picos fuertes en lag 12, 24… y luego corte brusco; ACF decae lentamente entre esos puntos |
+| **MA(Q)**      | picos en múltiplos de 12 | **ACF**         | 1 o 2 picos fuertes en lag 12, 24… y luego corte brusco; PACF decae lentamente                  |
+| **ARMA(P,Q)**  | mezcla                   | **ACF y PACF**  | picos moderados en lags 12, 24, 36… en ambos; decaimiento progresivo                            |
+> [!attention] Complementos prácticos
+> - Si **ACF decae muy lento → falta d o D**.
+> - Si **ACF alterna ± y muere rápido → exceso de diferencia**.
+> - Si **ACF/PACF muestran picos regulares cada 12 meses → hay estacionalidad (D=1 o SARIMA con P/Q > 0)**.
+
