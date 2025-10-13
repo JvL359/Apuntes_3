@@ -353,3 +353,35 @@ sqrt(mean((y_TV_est - y_TV)^2))
 > - Si **ACF alterna ± y muere rápido → exceso de diferencia**.
 > - Si **ACF/PACF muestran picos regulares cada 12 meses → hay estacionalidad (D=1 o SARIMA con P/Q > 0)**.
 
+> [!warning] Interpretación de la salida de **`summary`**
+> #### 1. Estructura SARIMA
+> 	Describe la composición y periodicidad del modelo.
+> #### 2. Lambda Cox-Box
+> 	Transformación de la varianza (λ≈1 no hay cambio; λ<1 sí que es útil, reduce la varianza).
+> #### 3. Coeficientes con su s.e. (standard error)  $\quad \lvert \text{coef} \rvert > 2 \cdot \text{s.e.}$  
+> 	Para estar bien tiene que cumplir la ecuación.
+>  #### 4. Indicadores de la Calidad del Ajuste ($\sigma, \ log \ likelihood, \ AIC \ y \ BIC$)
+> 	 La varianza no explicada cuanto más baja mejor.
+> 	 El Log Likelihood cuanto más alto mejor.
+> 	 Los criterios de información cuanto más bajos (y negativos) 
+> 	 es que indican un buen ajuste y simplicidad.
+> #### 5. Métricas del training (Precisión del Modelo)
+> 	- ME ≈ 0 no está sesgado.
+> 	- RMSE, MAE cuanto más bajo mejor.
+> 	- MASE < 1 es mejor que el modelo naive.
+> 	- ADF1 ≈ 0 residuos no correlacionados (ruido blanco).
+
+> [!warning] Interpretación de la salida de **`coeftest`**
+> #### Significancia de los coeficientes
+> 	Con tres asteríscos es muy significativo (del orden de 10^-14 o 10^-16)
+
+> [!warning] Interpretación de la salida de **`ChekResiduals`**
+> #### 1. P-valor
+> 	Si es mayor de 0.05 empieza a ser significativo (buen ajuste)
+> #### 2. Residuos
+> 		Tienen que estar dentro de las bandas azules (ruido blanco)
+
+> [!warning] Interpretación de la salida de **`Box.test`**
+> #### Lags Siguientes
+> 	Si son significativos (> 0.05) mejor porque indica que es escalable en el tiempo.
+
