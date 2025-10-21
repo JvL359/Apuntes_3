@@ -6,3 +6,5 @@
 - [[Week 6 - Dynamic Regression Models]]
 
 Para más contenido se puede mirar la carpeta `Archivado` pero no es recomendable. 
+
+- [[Guía Docente - FC]]
