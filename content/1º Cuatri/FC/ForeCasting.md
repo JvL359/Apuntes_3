@@ -4,6 +4,7 @@
 - [[Week 4 - ARIMA Processes & Metodología Box-Jenkins]]
 - [[Week 5 - SARIMA Processes]]
 - [[Week 6 - Dynamic Regression Models]]
+- [[Week 7 - Prophet Processes]]
 
 Para más contenido se puede mirar la carpeta `Archivado` pero no es recomendable. 
 
