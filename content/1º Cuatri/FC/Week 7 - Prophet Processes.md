@@ -2,6 +2,7 @@
 #### 1. Carga de Librerías
 > Añadimos **prophet** (modelo aditivo con tendencia + estacionalidades + festivos), junto con utilidades de EDA y validación.
 ```r
+# Librerías
 library(tseries)
 library(fpp2)
 library(prophet)   # https://facebook.github.io/prophet
@@ -13,11 +14,12 @@ library(dplyr)     # Manipulación de data frames (prophet_df)
 #### 2. Directorio
 > Igual que en semanas previas. 
 ```r
+# Setear el Directorio
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 ### II. Datos
-#### 1. Carga y Comprobaciones iniciales
+#### 1. Carga y Comprobaciones Iniciales
 > Leemos el CSV, ordenamos, revisamos **gaps**, **duplicados** y **NAs**.
 ```r
 # 1. Carga
@@ -66,7 +68,7 @@ prophet_df <- data.frame(
 > - Incertidumbre y control de _changepoints_ mediante hiperparámetros.
 
 ### IV. Modelado paso a paso
-#### 1) Modelo sin estacionalidad (solo tendencia)
+#### 1) Modelo sin Estacionalidad (solo tendencia)
 > Punto de partida: desactivamos estacionalidades; Prophet seguirá aprendiendo tendencia con _changepoints_ automáticos.
 ```r
 # 1. Instanciar el Modelo
@@ -79,7 +81,7 @@ model1 <- prophet(
 # 2. Predicción del Modelo
 pred1 <- predict(model1, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
+# 3. Curva + Changepoints
 p1 <- plot(model1, pred1) + add_changepoints_to_plot(model1)
 try(ggplotly(p1))
 
@@ -88,7 +90,7 @@ prophet_plot_components(model1, pred1)
 resid1 <- prophet_df$y - pred1$yhat
 CheckResiduals.ICAI(resid1, lags = 36)
 ```
-#### 2) Tendencia con changepoints definidos por el analista
+#### 2) Tendencia con Changepoints Definidos
 > Útil cuando conocemos rupturas (cambios de política, producto, etc.).
 ```r
 # 0. Determinar los Changepoints
@@ -105,7 +107,7 @@ model2 <- prophet(
 # 2. Predicción del Modelo
 pred2 <- predict(model2, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
+# 3. Curva + Changepoints
 plot(model2, pred2) + add_changepoints_to_plot(model2)
 
 # 4. Componentes y Residuos
@@ -113,7 +115,7 @@ prophet_plot_components(model2, pred2)
 resid2 <- prophet_df$y - pred2$yhat
 CheckResiduals.ICAI(resid2, lags = 36)
 ```
-#### 3) Añadir estacionalidad anual y semanal
+#### 3) Añadir Estacionalidad Anual y Semanal
 ```r
 # 1. Instanciar el Modelo
 model3 <- prophet(
@@ -126,7 +128,7 @@ model3 <- prophet(
 # 2. Predicción del Modelo
 pred3 <- predict(model3, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
+# 3. Curva + Changepoints
 plot(model3, pred3) + add_changepoints_to_plot(model3)
 
 # 4. Componentes y Residuos
@@ -134,7 +136,7 @@ prophet_plot_components(model3, pred3)
 resid3 <- prophet_df$y - pred3$yhat
 CheckResiduals.ICAI(resid3, lags = 36)
 ```
-#### 4) Estacionalidad **mensual** (personalizada)
+#### 4) Estacionalidad Mensual Personalizada
 > Periodo ~ **30.5 días** con orden de Fourier moderado.
 ```r
 # 1. Instanciar el Modelo
@@ -149,15 +151,15 @@ model4 <- prophet(
 # 2. Predicción del Modelo
 pred4 <- predict(model4, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
-plot(model4, pred4) |> ggplotly()
+# 3. Curva + Changepoints
+plot(model4, pred4) + add_changepoints_to_plot(model4) |> ggplotly()
 
 # 4. Componentes y Residuos
 prophet_plot_components(model4, pred4)
 resid4 <- prophet_df$y - pred4$yhat
 CheckResiduals.ICAI(resid4, lags = 36)
 ```
-#### 5) Añadir regresores externos
+#### 5) Añadir Regresores Externos
 > Antes, revisa su estructura temporal.
 ```r
 # 0. ACF/PACF de los regresores
@@ -177,8 +179,8 @@ model5 <- prophet(
 # 2. Predicción del Modelo
 pred5 <- predict(model5, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
-plot(model5, pred5) |> ggplotly()
+# 3. Curva + Changepoints
+plot(model5, pred5) + add_changepoints_to_plot(model5) |> ggplotly()
 
 # 4. Componentes y Residuos
 prophet_plot_components(model5, pred5)
@@ -189,15 +191,15 @@ CheckResiduals.ICAI(resid5, lags = 36)
 out_idx <- which(abs(resid5) > (mean(resid5) + 3*sd(resid5)))
 fdata$date[out_idx]
 ```
-#### 6) Festivos (ventanas ±días)
+#### 6) Festivos (ventana con ±días)
 > Los festivos actúan como dummies con ventana. Aquí creamos una Navidad sintética.
 ```r
 # 0. Determinar Festivos
 holidays <- data.frame(
   holiday = 'christmas',
   ds = seq.Date(as.Date("2015-12-24"), as.Date("2022-12-24"), by = "year"),
-  lower_window = 0,
-  upper_window = 5
+  lower_window = 2,
+  upper_window = 3
 )
 
 # 1. Instanciar el Modelo
@@ -214,15 +216,15 @@ model6 <- prophet(
 # 2. Predicción del Modelo
 pred6 <- predict(model6, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
-plot(model6, pred6) |> ggplotly()
+# 3. Curva + Changepoints
+plot(model6, pred6) + add_changepoints_to_plot(model6) |> ggplotly()
 
 # 4. Componentes y Residuos
 prophet_plot_components(model6, pred6)
 resid6 <- prophet_df$y - pred6$yhat
 CheckResiduals.ICAI(resid6, lags = 36)
 ```
-#### 7) Ajuste manual de hiperparámetros
+#### 7) Ajuste Manual de Hiperparámetros
 > En Prophet, pasar un **entero** en `yearly.seasonality`/`weekly.seasonality` indica el **orden de Fourier**.
 ```r
 # 1. Instanciar el Modelo
@@ -239,7 +241,7 @@ model7 <- prophet(
 # 2. Predicción del Modelo
 pred7 <- predict(model7, prophet_df)
 
-# 3. Curva + Changepoints Interactiva
+# 3. Curva + Changepoints
 plot(model7, pred7) + add_changepoints_to_plot(model7) |> ggplotly()
 
 # 4. Componentes y Residuos
@@ -250,12 +252,14 @@ CheckResiduals.ICAI(resid7, lags = 36)
 #### 8) Grid search con validación cruzada temporal
 > Exploramos órdenes de Fourier (anual/semanal/mensual) y evaluamos con `cross_validation()` + `performance_metrics()`.
 ```r
+# 1. Grid de Hiperparámetros
 param_grid <- expand.grid(
   yearly_fourier_order = c(1, 3, 5),
   weekly_fourier_order = c(1, 3, 5),
   monthly_fourier_order = c(1, 3, 5)
 )
 
+# 2. Cross Validation de los Hiperparámetros
 cv_results <- data.frame()
 for (i in 1:nrow(param_grid)) {
   params <- param_grid[i, ]
@@ -284,11 +288,11 @@ for (i in 1:nrow(param_grid)) {
 }
 cv_results
 
-# Selección (aquí por MAPE; podrías elegir RMSE)
+# 3. Selección de los Mejores (aquí por MAPE; podrías elegir RMSE)
 best_params <- cv_results %>% filter(MAPE == min(MAPE))
 best_params
 
-# Modelo final con los mejores hiperparámetros
+# 4. Modelo final con los Mejores Hiperparámetros
 model8 <- prophet(
   yearly.seasonality = best_params$yearly_fourier_order[1],
   weekly.seasonality = best_params$weekly_fourier_order[1],
@@ -300,41 +304,48 @@ model8 <- prophet(
   %>% add_regressor('x1') %>% add_regressor('x2')
   %>% fit.prophet(prophet_df)
 
+# 5. Predicción del Modelo
 pred8 <- predict(model8, prophet_df)
-plot(model8, pred8) |> ggplotly()
+
+# 6. Curva + Changepoints
+plot(model8, pred8) + add_changepoints_to_plot(model8) |> ggplotly()
+
+# 7. Componentes y Residuos
 prophet_plot_components(model8, pred8)
 resid8 <- prophet_df$y - pred8$yhat
 CheckResiduals.ICAI(resid8, lags = 36)
 ```
 
-### V. Pronóstico y validación final
-#### 1. Future dataframe con regresores
+### V. Pronóstico Final y Validación del Modelo
 > Para pronosticar, hay que proporcionar valores futuros de los **regresores**.
 ```r
-future_df <- make_future_dataframe(model8, periods = h_test, freq = 'days',
-                                   include_history = FALSE)
-future_df$x1 <- test_data$input1
-future_df$x2 <- test_data$input2
+# 0. Crear el DataFrame de las Predicciones
+prophet_df_test <- make_future_dataframe(
+    model8, 
+    periods = 182, # Number of samples to forecast
+    freq = 'days', # Frequency of samples to forecast
+    include_history = FALSE # indicate if previous dates should be included
+    ) 
+prophet_df_test$x1 <- test_data$input1
+prophet_df_test$x2 <- test_data$input2
 
-pred_test <- predict(model8, future_df)
+# 2. Realizar las Predicciones
+predictions_test <- predict(model8, prophet_df_test)
 
-# Visual: pronóstico vs datos reales (rojo)
-plot(model8, pred_test) +
-  geom_point(data = test_data, aes(x = future_df$ds, y = output),
-             color = "red", alpha = 0.5) |> ggplotly()
+# 3. Valor Real vs Valor Predicho
+p <- plot(model8, predictions_test) + 
+    geom_point(data=test_data, aes(x = prophet_df_test$ds, y = output), 
+               color = "red", alpha = 0.5)
+ggplotly(p)
 
-# Componentes del pronóstico
-prophet_plot_components(model8, pred_test)
-```
-#### 2. Evaluación (train y test)
-```r
-# Residuos de test y diagnóstico
-resid_test <- test_data$output - pred_test$yhat
-CheckResiduals.ICAI(resid_test, lags = 36)
+# 4. Componentes y Residuos
+prophet_plot_components(model8, predictions_test)
+residuals_test <- test_data$output - predictions_test$yhat
+CheckResiduals.ICAI(residuals_test, 36)
 
-# Métricas
-accuracy(pred8$yhat, train_data$output)
-accuracy(pred_test$yhat, test_data$output)
+# 5. Evaluación del model
+accuracy(predictions$yhat, train_data$output)
+accuracy(predictions_test$yhat, test_data$output)
 ```
 
 ### VI. Notas y buenas prácticas
