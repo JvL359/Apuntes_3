@@ -400,3 +400,5 @@ accuracy(predictions_test$yhat, test_data$output)
 > -  ¿Hiperparámetros validados vía CV?
 >     
 > -  ¿Modo aditivo vs multiplicativo comprobado?
+
+Los apuntes continúan en [[Week 8 - Dynamic Regression Seasonal Models]]

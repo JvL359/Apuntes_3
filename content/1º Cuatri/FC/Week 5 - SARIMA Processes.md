@@ -385,3 +385,4 @@ sqrt(mean((y_TV_est - y_TV)^2))
 > #### Lags Siguientes
 > 	Si son significativos (> 0.05) mejor porque indica que es escalable en el tiempo.
 
+Los apuntes continúan en [[Week 6 - Dynamic Regression Models]]

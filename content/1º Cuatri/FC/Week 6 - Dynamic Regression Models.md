@@ -332,3 +332,5 @@ abline(v = -5:5, col="orange", lty = 2)
 ccf(y4, x2)
 abline(v = -5:5, col="orange", lty = 2)
 ```
+
+Los apuntes continúan en [[Week 7 - Prophet Processes]]
