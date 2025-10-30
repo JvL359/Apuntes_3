@@ -1,9 +1,7 @@
 ### I. Previos
 
 #### 1. Carga de Librerías
-> Esta vez añadiremos las siguientes librerías:
-> - **library(TSA)** / **library(astsa)**: soporte para **transfer functions** (Pankratz) y utilidades de CCF/prewhitening.
-> - **library(Hmisc)**: `Lag()` para crear lags manteniendo el índice temporal (útil al alinear entradas/salida).
+> Empezamos igual que en el caso anterior
 ```r
 # Librerías
 library(MLTools)
@@ -15,7 +13,7 @@ library(lmtest)  #contains coeftest function
 library(tseries) #contains adf.test function
 ```
 #### 2. Directorio
-> Igual que en semanas anteriores: ajusta automáticamente al directorio del script activo.
+> Igual que en semanas anteriores.
 ```r
 # Setear el Directorio 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))`
@@ -23,61 +21,83 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))`
 
 ### II. Carga, EDA y Split de los Datos
 #### 1. Carga de Datos
-> RELLENAR
+> Cargamos el dataset de varios inputs.
 ```r
-# 1. Carga de Datos
+# Carga de Datos
 fdata <- read.csv("macro_data.csv")
-
-# 2. Renombrar Columnas
 head(fdata)
 ```
 #### 2. EDA
-> RELLENAR
+> En este paso realizamos la **exploración visual y estructural de las series**.  
+> Definimos la frecuencia temporal (`freq = 4` para datos trimestrales) y convertimos los datos en un objeto `ts`.  
+> El argumento `[,-(1:2)]` elimina las dos primeras columnas del `data.frame` (por ejemplo, fechas o índices) dejando solo las variables numéricas (Y, X1, X2).  
+> Representamos las series completas y un fragmento inicial para observar patrones o diferencias de escala, analizamos la ACF/PACF de la variable dependiente, y finalmente escalamos las variables para evitar problemas numéricos durante la estimación.
 ```r
 # 0. Objeto TS
 freq <- 4
 fdata_ts <- ts(fdata[,-(1:2)], frequency = freq) # EXPLICAR: [,-(1:2)]
 
-# 1. RELLENAR
+# 1. Visualización Global de Ambas Series (Y y X)
 autoplot(fdata_ts, facets = TRUE)
 
-# 2. RELLENAR
+# 2. Visualización de las Primeras Observaciones (zoom)
 autoplot(head(fdata_ts, 100), facets = TRUE)
 
-# 3. RELLENAR
+# 3. Plot Triple de la Variable Dependiente, su ACF y su PACF
 ggtsdisplay(fdata_ts[,1], lag = 15 * freq)
 
 # 4. Escalado de Valores
 scale_y <- 1000
 scale_x <- c(1000,1)
+y <- fdata_ts[ ,1] / scale_y
+x1 <- fdata_ts[ , 2] / scale_x[1]
+x2 <- fdata_ts[ , 3] / scale_x[2]
 
-# Create time series and scale values 
-y <- fdata_ts[ ,1]/scale_y
-x1 <- fdata_ts[ , 2]/scale_x[1]
-x2 <- fdata_ts[ , 3]/scale_x[2]
-
-
+# 5. Combinar Variables Escaladas en un Único Objeto TS
 x <- cbind(x1, x2)
 fdata_ts <- cbind(y, x1, x2)
 head(fdata_ts)
 ```
 #### 3. Split Train / Test
-> RELLENAR
+> Dividimos las series en **entrenamiento (train)** y **validación (test)** respetando el orden temporal.  
+> Reservamos los últimos 12 trimestres para validación y generamos subconjuntos `y.tr` y `x.tr` para el entrenamiento.
 ```r
-# 0. Tamaño del Split
-test_size = 4 * freq
+# 1. Output Original
+y_orig <- fdata_ts[,1]
 
-# 1. Train
-y.TR <- subset(y, end = length(y) - test_size)
-x.TR <- subset(x, end = length(y) - test_size)
+# 2. Definir Tamaño de Subconjuntos de Entrenamiento y Validación
+len_TV <- 12
+len_TR <- nrow(fdata_ts) - len_TV
 
-# 2. Test
-y.TV <- subset(y, start = length(y) - test_size + 1)
-x.TV <- subset(x, start = length(y) - test_size + 1)
+# 3. Crear Índices para Entrenamiento y Validación
+ind <- seq(1:nrow(fdata))
+ind_TR <- ind <= len_TR
+ind_TV <- !ind_TR
 
-# 3. Comprobación
-tail(y.TR)
-head(y.TV)
+# 4. Crear Subconjuntos de Entrenamiento
+y.tr <- ts(y[ind_TR], frequency = freq)
+x.tr <- ts(x[ind_TR,], frequency = freq)
+
+# 5. Visualizar Series de Entrenamiento
+autoplot(cbind(y.tr,x.tr), facets = TRUE)
+```
+#### 4. RELLENAR
+> Creamos los objetos `ts` para el **periodo de test** (tanto para Y como para X) y los graficamos junto con la parte final del conjunto de entrenamiento para comprobar la continuidad temporal entre ambos periodos.
+```r
+# 1. Crear Serie TS de Validación para Variable Dependiente
+y.ts <- ts(y[ind_TV], frequency = freq,
+           start = end(y.tr) + c(0,1)) 
+head(y.ts)
+
+# 2. Crear Serie TS de Validación para Variables Explicativas
+x.ts <- ts(x[ind_TV,], frequency = freq,
+           start = end(x.tr) + c(0,1))
+head(x.ts)
+
+# 3. Visualizar Transición entre Entrenamiento y Validación
+autoplot(tail(y.tr, 50), series = "Training", color="blue") + 
+  forecast::autolayer(y.ts, series = "Test", color = "red") + 
+  geom_vline(xintercept = time(tail(y.tr, 10)), linetype="dashed", size=0.5)
 ```
 
 ### Proceso de Identificación de Coeficientes
