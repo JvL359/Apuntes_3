@@ -6,7 +6,7 @@
 - [[Week 6 - Dynamic Regression Models]]
 - [[Week 7 - Prophet Processes]]
 - [[Week 8 - Dynamic Regression Seasonal Models]]
-- [[Week8 - Dynamic Regression Two Inputs Models]]
+- [[Week 8 - Dynamic Regression Two Inputs Models]]
 
 Para más contenido se puede mirar la carpeta `Archivado` pero no es recomendable. 
 
