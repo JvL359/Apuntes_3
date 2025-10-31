@@ -75,7 +75,7 @@ tail(y.TR)
 head(y.TV)
 ```
 
-### Identificación de Coeficientes y Ajuste del Modelo
+### III. Identificación de Coeficientes y Ajuste del Modelo
 #### 0. Análisis de las Funciones de Correlación
 > Hacemos este paso inicial para estimar los posibles coeficientes de nuestros modelos.
 ```r
@@ -84,37 +84,37 @@ ggtsdisplay(y, lag=4 * freq)
 ```
 #### 1. Primer Modelo TF
 > Estimamos un primer modelo de **Transfer Function (TF)** con estructura sencilla para identificar el retardo (b) y el grado del numerador (s).  
-> Ajustamos un modelo preliminar con ruido ARIMA(1,0,0)(1,0,0)[freq] y una función de transferencia de orden (r=0, s=9).  
+> Ajustamos un modelo preliminar con ruido SARIMA(1,0,0)(1,0,0)[freq] y una función de transferencia de orden (r=0, s=9).  
 > Después, analizamos los residuos con `TF.RegressionError.plot()` para verificar si el modelo captura correctamente la dinámica o si es necesario diferenciar la serie.
 ```r
 # 1. Estimación del Modelo Preliminar TF
 TF.fit <- arima(y.TR,
-                order=c(1, 0, 0),
+                order = c(1, 0, 0),
                 seasonal = list(order=c(1, 0, 0), period=freq),
                 xtransf = x.TR,
-                transfer = list(c(0,9)), #List with (r,s) orders
+                transfer = list(c(0, 9)), #List with (r,s) orders
                 include.mean = TRUE,
-                method="ML")
+                method = "ML")
 
 # 2. Diagnóstico de los Residuos del Modelo Preliminar (diferencia adicional ?)
-TF.RegressionError.plot(y,x,TF.fit,lag.max = 100)                
+TF.RegressionError.plot(y, x, TF.fit, lag.max = 100)                
 ```
 #### 2. Segundo Modelo TF
 > En esta segunda estimación introducimos **diferenciación estacional (D = 1)** para capturar mejor la estacionalidad observada en la serie.  
-> Mantenemos el mismo ruido ARIMA(1,0,0) y la misma estructura de función de transferencia (r = 0, s = 9).  
+> Mantenemos la forma SARIMA(1,0,0)(1,1,0)[freq] anterior y la misma estructura de función de transferencia (r = 0, s = 9).  
 > Tras el ajuste, analizamos nuevamente los residuos con `TF.RegressionError.plot()` para comprobar si la serie se ha estabilizado y si la estructura de errores es más cercana a un ruido blanco.
 ```r
 # 1.  Estimación del modelo con diferenciación estacional
 TF.fit <- arima(y.TR,
-                order=c(1, 0, 0),
+                order = c(1, 0, 0),
                 seasonal = list(order=c(1, 1, 0), period=freq),
                 xtransf = x.TR,
-                transfer = list(c(0,9)), #List with (r,s) orders
+                transfer = list(c(0, 9)), #List with (r,s) orders
                 include.mean = TRUE,
-                method="ML")
+                method = "ML")
 
 # 2. Diagnóstico de los Residuos del Modelo Diferenciado (ha mejorado ?)
-TF.RegressionError.plot(y,x,TF.fit,lag.max = 100)
+TF.RegressionError.plot(y, x, TF.fit, lag.max = 100)
 ```
 #### 3. Identificación de los Parámetros de la Función de Transferencia
 > Este paso permite **determinar los parámetros b, r y s** de la función de transferencia.
@@ -153,7 +153,7 @@ arima.fit <- arima(y,
 > Evaluamos la calidad del modelo y la validez de los supuestos estadísticos.
 > 	- `summary()` muestra los coeficientes estimados y el error residual.
 > 	- `coeftest()` verifica la **significancia estadística** de los parámetros.
-> 	- `CheckResiduals.ICAI()` permite analizar si los residuos se comportan como **ruido blanco**, condición necesaria para considerar el modelo adecuado.
+> 		- `CheckResiduals.ICAI()` permite analizar si los residuos se comportan como **ruido blanco**, condición necesaria para considerar el modelo adecuado.
 ```r
 # 1. Resumen General del Modelo Ajustado
 summary(arima.fit) 
@@ -177,10 +177,10 @@ res[is.na(res)] <- 0
 ccf(y = res, x = x)
 
 # 3. Graficar Serie Real frente a Serie Ajustada del Modelo
-autoplot(y, series = "Real", size = 2, alpha=0.8, color="blue") +
-  forecast::autolayer(fitted(arima.fit), series = "Fitted", color="yellow")
+autoplot(y, series = "Real", size = 2, alpha = 0.8, color = "blue") +
+  forecast::autolayer(fitted(arima.fit), series = "Fitted", color = "yellow")
 ```
-### Predicción de Datos Futuros
+### IV. Predicción de Datos Futuros
 #### 1. Predicción de Horizonte 1
 > Generamos predicciones de un paso adelante (**h = 1**) dentro del periodo de validación.  
 > En cada iteración, usamos todos los datos disponibles hasta ese momento y predecimos el siguiente valor.
@@ -190,12 +190,12 @@ h <- 1
 y.TV.est <- y * NA
 
 # 2. Bucle Rolling: en cada paso predecimos 1 paso adelante (h=1)
-for (i in seq(length(y.TR) + 1, length(y) - h, 1)){# loop for validation period
-  y.TV.est[i] <- TF.forecast(y.old = subset(y,end=i-1), #past values of the series
-                            x.old = subset(x,end=i-1), #Past values of the inputs
-                            x.new = subset(x,start = i,end=i), #New values of inputs
-                            model = arima.fit, #fitted transfer function model
-                            h=h)[h] #Forecast horizon
+for (i in seq(length(y.TR) + 1, length(y) - h, 1)){
+  y.TV.est[i] <- TF.forecast(y.old = subset(y,end=i-1), 
+                            x.old = subset(x,end=i-1), 
+                            x.new = subset(x,start = i,end=i), 
+                            model = arima.fit, 
+                            h = h)[h] 
 }
 
 # 3. Limpiar NAs del Vector de Predicciones
@@ -204,12 +204,18 @@ y.TV.est <- na.omit(y.TV.est)
 #### 2. Predicción Directa Multi-Step
 > Calculamos ahora un **forecast directo** para todo el periodo de validación, proyectando simultáneamente los próximos valores según el horizonte total `length(y.TV)`.
 ```r
-# Predicción Directa para Todo el Horizonte de Validación
-y.TV.est2 <- TF.forecast(y.old = subset(y,end=i-1), #past values of the series
-                        x.old = subset(x,end=i-1), #Past values of the inputs
-                        x.new = subset(x,start = i,end=i), #New values of inputs 
-                        model = arima.fit, #fitted transfer function model
-                        h=length(y.TV)) #forecast horizon
+# 1. Inicializar Vector de Predicciones en Validación
+y.TV.est2 <- y * NA
+
+# 2. Predicción Directa para Todo el Horizonte de Validación
+y.TV.est2 <- TF.forecast(y.old = y.TR, 
+                        x.old = x.TR, 
+                        x.new = x.TV,  
+                        model = arima.fit, 
+                        h = length(y.TV))
+  
+# 3. Limpiar NAs del Vector de Predicciones
+y.TV.est2 <- na.omit(y.TV.est2)
 ```
 #### 3. Plot del Forecast
 > Representamos las predicciones frente a los valores reales y calculamos métricas de error (**MAE, RMSE, MAPE**). Esto permite comparar el rendimiento de ambos enfoques (rolling y directo).
@@ -223,7 +229,7 @@ y.TV.est2_ts <- ts(y.TV.est2, frequency = freq, start = end(y.TR) + c(0, 1))
 head(y.TV_ts)
 
 # 3. Graficar Valores Reales, Predicciones y Datos de Entrenamiento
-autoplot(y.TV_ts, series = "Test set, real values", size=2, alpha=0.5, color="blue") +
+autoplot(y.TV_ts, series="Test set, real values", size=2, alpha=0.5, color="blue") +
   forecast::autolayer(y.TV.est_ts, series = "Forecast", color = "yellow") + 
   forecast::autolayer(y.TV.est2_ts, series = "Direct Forecast", color = "tan") +
   forecast::autolayer(tail(y.TR, freq), series = "Training data", color = "red") 
