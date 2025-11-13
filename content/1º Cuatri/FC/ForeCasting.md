@@ -7,6 +7,8 @@
 - [[Week 7 - Prophet Processes]]
 - [[Week 8 - Dynamic Regression Seasonal Models]]
 - [[Week 8 - Dynamic Regression Two Inputs Models]]
+- [[Week 9 - Intervention Analysis & Outliers Detection]]
+- [[Week 10 - Non Linear Models]]
 
 Para más contenido se puede mirar la carpeta `Archivado` pero no es recomendable. 
 
