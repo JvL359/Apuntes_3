@@ -315,8 +315,14 @@ y.tv.TF <- TF.forecast(y.old = y,      # past values of the series
                        model = TF.fit, # fitted transfer function model
                        h = 12)         # forecast horizon
 ```
-#### 4. RELLENAR
-> RELLENAR
+#### 4. Modelo ARIMA Sin Intervención y Comparación de Pronósticos
+> En este último bloque construimos un **modelo de referencia** sin intervención para cuantificar cuánto aporta realmente la variable `X`.  
+> Ajustamos un $ARIMA(2,1,1)(0,1,1)_{freq}$, es decir, un modelo puramente **univariado** sobre la serie de desempleo `y`, sin información explícita sobre el cambio de política o evento recogido en `X`.  
+> Analizamos sus coeficientes y residuos para comprobar que es un modelo razonable y luego generamos un **pronóstico de 12 meses**.  
+> Finalmente, comparamos la **precisión en el conjunto de validación** entre:
+> 	- El ARIMA sin intervención (`y.tv.ARIMA`),
+> 	- El modelo con intervención vía función de transferencia (`y.tv.TF`).  
+> La comparación gráfica y mediante métricas (`accuracy`) permite ver si **incluir la intervención mejora de forma clara los pronósticos**.
 ```r
 # 1. Ajustar Modelo ARIMA Sin Intervención
 arima.fit <- arima(y,
