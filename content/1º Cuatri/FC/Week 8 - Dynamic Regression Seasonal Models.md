@@ -1,5 +1,4 @@
 ### I. Previos
-
 #### 1. Carga de Librerías
 > Esta vez añadiremos las siguientes librerías:
 > - **library(TSA)** / **library(astsa)**: soporte para **transfer functions** (Pankratz) y utilidades de CCF/prewhitening.
@@ -18,7 +17,7 @@ library(tseries) #contains adf.test function
 > Igual que en semanas anteriores: ajusta automáticamente al directorio del script activo.
 ```r
 # Setear el Directorio 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))`
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 ### II. Carga, EDA y Split de los Datos
@@ -247,14 +246,4 @@ accuracy(y.TV.est2 * 100000, y.TV * 100000)
 > - ¿El modelo es **parsimonioso** (ω(B) y δ(B) simples) y **estable**?
 > - ¿Los **pronósticos** en el conjunto de test son **coherentes y razonables**?
 
-
-
-
-
-
-
-
-
-
-
-
+Los apuntes continúan en [[Week 8 - Dynamic Regression Two Inputs Models]]

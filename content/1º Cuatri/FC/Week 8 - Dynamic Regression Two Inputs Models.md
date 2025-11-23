@@ -1,5 +1,4 @@
 ### I. Previos
-
 #### 1. Carga de Librerías
 > Empezamos igual que en el caso anterior
 ```r
@@ -9,14 +8,14 @@ library(fpp2)
 library(ggplot2)
 library(TSA)
 library(Hmisc)     # for computing lagged variables
-library(lmtest)    #contains coeftest function
-library(tseries)   #contains adf.test function
+library(lmtest)    # contains coeftest function
+library(tseries)   # contains adf.test function
 ```
 #### 2. Directorio
 > Igual que en semanas anteriores.
 ```r
 # Setear el Directorio 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))`
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 ### II. Carga, EDA y Split de los Datos
