@@ -114,6 +114,7 @@ TF.fit <- arima(y.TR,
 
 # 2. Diagnóstico de los Residuos del Modelo Diferenciado (ha mejorado ?)
 TF.RegressionError.plot(y, x, TF.fit, lag.max = 100)
+# NOTE: Si el error de esta regresión no es estacionario en varianza, hay que aplicar Box-Cox a las series de entrada y de salida.
 ```
 #### 3. Identificación de los Parámetros de la Función de Transferencia
 > Este paso permite **determinar los parámetros b, r y s** de la función de transferencia.
@@ -126,8 +127,8 @@ TF.RegressionError.plot(y, x, TF.fit, lag.max = 100)
 TF.Identification.plot(x,TF.fit)
 
 # 2. Definición inicial de los órdenes (ajustar según los resultados del gráfico)
-p <- 0 ; d <- 0; q <- 1;
-P <- 1 ; D <- 1; Q <- 0;
+p <- 0; d <- 0; q <- 1;
+P <- 1; D <- 1; Q <- 0;
 
 b <- 0; r <- 0; s <- 0;
 ```

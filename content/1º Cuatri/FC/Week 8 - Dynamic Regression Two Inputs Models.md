@@ -141,7 +141,8 @@ summary(TF.fit)
 coeftest(TF.fit)
 
 # 3. Diagnóstico de los Residuos del Modelo Diferenciado (ha mejorado ?)
-TF.RegressionError.plot(y.tr,x.tr,TF.fit,lag.max = 50)
+TF.RegressionError.plot(y.tr, x.tr, TF.fit, lag.max = 50)
+# NOTE: Si el error de esta regresión no es estacionario en varianza, hay que aplicar Box-Cox a las series de entrada y de salida.
 ```
 #### 3. Identificación de los Parámetros de la Función de Transferencia
 > RELLENAR/COMPLETAR/MEJORAR
