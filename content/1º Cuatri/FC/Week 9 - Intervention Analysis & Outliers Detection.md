@@ -2,6 +2,7 @@
 #### 1. Carga de Librerías
 > En esta semana añadimos las librerías de *`imputeTS`*, para tratamiento de valores perdidos, y la de *`lubridate`* para manejo de fechas y calendarios.
 ```r
+# Librerías
 library(MLTools)
 library(fpp2)
 library(ggplot2)
