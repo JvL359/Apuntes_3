@@ -212,7 +212,7 @@ coefficients(yLS_arima) # Arima for unadjusted time series
 ```
 
 ### III. Intervention Analysis
-#### 1. Carga de Datos y Preprocesamiento
+#### 1. Carga y Preprocesamiento de Datos 
 > En este primer bloque preparamos los **datos reales de desempleo en España** para aplicar un modelo de **intervención**.  
 > Se carga el fichero Excel con las series mensuales y se construye un objeto `ts` que contiene:
 > 	- **TOTAL**: la serie de paro (variable dependiente),
