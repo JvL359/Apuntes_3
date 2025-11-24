@@ -1,97 +1,74 @@
 ### 0. Introducción Teórica
 #### 1. Motivación y Contexto
-- Limitaciones de los modelos lineales (ARIMA, TF):
+>  Limitaciones de los modelos lineales (ARIMA, TF):
     - Relación lineal entre entradas y salida.     
     - Dificultad para capturar saturaciones, umbrales, efectos asimétricos…
-
-- Situaciones típicas en las que aparecen **no linealidades**:
+> Situaciones típicas en las que aparecen **no linealidades**:
     - Demanda eléctrica vs temperatura.
     - Series financieras con cambios de volatilidad/regímenes.
     - Sistemas donde el comportamiento cambia según el nivel.
-
-- Objetivo de la semana:
+> Objetivo de la semana:
     - Ver **dos formas de introducir no linealidad**:
         - Feature engineering + modelos lineales (TF).
         - Modelos no lineales explícitos (MLP/NARX).
-
 #### 2. Modelos de Series Temporales No Lineales Basados en Regresión
 ##### 2.1. Modelo General de Regresión No Lineal
-- Forma general:  $y_t = f(y_{t-1}, y_{t-2}, \dots, x_t, x_{t-1}, \dots) + \varepsilon_t$
-
-- Diferencia con Linealidad: $f(\cdot)$ puede ser cualquier función no lineal (polinómica, a trozos, etc)
-
-- $\varepsilon_t$​ sigue siendo un **término de error** (idealmente ruido blanco), igual que en ARIMA; la diferencia está en la forma de $f(\cdot)$, no en cómo tratamos el ruido.
-
-- Conexión con ARIMA/TF: ARIMA → caso especial donde $f$ es lineal.
+> Forma general:  $y_t = f(y_{t-1}, y_{t-2}, \dots, x_t, x_{t-1}, \dots) + \varepsilon_t$
+> Diferencia con Linealidad: $f(\cdot)$ puede ser cualquier función no lineal (polinómica, a trozos, etc)
+> $\varepsilon_t$​ sigue siendo un **término de error** (idealmente ruido blanco), igual que en ARIMA; la diferencia está en la forma de $f(\cdot)$, no en cómo tratamos el ruido.
+> Conexión con ARIMA/TF: ARIMA → caso especial donde $f$ es lineal.
 ##### 2.2. Modelos NAR y NARX
-- **NAR (Nonlinear Autoregressive)**:
+> **NAR (Nonlinear Autoregressive)**:
     - Solo usa retardos de la propia serie: $y_t = f(y_{t-1}, \dots, y_{t-p}) + \varepsilon_t$
-
-- **NARX (Nonlinear Autoregressive with Exogenous Inputs)**:
+> **NARX (Nonlinear Autoregressive with Exogenous Inputs)**:
     - Incluye además inputs exógenos: $x_t, x_{t-1}, \dots$
-
-- Interpretación:
+> Interpretación:
     - Son la versión no lineal de AR/ARX, muy usados en control y forecasting.
 ##### 2.3. Modelos NARMAX
-- Extensión NARX añadiendo términos de ruido pasados: $y_t = f(y_{t-1:\,t-p}, x_{t:\,t-q}, \varepsilon_{t-1:\,t-r}) + \varepsilon_t$
-
-- Relación con ARMA/ARIMA y con modelos de caja negra.
-
-- Comentario práctico:
+> Extensión NARX añadiendo términos de ruido pasados: $y_t = f(y_{t-1:\,t-p}, x_{t:\,t-q}, \varepsilon_{t-1:\,t-r}) + \varepsilon_t$
+> Relación con ARMA/ARIMA y con modelos de caja negra.
+> Comentario práctico:
     - El MLP de la práctica se parece a un **NARX** (lags de DEM y de las X) sin modelar explícitamente $\varepsilon_{t-k}$
-
 #### 3. Modelos de Cambio de Régimen (Regime Switching)
 ##### 3.1. Idea Intuitiva de Cambio de Régimen
-- Concepto de **regímenes o estados**:
+> Concepto de **regímenes o estados**:
     - Períodos de “alta demanda” vs “baja demanda”.
     - Fases de “expansión” vs “recesión”.
-
-- Cada régimen tiene su **propio modelo**:
+>Cada régimen tiene su **propio modelo**:
     - Distintos parámetros AR/MA según el estado.
 ##### 3.2. Tipos de Modelos de Régimen
-- **Modelos threshold (TAR/SETAR)**:
+> **Modelos threshold (TAR/SETAR)**:
     - Cambios de régimen cuando la serie cruza ciertos umbrales.
-
-- **Modelos Markov-switching (MS-AR, MS-ARMA)**:
+> **Modelos Markov-switching (MS-AR, MS-ARMA)**:
     - El régimen sigue una cadena de Markov oculta.
-
-- Comentario:
+> Comentario:
     - Importantes conceptualmente, pero en las prácticas de esta semana **no se implementan**: el foco está en TF+FE y MLP.
     - Suelen ser útiles cuando vemos **cambios bruscos y persistentes** en la dinámica (no explicables solo con cambios de nivel o cambios de varianza).
-
 #### 4. Combinación de Pronósticos
 ##### 4.1. Motivación para Combinar Modelos
-- Distintos modelos capturan **partes diferentes** de la dinámica.
-
-- Combinación de pronósticos:
+> Distintos modelos capturan **partes diferentes** de la dinámica.
+> Combinación de pronósticos:
     - Reduce riesgo de elegir “el modelo equivocado”.
     - Suele mejorar estabilidad y robustez.
-
 ##### 4.2. Estrategias Sencillas de Combinación
-- Media simple de pronósticos.
-
-- Combinaciones ponderadas (por error histórico, AIC, etc.).
-
-- Comentario:
+> Media simple de pronósticos.
+> Combinaciones ponderadas (por error histórico, AIC, etc.).
+> Comentario:
     - En este curso, la combinación se puede **relacionar conceptualmente** con:
         - Modelos lineales + no lineales.
         - Diferentes configuraciones (TF vs MLP) que podrían combinarse.
 	- En la práctica, muchas competiciones de forecasting y aplicaciones reales usan **ensambles** (combinación de varios modelos) porque tienden a ser más **robustos** que cualquier modelo individual.
-
 #### 5. Conexión con las Prácticas de la Semana 10
 ##### 5.1. TF + Feature Engineering como Modelo No Lineal Implícito
-- Usar TF lineales, pero:
+> Usar TF lineales, pero:
     - Transformar inputs (por ejemplo, dividir temperatura en `tcold` y `thot`).
     - Esto equivale a aproximar una relación no lineal con un modelo lineal por tramos en las entradas.
-
 ##### 5.2. MLP como NARX No Lineal
-- Red neuronal MLP que recibe:
+> Red neuronal MLP que recibe:
     - Lags de DEM (output) y de las variables exógenas.
-
-- Se comporta como un modelo **NARX no lineal**:
+> Se comporta como un modelo **NARX no lineal**:
     - Aprende automáticamente la forma de $f(\cdot)$.
-
-- Validación mediante cross-validation y forecast iterativo a 7 días.
+> Validación mediante cross-validation y forecast iterativo a 7 días.
 
 ### I. Previos
 #### 1. Carga de Librerías
