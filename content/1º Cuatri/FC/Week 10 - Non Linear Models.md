@@ -8,9 +8,10 @@
     - Series financieras con cambios de volatilidad/regímenes.
     - Sistemas donde el comportamiento cambia según el nivel.
 > Objetivo de la semana:
-    - Ver **dos formas de introducir no linealidad**:
+    - Ver **tres formas de introducir no linealidad**:
         - Feature engineering + modelos lineales (TF).
         - Modelos no lineales explícitos (MLP/NARX).
+        - Modelos no lineales basados en árboles y boosting (XGBoost).
 #### 2. Modelos de Series Temporales No Lineales Basados en Regresión
 ##### 2.1. Modelo General de Regresión No Lineal
 > Forma general:  $y_t = f(y_{t-1}, y_{t-2}, \dots, x_t, x_{t-1}, \dots) + \varepsilon_t$
@@ -29,6 +30,15 @@
 > Relación con ARMA/ARIMA y con modelos de caja negra.
 > Comentario práctico:
     - El MLP de la práctica se parece a un **NARX** (lags de DEM y de las X) sin modelar explícitamente $\varepsilon_{t-k}$
+##### 2.4. Modelos XGBOOST
+> Idea básica:
+> 	- Un **árbol de regresión** particiona el espacio de variables en regiones y asigna una **constante** a cada región → aproximación por tramos, altamente no lineal.
+> 	- Un modelo de **boosting** (como XGBoost) combina muchos árboles “débiles” entrenados de forma secuencial, corrigiendo los errores del anterior.
+> Conexión con el modelo general:
+> 	- XGBoost implementa una función $y_t = f(\text{lags de } y_t,\ \text{lags de } x_t,\ \text{inputs actuales}) + \varepsilon_t$    donde $f(\cdot)$ es una suma de muchos árboles de decisión → **no lineal y muy flexible**.
+> Comentario práctico:
+> 	- Al igual que el MLP, XGBoost se puede usar como un **NARX no lineal**, recibiendo como inputs los lags de DEM, WD, TEMP, etc.
+> 	- En vez de aprender pesos y activaciones como una red, aprende **particiones del espacio** (reglas tipo “si TEMP > 25 y DEM_lag1 alto, entonces…”).
 #### 3. Modelos de Cambio de Régimen (Regime Switching)
 ##### 3.1. Idea Intuitiva de Cambio de Régimen
 > Concepto de **regímenes o estados**:
@@ -69,10 +79,22 @@
 > Se comporta como un modelo **NARX no lineal**:
     - Aprende automáticamente la forma de $f(\cdot)$.
 > Validación mediante cross-validation y forecast iterativo a 7 días.
+##### 5.3. XGBOOST como Regresor No Lineal
+> El modelo recibe:
+> 	- Lags de DEM (`DEM_lag1`, `DEM_lag7`),
+> 	- Lags de WD y TEMP (`WD_lag1`, `WD_lag7`, `TEMP_lag1`, `TEMP_lag7`),
+> 	- Más las variables contemporáneas (`WD`, `TEMP`).
+> Así se comporta como un **modelo NARX no lineal basado en árboles**:
+> - Aprende interacciones y umbrales (por ejemplo, efectos distintos de la temperatura según el tipo de día o el nivel de demanda previa).
+> La **no linealidad** no se mete “a mano” como en TF+feature engineering, sino que:
+> 	- XGBoost descubre automáticamente particiones y combinaciones de variables que explican mejor la demanda.
+> La interpretación se apoya en:
+> 	- **Importancia de variables** (`varImp(xgb.fit)`),
+> 	- Comparación visual de **valores reales vs predichos** y diagnóstico de errores.
 
 ### I. Previos
 #### 1. Carga de Librerías
-> En esta semana añadimos las librerías de *`NeuralSens`* para RELLENAR, *`caret`* para RELLENAR, *`kernlab`* para RELLENAR, *`nnet`* para RELLENAR, y *`NeuralNetTools`* para RELLENAR.
+> En esta semana añadimos las librerías de **`NeuralSens`** para el análisis de sensibilidad e interpretación de redes neuronales; **`caret`** para el entrenamiento y validación cruzada de modelos (incluyendo MLP y XGBoost), **`kernlab`** para disponer de métodos kernel/SVM integrados en caret; **`nnet`** para construir redes neuronales MLP sencillas; **`NeuralNetTools`** para visualizar y diagnosticar redes neuronales; y **`xgboost`** para ajustar modelos no lineales de boosting basado en árboles.
 ```r
 # Librerías
 library(fpp2)
@@ -87,6 +109,7 @@ library(caret)
 library(kernlab)
 library(nnet)
 library(NeuralNetTools)
+library(xgboost)
 ```
 #### 2. Directorio
 > Igual que en semanas anteriores: ajusta automáticamente al directorio del script activo.
@@ -699,4 +722,174 @@ for (i in (tstart + 1):(tstart + 7)) {
 
 # 8. Extraer Pronósticos para los 7 Próximos Días
 fdata.join$DEM[(tstart + 1):(tstart + 7)]
+```
+
+### IV. XGBOOST in NLP
+#### 1. Carga de Datos, Creación de Lags y Dataset de Regresión
+> En este bloque construimos el **dataset de regresión** que va a usar XGBoost para predecir la demanda.  
+> Primero leemos el fichero diario de entrenamiento `DAILY_DEMAND_TR.xlsx` y nos quedamos con las tres variables base:
+> 	- **DEM**: demanda (variable objetivo).
+> 	- **WD**: tipo de día (laborable / fin de semana).
+> 	- **TEMP**: temperatura.
+> Para que el modelo pueda capturar la **dinámica temporal** (memoria de la serie), añadimos **retardos (lags)** de cada variable con `Lag()` de `Hmisc`:
+> 	- `WD_lag1`, `WD_lag7` → calendario de ayer y del mismo día de la semana pasada.
+> 	- `TEMP_lag1`, `TEMP_lag7` → temperatura reciente y patrón semanal.
+> 	- `DEM_lag1`, `DEM_lag7` → autoregresión de la propia demanda.
+> Estos lags convierten el problema en una regresión tipo **NARX**: XGBoost recibe como inputs tanto valores actuales como pasados.  
+> Las primeras filas quedan con `NA` debido a los lags, por lo que creamos `fdata.Reg.tr` eliminando esas filas antes de entrenar el modelo.
+```r
+# 1. Lectura de Datos de Entrenamiento
+fdata <- readxl::read_excel("DAILY_DEMAND_TR.xlsx")
+fdata <- as.data.frame(fdata)
+
+# 2. Inicializar Dataset de Regresión con Output e Inputs Contemporáneos
+
+fdata.Reg <- fdata[, c(2, 3, 4)]  # (DEM, WD, TEMP)
+
+# 3. Incluir Variables Rezagadas con Lag de Hmisc
+fdata.Reg$WD_lag1    <- Lag(fdata$WD,   1)
+fdata.Reg$WD_lag7    <- Lag(fdata$WD,   7)
+fdata.Reg$TEMP_lag1  <- Lag(fdata$TEMP, 1)
+fdata.Reg$TEMP_lag7  <- Lag(fdata$TEMP, 7)
+fdata.Reg$DEM_lag1   <- Lag(fdata$DEM,  1)
+fdata.Reg$DEM_lag7   <- Lag(fdata$DEM,  7)
+
+# 4. Crear Dataset de Entrenamiento Eliminando Filas con NAs
+fdata.Reg.tr <- na.omit(fdata.Reg)
+```
+#### 2. Configuración de la Validación Cruzada
+> Antes de entrenar XGBoost definimos cómo vamos a **evaluar su capacidad de generalización**.  
+> Usamos `caret::trainControl()` con **validación cruzada K-fold (K = 10)**: dividimos los datos en 10 bloques, entrenamos en 9 y validamos en 1, rotando hasta usar todos los bloques como validación.  
+> Con `summaryFunction = defaultSummary` obtenemos métricas estándar de regresión (**RMSE, MAE, R²**) en cada fold, y con `savePredictions = TRUE` guardamos todas las predicciones para poder analizar el comportamiento del modelo a posteriori. Esto es lo que usará `caret::train()` al ajustar XGBoost.
+```r
+# 1. Definir Esquema de Validación Cruzada K-Fold (K = 10)
+ctrl_tune <- trainControl(
+  method = "cv",                     # Validación cruzada
+  number = 10,                       # Número de folds
+  summaryFunction = defaultSummary,  # Métricas de rendimiento (RMSE, MAE, R²)
+  savePredictions = TRUE             # Guardar predicciones de los folds
+)
+```
+#### 3. Entrenamiento del Modelo y Diagnóstico en Entrenamiento
+###### 3.1. Entrenamiento
+> En este bloque entrenamos el modelo **XGBoost** usando `caret`.  
+> Primero fijamos una semilla (`set.seed(150)`) para que la búsqueda de hiperparámetros sea **reproducible**. Después definimos un **grid de hiperparámetros** (`xgbGrid`) que explora distintas combinaciones de:
+> 	- `nrounds` (número de árboles),
+> 	- `max_depth` (complejidad de cada árbol),
+> 	- `eta` (learning rate),
+> 	- otros parámetros de regularización y muestreo (`gamma`, `colsample_bytree`, `min_child_weight`, `subsample`).
+> Con `train(..., method = "xgbTree")` y el `trainControl` definido antes, `caret` hace **validación cruzada** para cada combinación del grid y se queda con la que minimiza el **RMSE**. Además, aplicamos un preprocesado de **centrado y escalado** de los inputs para estabilizar el entrenamiento.
+> Finalmente inspeccionamos el objeto `xgb.fit`, visualizamos el rendimiento en función de los hiperparámetros (`ggplot(xgb.fit)`) y calculamos la **importancia de variables** con `varImp()`, lo que nos indica qué lags o variables (DEM, WD, TEMP, etc.) son más relevantes para la predicción de la demanda.
+```r
+# 1. Fijar Semilla para Reproducibilidad
+set.seed(150)
+
+# 2. Definir Grid de Hiperparámetros para XGBoost
+xgbGrid <- expand.grid(
+  nrounds = c(100, 200, 600),   # Número de Árboles de Boosting
+  max_depth = c(3, 6),          # Profundidad Máxima de Cada Árbol
+  eta = c(0.05, 0.1, 0.3),      # Learning Rate (Tamaño de Paso)
+  gamma = c(0),                 # Reducción de Pérdida Mínima para Hacer un Split
+  colsample_bytree = c(0.8),    # Proporción de Columnas Muestreadas por Árbol
+  min_child_weight = c(1),      # Peso Mínimo en Hijos (Control de Sobreajuste)
+  subsample = c(0.8)            # Proporción de Filas Muestreadas por Iteración
+)
+
+# 3. Entrenar el Modelo XGBoost con caret
+xgb.fit <- train(
+  DEM ~ ., 
+  data = fdata.Reg.tr, 
+  method = "xgbTree",
+  tuneGrid = xgbGrid,
+  preProcess = c("center", "scale"),  # Centrando y Escalando Inputs
+  trControl = ctrl_tune, 
+  metric = "RMSE"                     # Métrica de Optimización
+)
+
+# 4. Inspeccionar Información del Modelo y del Proceso de Validación
+xgb.fit
+print(xgb.fit)
+ggplot(xgb.fit) + scale_x_log10()
+
+# 5. Importancia de Variables según XGBoost
+var_imp <- varImp(xgb.fit)
+print(var_imp)
+plot(var_imp)
+```
+###### 3.2 Diagnóstico
+> En este bloque evaluamos qué tal se comporta el modelo XGBoost en el **conjunto de entrenamiento**.  
+> Primero generamos las predicciones `xgb_pred` sobre `fdata.Reg.tr` y usamos `PlotModelDiagnosis()` para revisar, de forma conjunta, **ajuste vs valores reales** y posibles **patrones en los residuos** (no linealidades no capturadas, heterocedasticidad, etc.).  
+> Después calculamos métricas de error con `accuracy()` (RMSE, MAE, …) para cuantificar el rendimiento del modelo en train.  
+> Finalmente dibujamos la **serie real frente a la predicha**: si el modelo es razonable, las curvas deberían solaparse bastante, especialmente en la dinámica de medio y largo plazo.
+```r
+# 1. Obtener Predicciones en el Conjunto de Entrenamiento
+xgb_pred <- predict(xgb.fit, newdata = fdata.Reg.tr)
+
+# 7. Diagnóstico del Modelo: Ajuste, Residuos y Patrones
+PlotModelDiagnosis(
+  fdata.Reg.tr[, -1],  # Variables Explicativas
+  fdata.Reg.tr[, 1],   # Demanda Real
+  xgb_pred,            # Predicción del Modelo XGBoost
+  together = TRUE
+)
+
+# 2. Medir Errores de Entrenamiento
+accuracy(fdata.Reg.tr[, 1], xgb_pred)
+
+# 3. Gráfico de Serie Real vs Predicción en Entrenamiento
+plot(fdata.Reg.tr[, 1],
+     type = "l",
+     main = "Actual vs Predicted",
+     ylab = "Demand")
+lines(xgb_pred, col = "red")
+legend("topright",
+       legend = c("Actual", "Predicted"),
+       col = c("black", "red"),
+       lty = 1)
+```
+#### 4. Forecast Multi-Step con XGBoost y Lags Recalculados
+> En este bloque usamos el modelo XGBoost entrenado para generar un **forecast multi-step (h = 7 días)**.  
+> Primero leemos el fichero de validación `DAILY_DEMAND_TV.xlsx`, que contiene los nuevos valores conocidos de **WD** y **TEMP** para los próximos días, y creamos un dataset `fdata.Reg.new` donde `DEM` está inicialmente a `NA`.  
+> A continuación, concatenamos los datos **históricos** con estos nuevos registros en `fdata.join` y volvemos a construir todos los **lags** (de WD, TEMP y DEM).
+> El pronóstico se hace de forma **iterativa/recursiva**:
+> 	- En cada paso `i` predecimos `DEM[i]` usando `predict(xgb.fit, newdata=fdata.join[i, ])`
+> 	- Guardamos esa predicción en `fdata.join$DEM[i]` y **recalculamos los lags de DEM**, de forma que el siguiente paso use como pasado tanto **observaciones reales** como **predicciones previas**.
+> Al final extraemos las 7 predicciones correspondientes a los nuevos días, que representan la demanda pronosticada para la próxima semana.
+```r
+# 1. Leer Datos de Validación con Nuevos Valores de WD y TEMP
+fdata.Reg.tv <- readxl::read_excel("DAILY_DEMAND_TV.xlsx")
+fdata.Reg.tv <- as.data.frame(fdata.Reg.tv)
+
+# 2. Preparar Dataset de Nuevos Inputs (WD, TEMP) para Forecast
+fdata.Reg.new <- fdata.Reg.tv[, c(2, 3)]
+fdata.Reg.new$DEM <- rep(NA, nrow(fdata.Reg.new))  # Output Futuro Desconocido
+
+# 3. Unir Datos Históricos y Nuevos Registros en un Solo Data Frame
+fdata.join <- rbind(fdata[, c(2:4)], fdata.Reg.new)
+
+# 4. Crear Variables Rezagadas sobre el Conjunto Ampliado
+fdata.join$WD_lag1    <- Lag(fdata.join$WD,   1)
+fdata.join$WD_lag7    <- Lag(fdata.join$WD,   7)
+fdata.join$TEMP_lag1  <- Lag(fdata.join$TEMP, 1)
+fdata.join$TEMP_lag7  <- Lag(fdata.join$TEMP, 7)
+fdata.join$DEM_lag1   <- Lag(fdata.join$DEM,  1)
+fdata.join$DEM_lag7   <- Lag(fdata.join$DEM,  7)
+
+# 5. Definir Índice de Inicio del Horizonte de Predicción
+tstart <- nrow(fdata)
+
+# 6. Bucle de Forecast Iterativo para Horizonte h = 7
+for (i in (tstart + 1):(tstart + 7)) {
+  # 6.1. Predecir DEM en el Instante i con el Modelo XGBoost
+  fdata.join$DEM[i] <- predict(xgb.fit, newdata = fdata.join[i, ])
+  
+  # 6.2. Recalcular Lags de DEM Usando las Predicciones Recientes
+  fdata.join$DEM_lag1 <- Lag(fdata.join$DEM, 1)
+  fdata.join$DEM_lag7 <- Lag(fdata.join$DEM, 7)
+}
+
+# 7. Extraer Pronósticos para los Próximos 7 Días
+forecasts <- fdata.join$DEM[(tstart + 1):(tstart + 7)]
+print("Forecasted Demand for the next 7 days:")
+print(forecasts)
 ```
