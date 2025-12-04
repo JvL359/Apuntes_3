@@ -145,11 +145,11 @@ TF.RegressionError.plot(y.tr, x.tr, TF.fit, lag.max = 50)
 # NOTE: Si el error de esta regresión no es estacionario en varianza, hay que aplicar Box-Cox a las series de entrada y de salida.
 ```
 #### 3. Identificación de los Parámetros de la Función de Transferencia
-> RELLENAR/COMPLETAR/MEJORAR
-> Identificar b, r, s
-> b: cuantos no significativos
-> r: grado del decaimiento
-> s: cuantos significativos antes de la caída
+> Este paso permite **determinar los parámetros b, r y s** de la función de transferencia para cada $x_i$.
+> 	- **b**: número de coeficientes iniciales no significativos → indica el **retardo** de la respuesta de Y respecto a X.
+> 	- **r**: grado del polinomio en el denominador → representa la **suavización o decaimiento** de la respuesta.  
+> 	- **s**: número de coeficientes significativos antes de que los efectos desaparezcan → mide la **duración del impacto** de X sobre Y.
+> Utilizamos `TF.Identification.plot()` para visualizar los coeficientes estimados y así ajustar estos valores antes del modelo final.
 ```r
 # 1. Identificación visual de los parámetros TF
 TF.Identification.plot(x.tr, TF.fit)
@@ -243,7 +243,7 @@ y.tv.est2 <- TF.forecast(y.old = y.tr,
                         x.old = x.tr, 
                         x.new = x.tv, 
                         model = arima.fit, 
-                        h = length(y.TV))  
+                        h = length(y.tv))  
   
 # 3. Limpiar NAs del Vector de Predicciones
 y.tv.est2 <- na.omit(y.tv.est2)                 
