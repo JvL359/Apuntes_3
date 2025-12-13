@@ -31,7 +31,6 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 > 	- Si además cada valor sigue una distribución normal, hablamos de ruido blanco gaussiano.
 > Formalmente:
 > 	$\{ \varepsilon_t \} \sim WN(0, \sigma^2) \quad \text{con} \quad E[\varepsilon_t] = 0, \quad Var(\varepsilon_t) = \sigma^2, \quad Cov(\varepsilon_t, \varepsilon_{t'} ) = 0 \ \forall t \neq t'$
-
 #### 2. Uso
 > El ruido blanco representa la parte impredecible de una serie temporal. Todo buen modelo debe reducir la serie observada hasta un residuo que sea indistinguible de ruido blanco.
 ###### 2.1. Ruido Puro o Base de Comparación
@@ -40,14 +39,12 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ###### 2.2. Componente de los Modelos ARMA/ARIMA
 > En los modelos estocásticos, el ruido blanco es la parte impredecible.
 > Por ejemplo:  $Y_t = \phi Y_{t-1} + \varepsilon_t,$  aquí, $\varepsilon_t$ es ruido blanco: el “shock” o innovación en el sistema.
-
-2.3. Diagnóstico de Modelos
+###### 2.3. Diagnóstico de Modelos
 > Una vez ajustado un modelo ARIMA o de suavizado exponencial, se comprueba que los residuos sean ruido blanco.
 > Si no lo son (si muestran autocorrelación), el modelo está mal especificado.
 ###### 2.4. Simulación y Pruebas
 > Se usa ruido blanco para simular series y comprobar el comportamiento de métodos de pronóstico.
 >  También como input en procesos ARMA para generar datos artificiales.
-
 ###### 2.5. Gaussiano vs No Gaussiano
 > - **Gaussiano**: cada $\varepsilon_t$ sigue una Normal(0,σ²). Esto es útil porque facilita inferencia estadística y resultados asintóticos.
 > - **No gaussiano**: mantiene independencia y varianza constante, pero con otra distribución (ej. uniforme, t-Student). Se sigue considerando ruido blanco, pero las propiedades de los estimadores cambian.
