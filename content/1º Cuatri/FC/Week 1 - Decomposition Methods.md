@@ -70,8 +70,8 @@ glimpse(fdata)
 > - **`Comparación`**: Si la longitud es 0 significa que no hay ningún gap.
 ```r
 # 1. Secuencia de Fechas entre la Mínima y la Máxima de la Serie Temporal
-valMin <- min(fdata$Data)
-valMax <- max(fdata$Data)
+valMin <- min(fdata$DATE)
+valMax <- max(fdata$DATE)
 date_range <- seq.Date(valMin, valMax, by = "months")
 
 # 2. Comparación de la Secuencia con la Propia Serie Temporal
@@ -123,7 +123,7 @@ autoplot(y_a, color="orange") +
 > donde $Y_t$​ es la serie observada, $T_t$​ la tendencia, $S_t$​ la estacionalidad y $E_t$ el ruido aleatorio.
 > Esto se usa cuando la amplitud de las fluctuaciones estacionales es constante a lo largo del tiempo (los “picos” y “valles” tienen siempre más o menos la misma magnitud).
 ```r
-# Descomposición
+# 1. Descomposición
 y_dec_add <- decompose(y, type="additive")
 
 # 2. Gráfica de la Descomposición
@@ -160,8 +160,30 @@ y_dec_seas <- seas(y)
 autoplot(y_dec_seas) + xlab("Year") +
   ggtitle("SEATS decomposition")
 ```
+#### 4. Extracción de Componentes
+> Usar `seasonal()`, `trendcycle()` y `remainder()` para extraer las componentes `estacional`, `tendencia-ciclo` y `residuo` del modelo SEATS.
+```r
+# 1. Extracción de Componentes
+y_trend_seas  <- trendcycle(y_dec_seas)
+y_season_seas <- seasonal(y_dec_seas)
+y_rem_seas    <- remainder(y_dec_seas)
 
-#### 4. Comparativa de Descomposiciones
+# Gráfico de los Componentes
+autoplot(cbind(y_trend_seas, y_season_seas, y_rem_seas), facets = TRUE)
+```
+#### 5. Series Ajustadas Estacionalmente
+> Usar `seasadj()` para obtener la serie ajustada estacionalmente (sin componente estacional).
+```r
+# 1. Aditiva
+autoplot(seasadj(y_dec_add),  series = "Additive")
+
+# 2. Multiplicativa
+autoplot(seasadj(y_dec_mult), series = "Multiplicative")
+
+# 3. SEATS
+autoplot(seasadj(y_dec_seas), series = "SEATS")
+```
+#### 6. Comparativa de Descomposiciones
 > Comparar **componentes estacionales** permite verificar si el patrón de estacionalidad es estable a lo largo del tiempo o si ha cambiado (por ejemplo, si la estacionalidad de las ventas de verano ahora empieza antes o es más intensa que antes).
 > **Ajustar los componentes estacionales** consiste en eliminar ese efecto estacional de la serie, de modo que se pueda analizar mejor la tendencia y el ciclo subyacente sin que los picos y valles regulares confundan el análisis.
 ```r
@@ -173,6 +195,18 @@ autoplot(seasonal(y_dec_mult), series = "Multiplicative") +
 autoplot(seasadj(y_dec_add), series = "Additive") +
   forecast::autolayer(seasadj(y_dec_mult), series = "Multiplicative") +
   forecast::autolayer(seasadj(y_dec_seas),series = "SEATS")
+```
+#### 7. SubSeries Estacionales
+> Los gráficos de subseries estacionales permiten visualizar la forma y estabilidad del patrón estacional a lo largo del tiempo y comparar cómo cada método captura la estacionalidad.
+```r
+# 1. Aditiva
+ggsubseriesplot(seasonal(y_dec_add)) 
+
+# 2. Multiplicativa
+ggsubseriesplot(seasonal(y_dec_mult)) 
+
+# 3. SEATS
+ggsubseriesplot(seasonal(y_dec_seas))
 ```
 
 Los apuntes continúan en [[Week 2 - Stochastic Processes]]
