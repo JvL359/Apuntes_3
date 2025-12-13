@@ -168,7 +168,7 @@ y_trend_seas  <- trendcycle(y_dec_seas)
 y_season_seas <- seasonal(y_dec_seas)
 y_rem_seas    <- remainder(y_dec_seas)
 
-# Gráfico de los Componentes
+# 2. Gráfico de los Componentes
 autoplot(cbind(y_trend_seas, y_season_seas, y_rem_seas), facets = TRUE)
 ```
 #### 5. Series Ajustadas Estacionalmente
