@@ -94,7 +94,7 @@ head(y_TV)
 autoplot(y_TR, color = "orange") + 
   autolayer(y_TV, color = "blue")
 ```
-#### 2. Qué Hacer si no Sabemos la Proporción de la División
+#### 2. Qué Hacer si no Sabemos la Frecuencia de Muestreo
 > En algunos datasets no se indica claramente la **frecuencia de muestreo**. En ese caso:
 > 	1. Primero graficamos la serie completa, aunque puede salir borrosa si es muy larga.
 >     2. Después analizamos la ACF (Función de Autocorrelación) para detectar picos significativos en rezagos regulares. Estos picos marcan el periodo estacional de la serie (por ejemplo, un pico en los lag 24 y 48 sugiere periodicidad de 24 observaciones).
