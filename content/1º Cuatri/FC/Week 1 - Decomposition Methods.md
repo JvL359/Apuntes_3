@@ -86,9 +86,8 @@ setdiff(date_range, fdata$DATE)
 > 	- Frecuencia de la serie.
 ```r
 # En este caso el periodo inicial de 1 significa mes 1 (enero) por la frecuencia de 12
-y <- ts(fdata$TOTAL, start = c(2010, 1), frequency = 12)
+y <- ts(fdata$TOTAL, start = c(2010, 1), end = c(2019, 12), frequency = 12)
 ```
-
 #### 2. Graficar el Objeto ts
 > Podemos ver cual es el comportamiento de la serie temporal.
 ###### 2.1. Visualización Inicial Completa
@@ -103,9 +102,9 @@ autoplot(y) +
 > Usando window se puede extraer un intervalo de la serie.
 ```r
 # 1. Selección del Intervalo
-y_a <- window(y, end = c(2019, 12))
-y_b <- window(y, start = c(2020, 1))
-y_c <- window(y, start = c(2015, 1), end = c(2017, 12))
+y_a <- window(y, end = c(2014, 12))
+y_b <- window(y, start = c(2015, 1), end = c(2017, 12))
+y_c <- window(y, start = c(2018, 1))
 
 # 2. Gráfica Conjunta de los Intervalos
 autoplot(y_a, color="orange") +
@@ -160,7 +159,7 @@ y_dec_seas <- seas(y)
 autoplot(y_dec_seas) + xlab("Year") +
   ggtitle("SEATS decomposition")
 ```
-#### 4. Extracción de Componentes
+#### 4. Extracción de Componentes (SEATS)
 > Usar `seasonal()`, `trendcycle()` y `remainder()` para extraer las componentes `estacional`, `tendencia-ciclo` y `residuo` del modelo SEATS.
 ```r
 # 1. Extracción de Componentes
