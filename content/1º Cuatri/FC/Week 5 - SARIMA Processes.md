@@ -90,7 +90,7 @@ y_TV <- tail(y, 5 * 12)
 tail(y_TR)
 head(y_TV)
 
-# Plot de la División
+# 3. Plot de la División
 autoplot(y_TR, color = "orange") + 
   autolayer(y_TV, color = "blue")
 ```
