@@ -96,7 +96,8 @@ TF.fit <- arima(y.TR,
                 method = "ML")
 
 # 2. Diagnóstico de los Residuos del Modelo Preliminar (diferencia adicional ?)
-TF.RegressionError.plot(y, x, TF.fit, lag.max = 100)                
+TF.RegressionError.plot(y, x, TF.fit, lag.max = 100)  
+# NOTE: Si el error de esta regresión no es estacionario en varianza, hay que aplicar Box-Cox a las series de entrada y de salida.              
 ```
 #### 2. Segundo Modelo TF
 > En esta segunda estimación introducimos **diferenciación estacional (D = 1)** para capturar mejor la estacionalidad observada en la serie.  

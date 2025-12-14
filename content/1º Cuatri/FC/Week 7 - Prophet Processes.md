@@ -90,7 +90,7 @@ prophet_df <- data.frame(
 > En conjunto, Prophet combina la **interpretabilidad clásica** de los modelos de descomposición con la **automatización** de un algoritmo moderno de pronóstico, lo que lo hace especialmente útil en entornos con estacionalidades múltiples y series largas con cambios de tendencia.
 
 ### IV. Modelado paso a paso
-#### 1) Modelo sin Estacionalidad (solo tendencia)
+#### 1. Modelo sin Estacionalidad (solo tendencia)
 > Comenzamos con la versión más simple de Prophet: sin estacionalidades ni eventos, solo la **tendencia global**. El modelo identifica automáticamente **cambios en la pendiente** (changepoints) y estima una curva suavizada que sigue la evolución a largo plazo. Sirve como línea base para comparar con versiones más complejas.
 ```r
 # 1. Instanciar el Modelo
@@ -112,7 +112,7 @@ prophet_plot_components(model1, pred1)
 resid1 <- prophet_df$y - pred1$yhat
 CheckResiduals.ICAI(resid1, lags = 36)
 ```
-#### 2) Tendencia con Changepoints Definidos
+#### 2. Tendencia con Changepoints Definidos
 > Aquí forzamos los **changepoints** en fechas específicas donde sabemos que hubo rupturas o saltos estructurales. Prophet ajusta la tendencia con **pendientes diferentes** antes y después de cada punto definido. Es útil cuando el analista conoce momentos concretos de cambio (p. ej. políticas, reformas, eventos externos).
 ```r
 # 0. Determinar los Changepoints
@@ -137,7 +137,7 @@ prophet_plot_components(model2, pred2)
 resid2 <- prophet_df$y - pred2$yhat
 CheckResiduals.ICAI(resid2, lags = 36)
 ```
-#### 3) Añadir Estacionalidad Anual y Semanal
+#### 3. Añadir Estacionalidad Anual y Semanal
 > Incorporamos los **patrones periódicos** más comunes: la **variación anual** (efecto de estaciones o ciclos largos) y la **semanal** (efecto de días laborables vs. fines de semana). Prophet usa funciones de **Fourier** para estimar estas oscilaciones. El resultado es una mejor captura de los movimientos cíclicos regulares del sistema.
 ```r
 # 1. Instanciar el Modelo
@@ -159,7 +159,7 @@ prophet_plot_components(model3, pred3)
 resid3 <- prophet_df$y - pred3$yhat
 CheckResiduals.ICAI(resid3, lags = 36)
 ```
-#### 4) Estacionalidad Mensual Personalizada
+#### 4. Estacionalidad Mensual Personalizada
 > Añadimos una estacionalidad **adicional de periodo ≈ 30.5 días**, útil para fenómenos con ciclo mensual (p. ej., consumo, facturación, clima). Con `fourier.order = 3` limitamos la complejidad del patrón para evitar sobreajuste. Este componente complementa los patrones anual y semanal, mejorando la precisión a corto plazo.
 ```r
 # 1. Instanciar el Modelo
@@ -168,8 +168,11 @@ model4 <- prophet(
   weekly.seasonality = TRUE,
   daily.seasonality  = FALSE,
   changepoints = changepoints
-) %>% add_seasonality(name = "monthly", period = 30.5, fourier.order = 3)
-  %>% fit.prophet(prophet_df)
+) %>% add_seasonality(
+    name = 'monthly',
+    period = 30.5,
+    fourier.order = 3
+) %>% fit.prophet(prophet_df)
   
 # 2. Predicción del Modelo
 pred4 <- predict(model4, prophet_df)
@@ -182,7 +185,7 @@ prophet_plot_components(model4, pred4)
 resid4 <- prophet_df$y - pred4$yhat
 CheckResiduals.ICAI(resid4, lags = 36)
 ```
-#### 5) Añadir Regresores Externos
+#### 5. Añadir Regresores Externos
 > Incorporamos variables explicativas (`x1`, `x2`) que podrían influir en la salida —por ejemplo, temperatura, tráfico o indicadores externos. Prophet las trata como **efectos lineales adicionales**, ajustando su contribución junto con la tendencia y estacionalidad. Tras el ajuste, comprobamos los residuos y detectamos posibles **outliers** o fechas atípicas que el modelo no explica bien.
 ```r
 # 0. ACF/PACF de los regresores
@@ -195,9 +198,15 @@ model5 <- prophet(
   weekly.seasonality = TRUE,
   daily.seasonality  = FALSE,
   changepoints = changepoints
-) %>% add_seasonality(name = "monthly", period = 30.5, fourier.order = 5)
-  %>% add_regressor("x1") %>% add_regressor("x2")
-  %>% fit.prophet(prophet_df)
+) %>% add_seasonality(
+  name = "monthly", 
+  period = 30.5, 
+  fourier.order = 5
+) %>% add_regressor(
+  "x1"
+) %>% add_regressor(
+  "x2"
+) %>% fit.prophet(prophet_df)
 
 # 2. Predicción del Modelo
 pred5 <- predict(model5, prophet_df)
@@ -214,7 +223,7 @@ CheckResiduals.ICAI(resid5, lags = 36)
 out_idx <- which(abs(resid5) > (mean(resid5) + 3*sd(resid5)))
 fdata$date[out_idx]
 ```
-#### 6) Festivos (ventana con ±días)
+#### 6. Festivos (ventana con ±días)
 > Añadimos el efecto de **festivos o eventos especiales**, definidos con sus **ventanas de influencia** (`lower_window`, `upper_window`). En este ejemplo se simula **Navidad**, afectando desde dos días antes hasta tres días después. Prophet crea variables dummy para cada fecha y estima su impacto, mejorando la capacidad del modelo para capturar picos o caídas estacionales no periódicas.
 ```r
 # 0. Determinar Festivos
@@ -247,7 +256,7 @@ prophet_plot_components(model6, pred6)
 resid6 <- prophet_df$y - pred6$yhat
 CheckResiduals.ICAI(resid6, lags = 36)
 ```
-#### 7) Ajuste Manual de Hiperparámetros
+#### 7. Ajuste Manual de Hiperparámetros
 > Prophet permite controlar la **complejidad de las estacionalidades** modificando directamente los **órdenes de Fourier** (`yearly.seasonality = 3`, `weekly.seasonality = 3`). Esto sirve para **suavizar** patrones demasiado flexibles o reducir el riesgo de sobreajuste. Es un ajuste fino que busca equilibrio entre precisión y estabilidad en los pronósticos.
 ```r
 # 1. Instanciar el Modelo
@@ -272,7 +281,7 @@ prophet_plot_components(model7, pred7)
 resid7 <- prophet_df$y - pred7$yhat
 CheckResiduals.ICAI(resid7, lags = 36)
 ```
-#### 8) Grid search con validación cruzada temporal
+#### 8. Grid Search con Validación Cruzada
 > En esta fase realizamos una **búsqueda en rejilla (grid search)** para encontrar la combinación óptima de **órdenes de Fourier** en las estacionalidades anual, semanal y mensual. 
 > Prophet no tiene un optimizador automático para estos parámetros, así que iteramos sobre todas las combinaciones posibles y medimos el rendimiento mediante **validación cruzada temporal** (`cross_validation`).  
 > Este método divide la serie en ventanas deslizantes respetando la secuencia temporal: se entrena en los primeros años, se evalúa en horizontes futuros y se repite.  
@@ -350,7 +359,7 @@ CheckResiduals.ICAI(resid8, lags = 36)
 > Los **componentes** muestran cómo cada parte del modelo (tendencia, estacionalidad y festivos) contribuye al pronóstico total.  
 > Finalmente, analizamos los **residuos de test** para verificar que se comporten como ruido blanco y calculamos las métricas de **precisión** (`accuracy`) tanto en entrenamiento como en test, comprobando la capacidad predictiva y la estabilidad del modelo fuera de muestra.
 ```r
-# 0. Crear el DataFrame de las Predicciones
+# 1. Crear el DataFrame de las Predicciones
 prophet_df_test <- make_future_dataframe(
     model8, 
     periods = 182, # Number of samples to forecast

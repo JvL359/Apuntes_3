@@ -121,14 +121,14 @@ TF.fit <- arima(y.tr,
                 method = "ML")
 
 # 2. Diagnóstico de los Residuos del Modelo Preliminar (diferencia adicional ?)
-TF.RegressionError.plot(y.tr, x.tr, TF.fit, lag.max = 50)            
+TF.RegressionError.plot(y.tr, x.tr, TF.fit, lag.max = 100)            
 ```
 #### 2. Segundo Modelo TF
-> En esta segunda estimación introducimos **diferenciación estacional (D = 1)** para capturar mejor la estacionalidad observada en la serie.  
+> En esta segunda estimación introducimos **diferenciación regular (d = 1)** para capturar mejor la estacionalidad observada en la serie.  
 > Ahora pasamos a la forma SARIMA(1,0,0)(1,1,0)[freq] y la misma estructura de las funciones de transferencia (r = 0, s = 9).  
 > Tras el ajuste, analizamos nuevamente los residuos, primero con `summary()` y `coeftest()`, y después con `TF.RegressionError.plot()` para comprobar si la serie se ha estabilizado y si la estructura de errores es más cercana a un ruido blanco.
 ```r
-# 1.  Estimación del modelo con diferenciación estacional
+# 1.  Estimación del modelo con diferenciación regular
 TF.fit <- arima(y.tr,
                 xtransf = x.tr,
                 order=c(1,1,0),
@@ -141,7 +141,7 @@ summary(TF.fit)
 coeftest(TF.fit)
 
 # 3. Diagnóstico de los Residuos del Modelo Diferenciado (ha mejorado ?)
-TF.RegressionError.plot(y.tr, x.tr, TF.fit, lag.max = 50)
+TF.RegressionError.plot(y.tr, x.tr, TF.fit, lag.max = 100)
 # NOTE: Si el error de esta regresión no es estacionario en varianza, hay que aplicar Box-Cox a las series de entrada y de salida.
 ```
 #### 3. Identificación de los Parámetros de la Función de Transferencia
