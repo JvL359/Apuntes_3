@@ -893,3 +893,5 @@ forecasts <- fdata.join$DEM[(tstart + 1):(tstart + 7)]
 print("Forecasted Demand for the next 7 days:")
 print(forecasts)
 ```
+
+Fin de los apuntes de la asignatura :)
