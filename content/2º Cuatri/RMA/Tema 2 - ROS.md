@@ -104,4 +104,81 @@ mkdir <espacio_de_trabajo>/src    # ej.: mkdir sim_ws/src
 ros2 pkg create --build-type ament_python <nombre_del_paquete>
 ros2 pkg create --build-type ament_python --node-name <nombre_del_nodo> <nombre_del_paquete>  # crea también plantilla de nodo
 ```
+#### 2. Nodes
+> Un **nodo (node)** es un **proceso** que realiza una **tarea concreta**.  
+> Un sistema de control puede estar formado por **muchos nodos**, por ejemplo: adquirir datos de un sensor de distancia, capturar imágenes, controlar motores, localizar respecto al mapa, planificar rutas o mostrar el estado del sistema.  
+> **Ventajas:**
+> 	- Mayor **tolerancia a fallos** (un error afecta solo a parte del sistema).
+> 	- Se **reduce la complejidad** frente a aplicaciones monolíticas.
+```py
+# Compilar Nodos (ejecutar desde la raíz del workspace, p. ej. sim_ws)
+colcon build
+colcon build --packages-select <nombre_del_paquete_1> <nombre_del_paquete_2>
+colcon build --symlink-install  # útil en Python: cambios se actualizan al guardar
 
+# Ejecutar Nodos (en cada terminal/pestaña, desde el workspace)
+. install/setup.bash
+source install/setup.bash
+
+ros2 run <nombre_del_paquete> <nombre_del_nodo>  # p. ej., ros2 run amr_simulation coppeliasim_node
+
+# Mostrar Información de Nodos
+ros2 node list
+ros2 node info <nombre_del_nodo>  # p. ej., ros2 node info /coppeliasim_node
+```
+#### 3. Topics
+> Los nodos intercambian datos principalmente mediante **mensajes (messages)**.  
+> Los mensajes se organizan en **temas (topics)** con **nombres únicos**:
+> 	- Un nodo puede **publicar** mensajes en uno o varios topics.
+> 	- Un nodo puede **suscribirse** a uno o varios topics.
+> 	- Puede haber **varios publicadores y varios suscriptores** en el mismo topic.
+```py
+# Listar Temas
+ros2 topic list
+ros2 topic list -t      # muestra también el tipo de mensaje
+ros2 topic list -v      # detalles: tipo + nº publicadores/suscriptores
+
+# Info de un Tema
+ros2 topic info <nombre_del_tema>     # p. ej., ros2 topic info /cmd_vel
+ros2 topic info <nombre_del_tema> -v  # incluye info de QoS
+
+# Ver datos y Estadísticos
+ros2 topic echo <nombre_del_tema>     # p. ej., ros2 topic echo /cmd_vel
+ros2 topic hz <nombre_del_tema>       # tasa de publicación
+
+# Publicar (ver formato con -h)
+ros2 topic pub <nombre_del_tema> <tipo_de_mensaje> <valores>
+```
+#### 4. Messages
+> ROS proporciona muchos **mensajes predefinidos**, organizados en paquetes (ejemplos):
+> - `builtin_interfaces/msg/` (Duration, Time)
+> - `geometry_msgs/msg/` (Pose, PoseStamped, Quaternion, Twist, Vector3…)
+> - `nav_msgs/msg/` (OccupancyGrid, Odometry, Path…)
+> - `sensor_msgs/msg/` (BatteryState, Image, Imu, LaserScan, Range…)
+> - `std_msgs/msg/` (Header, Bool, Byte, Float64, Int32, UInt32, String…)  
+>     Además, se pueden crear **mensajes personalizados**.
+```py
+# Listar Mensajes
+ros2 interface list -m
+
+# Ver Interfaces de un Paquete
+ros2 interface package <nombre_del_paquete>  # p. ej., ros2 interface package sensor_msgs
+
+# Ver la Estructura de un Mensaje
+ros2 interface show <tipo_de_mensaje>        # p. ej., ros2 interface show geometry_msgs/msg/Twist
+```
+#### 5. Topics & Messages
+> Relación clave: un **topic** es el “canal” con nombre; el **mensaje** es el “formato” de lo que viaja por ese canal.  
+> Por eso, al inspeccionar o publicar en un topic suele interesar ver **qué tipo de mensaje** usa y cuántos nodos están conectados (publicando/suscritos).
+```py
+# Ver Tipo y Conexiones de un Topic
+ros2 topic list -t
+ros2 topic info <nombre_del_tema>
+ros2 topic info <nombre_del_tema> -v  # incluye QoS
+
+# Ver Estructura del Tipo de mMnsaje Asociado
+ros2 interface show <tipo_de_mensaje>
+
+# Mostrar Datos del Topic
+ros2 topic echo <nombre_del_tema>
+```
