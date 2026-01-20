@@ -106,7 +106,6 @@ a += b # actualiza el objeto ya existente (más eficiente)
 > No se permiten in-place operations con grafos porque podemos modificar un aspecto que cambia la derivada (en el += no afecta? pero en el \*= si). -- Mirar ejemplos en las diapos de cuando si o cuando no --. 
 > 
 
-
 ### V.
 #### 1.
 

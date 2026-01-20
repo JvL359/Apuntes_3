@@ -182,3 +182,213 @@ ros2 interface show <tipo_de_mensaje>
 # Mostrar Datos del Topic
 ros2 topic echo <nombre_del_tema>
 ```
+#### 6. Ejemplo 1 - Publicación
+###### 6.1. Publicación en Python
+> La clase `MinimalPublisher` del publicador, se puede definir de la siguiente manera. Así
+> se inicializa el publicador con un tipo de mensaje, un topic, y un perfil que tiene que ser idéntico en el suscriptor (este perfil sirve para RELLENAR); y un contador para que el publicador publique cada `500ms` en este caso. Para debuguear usaremos la última línea, ya que funciona en tiempo real (no como un print).
+> Por último, se define en un `main()` un publicador, y se espera mediante un bucle infinito _`rclpy.spin()`_ equivalente a `while True`, hasta recibir `ctrl + C` para eliminar la memoria y detener el proceso (mejor no darle muchas veces seguidas para que la terminal no se enfade).
+```python
+import rclpy  
+from rclpy.node import Node  
+# Message types  
+from std_msgs.msg import String # Example message (deprecated)
+  
+class MinimalPublisher(Node): # Nodes inherit from the base class Node  
+	def __init__(self) -> None:  
+		super().__init__("minimal_publisher") # Set the node name  
+		# Publishers  
+		self._publisher = self.create_publisher(  
+			msg_type=String, topic="hello", qos_profile=10  
+		)  
+		# Create a timer to publish every 500 ms  
+		self._timer = self.create_timer(  
+			timer_period_sec=0.5, callback=self._timer_callback  
+		)  
+		
+	def _timer_callback(self) -> None:  
+		msg = String()  
+		msg.data = "Hello, World!"  
+		self._publisher.publish(msg)  
+		
+		# Log to the terminal with information (info) level  
+		self.get_logger().info(f"Publishing: {msg.data}")
+
+def main(args=None) -> None:  
+	rclpy.init(args=args)  
+	minimal_publisher = MinimalPublisher()  
+	rclpy.spin(minimal_publisher)  
+	# Destroy the node explicitly.  
+	# Optional. Otherwise, it will be done automatically  
+	# when the garbage collector destroys the node object.  
+	minimal_publisher.destroy_node()  
+	rclpy.shutdown() # Or rclpy.try_shutdown()  
+	
+if __name__ == "__main__":  
+main()
+```
+###### 6.2. Suscripción en Python
+> a
+```python
+import rclpy  
+from rclpy.node import Node  
+# Message types  
+from std_msgs.msg import String # Example message (deprecated)  
+
+class MinimalSubscriber(Node): # Nodes inherit from the base class Node  
+	def __init__(self) -> None:  
+		super().__init__("minimal_subscriber") # Set the node name  
+		# Subscribers (beware self._subscriptions is reserved)  
+		self._subscriber = self.create_subscription(  
+			msg_type=String,  
+			topic="hello",  
+			callback=self._listener_callback,  
+			qos_profile=10,  
+		)  
+	def _listener_callback(self, msg: String) -> None:  
+		# Log to the terminal with information (info) level  
+		self.get_logger().info(f"I heard: {msg.data}")
+		
+def main(args=None) -> None:  
+	rclpy.init(args=args)  
+	minimal_subscriber = MinimalSubscriber()  
+	rclpy.spin(minimal_subscriber)  
+	# Destroy the node explicitly.  
+	# Optional. Otherwise, it will be done automatically  
+	# when the garbage collector destroys the node object.  
+	minimal_subscriber.destroy_node()  
+	rclpy.shutdown() # Or rclpy.try_shutdown()  
+	
+if __name__ == "__main__":  
+main()		
+```
+###### 6.3. Configuración del Ejecutable en el Paquete `setup.py` 
+> a
+```python
+from setuptools import find_packages, setup  
+package_name = "tutorial_pubsub_py" # Rellenar  
+setup(  
+	name=package_name,  
+	version="1.0.0", # Rellenar  
+	packages=find_packages(exclude=["test"]),  
+	data_files=[  
+		("share/ament_index/resource_index/packages", ["resource/" + package_name]),  
+		("share/" + package_name, ["package.xml"]),  
+	],  
+	install_requires=["setuptools"],  
+	zip_safe=True,  
+	maintainer="Jaime Boal", # Rellenar  
+	maintainer_email="jboal@comillas.edu", # Rellenar  
+	description="Pub/sub tutorial for Autonomous Mobile Robots @ Comillas ICAI.", # Rellenar  
+	license="Apache License 2.0", # Rellenar  
+	tests_require=["pytest"],  
+	entry_points={  
+		"console_scripts": [ # Rellenar con la función inicial de todos los nodos del paquete  
+			"publisher_node = tutorial_pubsub_py.publisher_node:main", # nombre_del_ejecutable = nombre_del_paquete.nombre_del_archivo_python:main  
+			"subscriber_node = tutorial_pubsub_py.subscriber_node:main",  
+		],  
+	},  
+)
+```
+#### 7. Servicios
+> Rellenar diapos 25, 26
+#### 8. Ejemplo 2 - Servicio
+###### 8.1. Servidor en Python
+> rellenar diapo 27
+```python
+
+```
+###### 8.2. Cliente en Python
+> rellenar diapo 28
+```python
+
+```
+#### 9. Acciones
+> rellenar diapos 29, 30
+> Se manda una tarea al robot, este devuelve una respuesta de ok, aceptando la tarea, luego mientras está en mitad del proceso va enviando topics de su estado actual, y por último envía una respuesta al completar la tarea. 
+> (NO SON MUY IMPORTANTES, SOLO SABER Q EXISTEN)
+#### 10. Ejemplo 3 - Actions
+###### 10.1. Servidor en Python
+> rellenar diapo 31
+```python
+
+```
+###### 10.2. Cliente en Python
+> rellenar diapo 32
+```python
+
+```
+#### 11. Nodos con Ciclo de Vida
+> rellenar diapos 33, 34
+> Pueden estar en 4 estados: no configurado, inactivo, activado y finalizado; que están conectados bidireccionalmente (salvo finalizado que no puede retroceder porque elimina el nodo).
+> rellenar definiciones de estados
+```python
+import rclpy  
+from rclpy.lifecycle import (  
+	LifecycleNode,  
+	LifecycleState,  
+	TransitionCallbackReturn,  
+)  
+
+class MinimalLifecycleNode(LifecycleNode): # Inherit from LifecycleNode  
+	def __init__(self) -> None:  
+		"""Called in response to the 'create()' transition.  
+		The node is initialized in the 'unconfigured' state."""  
+		super().__init__("minimal_lifecycle_node")  
+	def on_configure(self, state: LifecycleState) -> TransitionCallbackReturn:  
+		"""Called as response to the 'configure()' transition.  
+		The node evolves from 'unconfigured' to 'inactive'."""  
+		return super().on_configure(state) # TransitionCallbackReturn.SUCCESS  
+										  # TransitionCallbackReturn.FAILURE  
+										  # TransitionCallbackReturn.ERROR  
+	def on_activate(self, state: LifecycleState) -> TransitionCallbackReturn:  
+		"""Called as response to the 'activate()' transition.  
+		The node evolves from 'inactive' to 'active'."""  
+		return super().on_activate(state)  
+	def on_deactivate(self, state: LifecycleState) -> TransitionCallbackReturn:  
+		"""Called as response to the 'deactivate()' transition.  
+		The node evolves from 'active' to 'inactive'."""  
+		return super().on_deactivate(state)  
+	def on_cleanup(self, state: LifecycleState) -> TransitionCallbackReturn:  
+		"""Called as response to the 'cleanup()' transition.  
+		The node evolves from 'inactive' to 'unconfigured'."""  
+		return super().on_cleanup(state)  
+	def on_shutdown(self, state: LifecycleState) -> TransitionCallbackReturn:  
+		"""Called as response to the 'shutdown()' transition. The node evolves  
+		from 'unconfigured', 'inactive', or 'active' to 'finalized'."""  
+		return super().on_shutdown(state)  
+	def on_error(self, state: LifecycleState) -> TransitionCallbackReturn:  
+		"""Called as a response to an error raised in any state or transition.  
+		The node evolves to 'unconfigured' if the error is fixed or to  
+		'finalized' on failure."""  
+		return super().on_error(state)  
+		
+def main(args=None):  
+	rclpy.init(args=args)  
+	minimal_lifecycle_node = MinimalLifecycleNode()  
+	rclpy.spin(minimal_lifecycle_node)  
+	minimal_lifecycle_node.destroy_node() # Optional  
+	rclpy.shutdown() # Or rclpy.try_shutdown()  
+	
+if __name__ == "__main__":  
+main()
+```
+#### 12. Archivos de Lanzamiento
+> rellenar diapo 35
+#### 13. Ejemplo 4 - Launcher File & Node Managing
+###### 13.1. Launcher File
+> rellenar diapo 36
+```python
+
+```
+###### 13.2. Node Managing
+> rellenar diapo 37
+```python
+
+```
+#### 14. Calidad de Servicio `QoS`
+> rellenar diapos 38-42
+#### 15. Ejemplo 5 - QoS
+> rellenar diapo 43
+```python
+
+```
