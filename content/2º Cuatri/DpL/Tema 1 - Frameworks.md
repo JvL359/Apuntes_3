@@ -70,7 +70,41 @@ if __name__ == "__main__":
 > Son unos arrays "aumentados". Para una inicialización vacía mejor usar `empty`. También tienen métodos de indexado y slicing como los arrays.
 #### 3. Almacenamiento
 > Mejor usar view siempre para saber qué estamos haciendo con el tensor. Pueden almacenarse de manera contigua o no. Los contiguos almacenan la última dimensión toda seguida. Esto se modela con un `stride`, que marca los saltos a la siguiente dimensión, por ejemplo en una matriz `3x3` su stride es `(3, 1)` porque para cambiar de fila es un salto de 3 elementos y para cambiar de columna es un salto de 1 elemento.
+#### 4. View vs Clone
+> View solo se puede cuando el tensor es contiguo (stride terminado en 1: `(..., 1)`).
+> Clone crea una copia del objeto en una dirección de memoria nueva.
+> Basic slices: son views, que cambian el tensor original ya que comparten memoria.
+> Advanced slices: son clones, que no cambian el tensor original ya que copian el original en otro sitio de la memoria.
+#### 5. Contigüidad
+> Esto es que en la última dimensión, los elementos vayan seguidos, lo que facilita y acelera realizar operaciones.
+#### 6. In-Place Operations
+> ejemplo base python: 
+```python
+# Operación normal
+a = init
+a = a + b # crea un nuevo objeto (menos eficiente)
 
+# Operación In-Place
+a = init
+a += b # actualiza el objeto ya existente (más eficiente)
+```
+#### 7. Tensores de Numpy vs PyTorch
+> La memoria es compartida, si se cambia el tensor se cambia el array.
+> En pytorch hay que tener cuidado con el import, que es mejor poner `torch.tensor()` con _tensor_ en minúsculas, para que mantenga el tipo de dato inicial siempre.
+#### 8. AutoDiff y AutoGrad
+> - Forward: como se predice el ouptup.
+> - Backward: como se consigue el gradiente desde el output hacia atrás. 
+> - Grafo Computacional: es la estructura que se construye automáticamente, y que será luego usada por el backward. Tiene `leaf nodes` que son el inicio (donde termina el backward), de normal no se necesitan gradientes intermedios. Todos los nodos que no tienen nada antes (tanto inputs como pesos) son nodos hoja. Una vez tenemos el mapa hay varias maneras, hacer las operaciones de alante hacia atrás o al revés. Internamente se guarda la derivada de cada bloque, y con la regla de la cadena se calcula de forma backward (más eficiente que forward por las dimensiones) el resultado del gradiente.
+> - IMPORTANTE: el backward solo se puede llamar desde un escalar, también por tema de dimensiones, ya que habría varias derivadas parciales en vez de una única en cada iteración. Si el resultado final son varios elementos, se unifican haciendo una suma ponderada o algo del estilo para reducirlo a un escalar. Hay funciones que hacen automáticamente esta ponderación pero también se puede hacer a mano.
+> 
+> Los tensores tienen una variable asociada `.requires_grad_(True)` (que acabe en `_` quiere decir que modifica el tensor original), que activa su reconocimiento en el backward. Su gradiente se calcula en `.grad`, que NO se borra por defecto después de la iteración, ya que como el gradiente se acumula se estaría considerando un valor de otra iteración con los pesos actuales que pueden ser distintos y haciendo que el valor obtenido sea erróneo.
+> También tienen una grad function `grad_fn` que indica la función aplicada en ese instante, que sirve para mirar de donde viene y que operación tiene que hacer (en el primero es None xq es un nodo hoja).
+> Si queremos sacar algo del grafo computacional se usa el `detach` que crea un tensor separado del grafo actual, creando un nuevo nodo hoja de un nuevo grafo computacional. Por ejemplo, para pasar un tensor a numpy hace falta hacer detach.
+> Los hijos de un nodo hoja que tiene el `requires_grad` en `True` también lo tienen activado.
+> **POSIBLE PREGUTNA: QUE HACE REQUIRES_GRAD : EVITAR QUE SE CALCULE O EVITAR QUE SE GUARDE -> EVITAR QUE SE GUARDE PORQUE SI QUE SE CALCULA PERO NO LO DEVUELVE.**
+> También está `retains_grad` que si está en `True` hace que no se borren los gradientes intermedios y los guarda, se lo pones al final (de la derecha) y se auto pone en el resto.
+> No se permiten in-place operations con grafos porque podemos modificar un aspecto que cambia la derivada (en el += no afecta? pero en el \*= si). -- Mirar ejemplos en las diapos de cuando si o cuando no --. 
+> 
 
 
 ### V.
