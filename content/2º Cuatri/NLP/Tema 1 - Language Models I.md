@@ -19,3 +19,15 @@
 > diapo 64
 > Ejemplo: 
 ![[Pasted image 20260121164646.png]]
+##### 1.2. Problema del Modelo
+> Si se introduce un prompt que no está contenido en el contexto del modelo, hay una probabilidad 0 de ocurrencia.
+##### 1.3. Solución al Zero-Count
+> Descartar las primeras `m` palabras del prompt hasta que haya una coincidencia. Esto se llama `Supuesto Markoviano` que se queda con las `n-1` últimas palabras para predecir con un `N-grama`. 
+> Por ejemplo en un `Tri-grama` si se quiere predecir `P(dream | a kid who had a)` se toma la aproximación `P(dream | had a)` haciendo `Count(had a dream) / Count (had a __)`.
+
+rellenar 89-
+##### 1.5. Limitaciones del Modelo
+> - Zero-Count: reducir el input (`Backoff`), o suavizarlo (`Smoothing`) añadiendo 1 al count.
+> - Dependencias a largo plazo: El modelo va perdiendo 'memoria' y  cambia totalmente de tema.
+> - Generalización limitada: Sus conocimientos son independientes, dando problemas con sinónimos o palabras pertenecientes a la misma familia de palabras pero que no aparecen.
+
