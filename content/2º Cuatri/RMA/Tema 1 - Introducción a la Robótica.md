@@ -81,3 +81,5 @@
 > - **Actuar (Control de Movimiento):** _Path Execution_ traduce el path a **comandos de actuador** → _Acting_ ejecuta el movimiento en el **mundo real**, cerrando el bucle con nueva percepción.
 
 ![[Pasted image 20260115172007.png]]
+
+Los apuntes continúan en [[Tema 2 - ROS]]

@@ -829,3 +829,5 @@ self._subscriber = self.create_subscription(
 	qos_profile=qos_profile,  
 )
 ```
+
+Los apuntes continúan en [[Tema 3 - Percepción]]
