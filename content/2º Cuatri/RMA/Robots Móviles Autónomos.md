@@ -1,3 +1,4 @@
 - [[Tema 1 - Introducción a la Robótica]]
 - [[Tema 2 - ROS]]
+- [[Tema 3 - Percepción]]
 - [[Guía Docente - RMA]]

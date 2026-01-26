@@ -104,7 +104,9 @@ a += b # actualiza el objeto ya existente (más eficiente)
 > **POSIBLE PREGUTNA: QUE HACE REQUIRES_GRAD : EVITAR QUE SE CALCULE O EVITAR QUE SE GUARDE -> EVITAR QUE SE GUARDE PORQUE SI QUE SE CALCULA PERO NO LO DEVUELVE.**
 > También está `retains_grad` que si está en `True` hace que no se borren los gradientes intermedios y los guarda, se lo pones al final (de la derecha) y se auto pone en el resto.
 > No se permiten in-place operations con grafos porque podemos modificar un aspecto que cambia la derivada (en el += no afecta? pero en el \*= si). -- Mirar ejemplos en las diapos de cuando si o cuando no --. 
-> 
+
+#### COSA DE LA PRACTICA
+> en los constructores hay que poner super inits, parametros: torch.nn.parameter (con random), mejor inference_mode que grad no sé que, copiar la linea de la gpu y pasar todo a la gpu en bucle training o bucle test. dataset y dataload, dataset -> carga cada elemento, dataload -> batches, siempre con 3 métodos (diapo "DATASET"). DataLoader, para entrenar de batches en batches, le pasamos el dataset y le damos el tamaño y el shuffle (en train siempre true), num worker (4 y ya), drop last para quitar batches incompletos. copiar el training loop.
 
 ### V.
 #### 1.

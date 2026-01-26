@@ -83,7 +83,7 @@
 ###### 1.1. Espacio de Trabajo
 > Un **espacio de trabajo (workspace)** es el “contenedor” donde organizas tus proyectos de ROS 2: básicamente un **repositorio de paquetes**.  
 > La estructura mínima incluye una carpeta **`src/`**, donde se colocan los paquetes.
-```py
+```python
 # Crear un Espacio de Trabajo (Linux)
 mkdir <espacio_de_trabajo>        # ej.: mkdir sim_ws
 mkdir <espacio_de_trabajo>/src    # ej.: mkdir sim_ws/src
@@ -99,18 +99,18 @@ mkdir <espacio_de_trabajo>/src    # ej.: mkdir sim_ws/src
 > - `setup.py`: instalación (paquetes Python).
 > - `setup.cfg`: ayuda a localizar paquetes Python y lanzar ejecutables sin especificar ruta.
 > - `README`, `LICENSE`: descripción y licencia.
-```py
+```python
 # Crear un Paquete de Python (ejecutar src, p.ej. sim_ws/src)
 ros2 pkg create --build-type ament_python <nombre_del_paquete>
 ros2 pkg create --build-type ament_python --node-name <nombre_del_nodo> <nombre_del_paquete>  # crea también plantilla de nodo
 ```
-#### 2. Nodes
+#### 2. Nodos
 > Un **nodo (node)** es un **proceso** que realiza una **tarea concreta**.  
 > Un sistema de control puede estar formado por **muchos nodos**, por ejemplo: adquirir datos de un sensor de distancia, capturar imágenes, controlar motores, localizar respecto al mapa, planificar rutas o mostrar el estado del sistema.  
 > **Ventajas:**
 > 	- Mayor **tolerancia a fallos** (un error afecta solo a parte del sistema).
 > 	- Se **reduce la complejidad** frente a aplicaciones monolíticas.
-```py
+```python
 # Compilar Nodos (ejecutar desde la raíz del workspace, p. ej. sim_ws)
 colcon build
 colcon build --packages-select <nombre_del_paquete_1> <nombre_del_paquete_2>
@@ -132,7 +132,7 @@ ros2 node info <nombre_del_nodo>  # p. ej., ros2 node info /coppeliasim_node
 > 	- Un nodo puede **publicar** mensajes en uno o varios topics.
 > 	- Un nodo puede **suscribirse** a uno o varios topics.
 > 	- Puede haber **varios publicadores y varios suscriptores** en el mismo topic.
-```py
+```python
 # Listar Temas
 ros2 topic list
 ros2 topic list -t      # muestra también el tipo de mensaje
@@ -149,7 +149,7 @@ ros2 topic hz <nombre_del_tema>       # tasa de publicación
 # Publicar (ver formato con -h)
 ros2 topic pub <nombre_del_tema> <tipo_de_mensaje> <valores>
 ```
-#### 4. Messages
+#### 4. Mensajes
 > ROS proporciona muchos **mensajes predefinidos**, organizados en paquetes (ejemplos):
 > - `builtin_interfaces/msg/` (Duration, Time)
 > - `geometry_msgs/msg/` (Pose, PoseStamped, Quaternion, Twist, Vector3…)
@@ -157,7 +157,7 @@ ros2 topic pub <nombre_del_tema> <tipo_de_mensaje> <valores>
 > - `sensor_msgs/msg/` (BatteryState, Image, Imu, LaserScan, Range…)
 > - `std_msgs/msg/` (Header, Bool, Byte, Float64, Int32, UInt32, String…)  
 >     Además, se pueden crear **mensajes personalizados**.
-```py
+```python
 # Listar Mensajes
 ros2 interface list -m
 
@@ -167,10 +167,10 @@ ros2 interface package <nombre_del_paquete>  # p. ej., ros2 interface package se
 # Ver la Estructura de un Mensaje
 ros2 interface show <tipo_de_mensaje>        # p. ej., ros2 interface show geometry_msgs/msg/Twist
 ```
-#### 5. Topics & Messages
+#### 5. Topics & Mensajes
 > Relación clave: un **topic** es el “canal” con nombre; el **mensaje** es el “formato” de lo que viaja por ese canal.  
 > Por eso, al inspeccionar o publicar en un topic suele interesar ver **qué tipo de mensaje** usa y cuántos nodos están conectados (publicando/suscritos).
-```py
+```python
 # Ver Tipo y Conexiones de un Topic
 ros2 topic list -t
 ros2 topic info <nombre_del_tema>
@@ -184,9 +184,11 @@ ros2 topic echo <nombre_del_tema>
 ```
 #### 6. Ejemplo 1 - Publicación
 ###### 6.1. Publicación en Python
-> La clase `MinimalPublisher` del publicador, se puede definir de la siguiente manera. Así
-> se inicializa el publicador con un tipo de mensaje, un topic, y un perfil que tiene que ser idéntico en el suscriptor (este perfil sirve para RELLENAR); y un contador para que el publicador publique cada `500ms` en este caso. Para debuguear usaremos la última línea, ya que funciona en tiempo real (no como un print).
-> Por último, se define en un `main()` un publicador, y se espera mediante un bucle infinito _`rclpy.spin()`_ equivalente a `while True`, hasta recibir `ctrl + C` para eliminar la memoria y detener el proceso (mejor no darle muchas veces seguidas para que la terminal no se enfade).
+> La clase `MinimalPublisher` define un **nodo** que crea un **publicador** de mensajes `String` en el topic `"hello"`.  
+> El parámetro `qos_profile=10` indica el **perfil de Calidad de Servicio (QoS)** usado por el publicador; en este ejemplo se usa como “profundidad” (tamaño de cola) y debe ser **compatible** con el del suscriptor para que la comunicación funcione como se espera.  
+> Con `create_timer(timer_period_sec=0.5, ...)` se programa una publicación periódica cada **500 ms**.  
+> Para depurar en terminal se usa `self.get_logger().info(...)`, que muestra trazas en tiempo real (más útil que `print` en este contexto).  
+> Por último, en `main()` se inicializa ROS (`rclpy.init`), se crea el nodo y se mantiene ejecutándose con `rclpy.spin(...)` (equivalente a un `while True`) hasta recibir `Ctrl+C`, momento en el que se libera el nodo (`destroy_node`) y se cierra ROS (`rclpy.shutdown()`) (mejor no darle muchas veces seguidas para que la terminal no se enfade).
 ```python
 import rclpy  
 from rclpy.node import Node  
@@ -227,7 +229,10 @@ if __name__ == "__main__":
 main()
 ```
 ###### 6.2. Suscripción en Python
-> a
+> La clase `MinimalSubscriber` define un **nodo** que crea un **suscriptor** al topic `"hello"` con el mismo tipo de mensaje (`String`).
+> - `create_subscription(...)` registra: **tipo de mensaje**, **topic**, **callback** y **QoS** (debe ser compatible con el publicador).
+> - La función `_listener_callback(self, msg)` se ejecuta **cada vez que llega un mensaje**, y aquí se usa el logger para mostrar lo recibido: `I heard: ...`.
+> - En `main()` se repite el patrón estándar: `rclpy.init` → crear nodo → `rclpy.spin` (espera “infinita”) → `destroy_node` y `rclpy.shutdown` al terminar con `Ctrl+C`.
 ```python
 import rclpy  
 from rclpy.node import Node  
@@ -262,7 +267,9 @@ if __name__ == "__main__":
 main()		
 ```
 ###### 6.3. Configuración del Ejecutable en el Paquete `setup.py` 
-> a
+> Este `setup.py` define cómo se **empaqueta e instala** un paquete de Python en ROS 2 y, sobre todo, cómo se registran sus **ejecutables**.  
+> Lo importante para poder lanzar nodos con `ros2 run` es `entry_points["console_scripts"]:` ahí se mapea cada **nombre de ejecutable** (p. ej., `publisher_node`) a la función `main` del módulo correspondiente (`tutorial_pubsub_py.publisher_node:main`).  
+> Además, `package_name`, `packages=find_packages(...)` y `data_files` aseguran que se instalan tanto el código como los ficheros necesarios para que ROS 2 reconozca el paquete (p. ej., `package.xml` y el recurso del índice).
 ```python
 from setuptools import find_packages, setup  
 package_name = "tutorial_pubsub_py" # Rellenar  
@@ -290,37 +297,272 @@ setup(
 )
 ```
 #### 7. Servicios
-> Rellenar diapos 25, 26
+> Los **servicios (services)** implementan comunicación **cliente/servidor** en ROS 2.
+> - Se define un mensaje de **solicitud** y otro de **respuesta**, separados por `---` en un archivo `*.srv`.
+> - El nodo que ofrece el servicio lo **anuncia** con un **nombre** concreto (nombre del servicio).
+> - El nodo cliente envía la **solicitud** y espera la **respuesta de forma asíncrona**.
+> Además, ROS incluye **servicios predefinidos** organizados en paquetes, por ejemplo:
+> 	- `map_msgs/srv/` (p. ej., GetMapROI, GetPointMap, SaveMap…)
+> 	- `nav_msgs/srv/` (GetMap, GetPlan, SetMap)
+> 	- `sensor_msgs/srv/` (SetCameraInfo)
+> 	- `std_srvs/srv/` (Empty, SetBool, Trigger…)
+> 	- `tf2_msgs/srv/` (FrameGraph)  
+> Se pueden listar todos los servicios con `ros2 interface list –s`.
+> También es habitual crear **servicios personalizados**.
+```python
+# 1. Obtener el Mapa
+nav_msgs/msg/GetMap
+---
+nav_msgs/OccupancyGrid map
+
+# 2. Obtener el Plan de Ruta
+nav_msgs/msg/GetPlan
+geometry_msgs/PoseStamped start
+geometry_msgs/PoseStamped goal
+float tolerance
+---
+nav_msgs/Path plan
+
+# 3. Establecer el Mapa Inicial
+nav_msgs/msg/SetMap
+nav_msgs/OccupancyGrid map
+geometry_msgs/PoseWithCovarianceStamped initial_pose
+---
+bool success
+
+# 4. Establecer la Info de Cámara
+sensor_msgs/srv/SetCameraInfo
+sensor_msgs/CameraInfo camera_info
+---
+bool success
+string status_message
+
+# 5. Servicio Vacío
+std_srvs/srv/Empty
+---
+
+# 6. Activar o Desactivar (bool)
+std_srvs/srv/SetBool
+bool data  # Ej.: Activar hardware
+---
+bool success
+string message
+
+# 7. Disparar Acción y Devolver Estado
+std_srvs/srv/Trigger
+---
+bool success
+string message
+```
 #### 8. Ejemplo 2 - Servicio
 ###### 8.1. Servidor en Python
-> rellenar diapo 27
+> Este nodo (`MinimalService`) implementa un **servidor de servicio** usando el tipo `AddTwoInts`. Al inicializarse, crea el servicio con `create_service`, indicando: el **tipo de servicio** (`srv_type`), el **nombre** con el que se anuncia (`srv_name="add_two_ints"`) y la **función callback** que se ejecutará cuando llegue una solicitud.  
+> En `_add_two_ints_callback`, el servidor recibe un `request` (con campos `a` y `b`) y rellena el `response` (campo `sum`) con la suma. Además, se registra en terminal la solicitud recibida con `get_logger().info(...)`. Como en el resto de nodos, `rclpy.spin(...)` mantiene el servidor activo hasta `Ctrl+C`, y al terminar se liberan recursos con `destroy_node()` y `rclpy.shutdown()`.
 ```python
+import rclpy  
+from rclpy.node import Node  
+from example_interfaces.srv import AddTwoInts  
+class MinimalService(Node):  
+	def __init__(self) -> None:  
+		super().__init__("minimal_service")  
+		# Services  
+		self._service = self.create_service(  
+			srv_type=AddTwoInts,  
+			srv_name="add_two_ints",  
+			callback=self._add_two_ints_callback  
+		)  
+	def _add_two_ints_callback(  
+		self, request: AddTwoInts.Request, response: AddTwoInts.Response  
+	):  
+		response.sum = request.a + request.b  
+		# Log to the terminal with information (info) level  
+		self.get_logger().info(  
+			f"Incoming request - a: {request.a} b: {request.b}"  
+		)  
+		return response
 
+def main(args=None) -> None:  
+	rclpy.init(args=args)  
+	minimal_service = MinimalService()  
+	rclpy.spin(minimal_service)  
+	# Destroy the node explicitly.  
+	# Optional. Otherwise, it will be done automatically  
+	# when the garbage collector destroys the node object.  
+	minimal_service.destroy_node()  
+	rclpy.shutdown() # Or rclpy.try_shutdown()  
+	
+if __name__ == "__main__":  
+main()
 ```
 ###### 8.2. Cliente en Python
-> rellenar diapo 28
+> Este nodo (`MinimalClientAsync`) implementa un **cliente asíncrono** del servicio `add_two_ints` (mismo nombre que anuncia el servidor) usando `create_client`. Antes de enviar peticiones, espera a que el servicio esté disponible con `wait_for_service(timeout_sec=1.0)`, mostrando un mensaje si aún no existe.  
+> La solicitud se construye con `AddTwoInts.Request()` y se envía con `call_async(self._request)`, que devuelve un `future` (resultado pendiente). En lugar de bloquearse esperando, el cliente registra un **callback de finalización** con `future.add_done_callback(...)`: cuando llega la respuesta, `_add_two_ints_callback` extrae el resultado (`future.result()`) y lo muestra por el logger. El patrón de ejecución vuelve a ser el estándar: `spin` para mantener el nodo vivo y `shutdown` para cerrar correctamente.
 ```python
+import rclpy  
+from rclpy.node import Node  
+from example_interfaces.srv import AddTwoInts  
 
+class MinimalClientAsync(Node):  
+	def __init__(self) -> None:  
+		super().__init__("minimal_client_async")  
+		self._client_async = self.create_client(  
+			srv_type=AddTwoInts,  
+			srv_name="add_two_ints"  
+		)  
+		while not self._client_async.wait_for_service(timeout_sec=1.0):  
+			self.get_logger().info("Service not available. Waiting...")  
+		self._request = AddTwoInts.Request()  
+		self._send_request() # Can be called anywhere else  
+	def _send_request(self) -> None:  
+		self._request.a = 41  
+		self._request.b = 1  
+		future = self._client_async.call_async(self._request)  
+		future.add_done_callback(self._add_two_ints_callback)
+	def _add_two_ints_callback(self, future) -> None:  
+		response: AddTwoInts.Response = future.result()  
+		self.get_logger().info(  
+			"Result of add_two_ints: "  
+			f"{self._request.a} + "  
+			f"{self._request.b} = "  
+			f"{response.sum}"  
+		)  
+		
+def main(args=None) -> None:  
+	rclpy.init(args=args)  
+	minimal_client = MinimalClientAsync()  
+	rclpy.spin(minimal_client)  
+	# Destroy the node explicitly.  
+	# Optional. Otherwise, it will be done automatically  
+	# when the garbage collector destroys the node object.  
+	minimal_client.destroy_node()  
+	rclpy.shutdown() # Or rclpy.try_shutdown() 
+	 
+if __name__ == "__main__":  
+main()
 ```
 #### 9. Acciones
-> rellenar diapos 29, 30
-> Se manda una tarea al robot, este devuelve una respuesta de ok, aceptando la tarea, luego mientras está en mitad del proceso va enviando topics de su estado actual, y por último envía una respuesta al completar la tarea. 
-> (NO SON MUY IMPORTANTES, SOLO SABER Q EXISTEN)
+> Las **acciones (actions)** son un mecanismo similar a los **servicios**, pero pensado para **tareas que se extienden en el tiempo**.  
+> Se diferencian porque **pueden cancelarse** y porque ofrecen **realimentación continua (feedback)** mientras la tarea está en ejecución, normalmente a través de un **tema (topic)**.  
+> La interfaz de una acción se define en un fichero `*.action` y se estructura en **tres bloques** separados por `---`:
+> 	- **Objetivo (goal):** lo que se pide hacer.
+> 	- **Resultado (result):** lo que devuelve al terminar.
+> 	- **Realimentación (feedback):** estado parcial mientras se ejecuta.  
+> **Flujo típico:** el cliente envía el **objetivo**, el servidor **acepta** (o no) la tarea, durante la ejecución publica **feedback**, y al finalizar devuelve el **resultado**.  
+> (no son muy importantes, solo saber que existen)
+```python
+# 0. Listar las Acciones (ros 2 cli)
+ros2 interface list -a
+
+# 1. Ejemplo de Acción: Rotación Absoluta (turtlesim)
+turtlesim/action/RotateAbsolute
+# Objetivo: Orientación Deseada en Radianes
+float32 theta
+---
+# Resultado: Desplazamiento en Radianes Respecto a la Posición Inicial
+float32 delta
+---
+# Realimentación: Rotación Pendiente en Radianes
+float32 remaining
+
+# 2. Ejemplo de Acción: Fibonacci (action_tutorials_interfaces)
+action_tutorials_interfaces/action/Fibonacci
+# Objetivo: Número de Elementos de la Sucesión Solicitado
+int32 order
+---
+# Resultado: Secuencia con Todos los Elementos Solicitados
+int32[] sequence
+---
+# Realimentación: Estado Actual de la Secuencia
+int32[] partial_sequence
+```
 #### 10. Ejemplo 3 - Actions
 ###### 10.1. Servidor en Python
-> rellenar diapo 31
+> Este nodo actúa como **servidor de acción** para la acción `Fibonacci` (nombre: `"fibonacci"`). Al recibir un **objetivo** (`order`), ejecuta la tarea en `_execute_callback`: inicializa el **feedback** con la secuencia parcial `[0, 1]`, va calculando nuevos términos de Fibonacci y, en cada iteración, publica la **realimentación** (`publish_feedback`) para que el cliente vea el progreso (aquí se simula tiempo de cómputo con `sleep(1)`).  
+> Al terminar, marca el objetivo como completado (`goal_handle.succeed()`), construye el **resultado** final (`result.sequence`) con la secuencia completa y lo devuelve.
 ```python
+import time  
+import rclpy  
+from rclpy.action import ActionServer  
+from rclpy.node import Node  
+from action_tutorials_interfaces.action import Fibonacci  
 
+class FibonacciActionServer(Node):  
+	def __init__(self):  
+		super().__init__("fibonacci_action_server")  
+		# Action servers  
+		self._action_server = ActionServer(  
+			self,  
+			action_type=Fibonacci,  
+			action_name="fibonacci",  
+			execute_callback=self._execute_callback  
+		)  
+	def _execute_callback(self, goal_handle):  
+		# Feedback  
+		feedback_msg = Fibonacci.Feedback()  
+		feedback_msg.partial_sequence = [0, 1]
+		for i in range(1, goal_handle.request.order):  
+			feedback_msg.partial_sequence.append(  
+				feedback_msg.partial_sequence[i]  
+				+ feedback_msg.partial_sequence[i - 1]  
+			)  
+			goal_handle.publish_feedback(feedback_msg)  
+			time.sleep(1)  
+		# Result  
+		goal_handle.succeed()  
+		result = Fibonacci.Result()  
+		result.sequence = feedback_msg.partial_sequence  
+		return result 
+		 
+def main(args=None):  
+	rclpy.init(args=args)  
+	fibonacci_action_server = FibonacciActionServer()  
+	rclpy.spin(fibonacci_action_server)  
+	fibonacci_action_server.destroy_node() # Optional  
+	rclpy.shutdown() # Or rclpy.try_shutdown()  
+
+if __name__ == "__main__":  
+main()
 ```
 ###### 10.2. Cliente en Python
-> rellenar diapo 32
+> Este nodo actúa como **cliente de acción**. Crea un `ActionClient` para la acción `Fibonacci` (nombre: `"fibonacci"`) y, en `send_goal`, construye el **mensaje de objetivo** (`Fibonacci.Goal`) fijando `order`. Luego espera a que el servidor esté disponible (`wait_for_server`) y envía el objetivo de forma **asíncrona** con `send_goal_async`, que devuelve un _future_ (la operación no bloquea por sí sola).  
+> En `main`, se envía un objetivo (por ejemplo `10`) y se usa `rclpy.spin_until_future_complete(...)` para **esperar** a que el envío/gestión del objetivo complete; para gestionar **feedback** y el **resultado** normalmente se añaden _callbacks_ al _future_ (en este ejemplo se deja minimalista).
 ```python
-
+import rclpy  
+from rclpy.action import ActionClient  
+from rclpy.node import Node  
+from action_tutorials_interfaces.action import Fibonacci 
+ 
+class FibonacciActionClient(Node):  
+	def __init__(self):  
+		super().__init__("fibonacci_action_client")  
+		self._action_client = ActionClient(  
+			self,  
+			action_type=Fibonacci,  
+			action_name="fibonacci"  
+		)  
+	def send_goal(self, order):  
+		goal_msg = Fibonacci.Goal()  
+		goal_msg.order = order  
+		self._action_client.wait_for_server()  
+	return self._action_client.send_goal_async(goal_msg)
+	
+def main(args=None):  
+	rclpy.init(args=args)  
+	action_client = FibonacciActionClient()  
+	future = action_client.send_goal(10)  
+	rclpy.spin_until_future_complete(action_client, future) 
+	 
+if __name__ == "__main__":  
+main()
 ```
 #### 11. Nodos con Ciclo de Vida
-> rellenar diapos 33, 34
-> Pueden estar en 4 estados: no configurado, inactivo, activado y finalizado; que están conectados bidireccionalmente (salvo finalizado que no puede retroceder porque elimina el nodo).
-> rellenar definiciones de estados
+> También se llaman nodos gestionados (managed): permiten ahorrar recursos y orquestar el orden de arranque y ejecución.
+> **4 Estados:**
+> 	- **Sin configurar (unconfigured):** estado inicial; el nodo está creado, pero todavía no ha reservado/inicializado recursos (sensores, publicadores, parámetros, etc.).
+> 	- **Inactivo (inactive):** nodo configurado pero “parado”; los callbacks y publicadores no están operativos (no publica ni procesa como en ejecución normal).
+> 	- **Activo (active):** comportamiento de un nodo estándar; ya ejecuta callbacks, publica y responde con normalidad.
+> 	- **Finalizado (finalized):** estado final; la única transición es destruir el nodo (no puede volver atrás).
+> **Transiciones y Callbacks:** existen 7 transiciones y 6 callbacks asociados (configure/activate/deactivate/cleanup/shutdown/error). Las transiciones se pueden disparar desde el terminal o con un nodo dedicado (lifecycle manager), por ejemplo: `ros2 lifecycle set <nombre_del_nodo> <transición>` (p. ej. `ros2 lifecycle set /coppeliasim_node configure`).
 ```python
 import rclpy  
 from rclpy.lifecycle import (  
@@ -373,22 +615,217 @@ if __name__ == "__main__":
 main()
 ```
 #### 12. Archivos de Lanzamiento
-> rellenar diapo 35
+> Un robot suele estar compuesto por muchos nodos, y abrir un terminal por cada uno es tedioso y propenso a errores. Un archivo de lanzamiento (_launch file_) permite definir **qué nodos** se van a ejecutar, con **qué argumentos** y **qué parámetros**, para arrancarlo todo con **un único comando**. Se ejecuta con `ros2 launch <paquete> <archivo.launch.py> <parámetros>` (los parámetros son opcionales). Normalmente, los parámetros que recibe cada nodo se declaran y se leen en `__init__()` o (si es un _lifecycle node_) en `on_configure()`.
+> Para lanzar varios nodos en un solo comando se usa: 
+> 	`ros2 launch <nombre_del_paquete> <nombre_del_archivo> <parámetros>` 
+> como por ejemplo `ros2 launch amr_bringup wall_follower_sim.launch.py`
+```python
+# Ejemplo de Launch File (Python)
+from launch import LaunchDescription
+from launch_ros.actions import Node
+import math
+
+def generate_launch_description():  # Este Nombre Es Obligatorio
+    # Parámetros
+    start = (2.0, -3.0, 1.5 * math.pi)
+
+    wall_follower_node = Node(
+        package="amr_control",
+        executable="wall_follower",
+        arguments=["--ros-args", "--log-level", "WARN"],
+    )
+
+    coppeliasim_node = Node(
+        package="amr_simulation",
+        executable="coppeliasim",
+        arguments=["--ros-args", "--log-level", "WARN"],
+        parameters=[{"start": start}],
+    )
+
+    return LaunchDescription([
+        wall_follower_node,
+        coppeliasim_node,
+    ])
+
+# Leer un Parámetro Dentro del Nodo (en __init__ o en on_configure)
+self.declare_parameter("start", (0.0, 0.0, 0.0))
+start = tuple(
+	self.get_parameter("start")
+    .get_parameter_value()
+    .double_array_value.tolist()
+)
+```
 #### 13. Ejemplo 4 - Launcher File & Node Managing
 ###### 13.1. Launcher File
-> rellenar diapo 36
+> En este _launch file_ se lanzan **dos nodos con ciclo de vida** (`LifecycleNode`), `wall_follower` y `coppeliasim`, y además un nodo normal (`Node`) que actúa como **gestor del ciclo de vida** (`lifecycle_manager`). La idea es que el _launch_ no solo arranque los procesos, sino que también deje preparado el **orden de arranque** mediante el parámetro `node_startup_order`, indicando qué nodos hay que configurar y activar primero. En este caso, `coppeliasim` se fuerza a ir el último para que el resto del sistema esté listo antes de iniciar la simulación.
 ```python
+from launch import LaunchDescription  
+from launch_ros.actions import LifecycleNode, Node  
+import math  
 
+def generate_launch_description(): # This name is mandatory  
+	# Parameters  
+	start = (2.0, -3.0, 1.5 * math.pi)  
+	wall_follower_node = LifecycleNode(  
+		package="amr_control",  
+		executable="wall_follower",  
+		name="wall_follower",  
+		namespace="",  
+		output="screen",  
+		arguments=["--ros-args", "--log-level", "WARN"],  
+	)  
+	coppeliasim_node = LifecycleNode(  
+		package="amr_simulation",  
+		executable="coppeliasim",  
+		name="coppeliasim",  
+		namespace="",  
+		output="screen",  
+		arguments=["--ros-args", "--log-level", "WARN"],  
+		parameters=[{"start": start}],  
+	)
+	lifecycle_manager_node = Node(  
+		package="amr_bringup",  
+		executable="lifecycle_manager",  
+		output="screen",  
+		arguments=["--ros-args", "--log-level", "WARN"],  
+		parameters=[  
+			{  
+				"node_startup_order": (  
+					"wall_follower",  
+					"coppeliasim", # Must be started last  
+				)  
+			}  
+		],  
+	)  
+	return LaunchDescription(  
+		[  
+			wall_follower_node,  
+			coppeliasim_node,  
+			lifecycle_manager_node, # Must be launched last  
+		]  
+	)
 ```
 ###### 13.2. Node Managing
-> rellenar diapo 37
+> Este nodo (`LifecycleManagerNode`) lee el parámetro `node_startup_order` y, con esa lista de nombres, crea un **cliente de servicio** `ChangeState` para cada _lifecycle node_ (el servicio típico es `/<nombre>/change_state`). Primero espera a que todos esos servicios estén disponibles y después lanza las transiciones **en orden**: (1) `configure` para pasar de _unconfigured_ a _inactive_, y (2) `activate` para pasar de _inactive_ a _active_. La función `_change_state()` construye la petición con el `transition_id`, hace la llamada asíncrona y bloquea hasta recibir respuesta con `spin_until_future_complete`, asegurando que cada transición se completa antes de pasar a la siguiente.
 ```python
+import rclpy  
+from rclpy.client import Client  
+from rclpy.node import Node  
+from lifecycle_msgs.srv import ChangeState  
+from lifecycle_msgs.msg import Transition  
 
+class LifecycleManagerNode(Node):  
+	def __init__(self):  
+		"""Lifecycle manager initializer."""  
+		super().__init__("lifecycle_manager")  
+		# Parameters  
+		self.declare_parameter("node_startup_order", [""])  
+		lifecycle_names = (  
+			self.get_parameter("node_startup_order")  
+			.get_parameter_value()  
+			.string_array_value  
+		)  
+		# Create clients to change the states of lifecycle nodes  
+		self._clients = [  
+			self.create_client(ChangeState, f"/{name}/change_state")  
+			for name in lifecycle_names  
+		]  
+		# Wait for the services to be available  
+		for client in self._clients:  
+			client.wait_for_service()
+		# Transition nodes to the 'inactive' state in order  
+		for client in self._clients:  
+			self._change_state(client, Transition.TRANSITION_CONFIGURE)  
+		# Transition nodes to the 'active' state in order  
+		for client in self._clients:  
+		self._change_state(client, Transition.TRANSITION_ACTIVATE)  
+	def _change_state(self, client: Client, transition_id: int) -> None:  
+		request = ChangeState.Request()  
+		request.transition.id = transition_id  
+		future = client.call_async(request)  
+		rclpy.spin_until_future_complete(self, future)  
+		
+def main(args=None):  
+	rclpy.init(args=args)  
+	lifecycle_manager_node = LifecycleManagerNode()  
+	try:  
+		rclpy.spin(lifecycle_manager_node)  
+	except KeyboardInterrupt:  
+		pass  
+	lifecycle_manager_node.destroy_node()  
+	rclpy.try_shutdown()  
+	
+if __name__ == "__main__":  
+main()
 ```
 #### 14. Calidad de Servicio `QoS`
-> rellenar diapos 38-42
+> En ROS 2, gracias a que se apoya en DDS (Data Distribution Service), la **calidad de servicio (QoS)** permite ajustar _cómo_ se comunican los nodos (no solo “qué” se comunican). Esto va desde comunicaciones muy fiables (tipo TCP) hasta entregas de _mejor esfuerzo_ (best-effort, más parecido a UDP). En la práctica, un **perfil de QoS** se construye combinando varias **políticas** (history, reliability, durability, etc.), y ROS 2 incluso ofrece **perfiles predefinidos** (`QoSPresetProfiles`) para usos típicos como datos de sensores.
+> 
+> Los QoS se pueden fijar en **publicadores, suscriptores, servicios y clientes**, y cada instancia puede tener un perfil distinto. La idea clave es que la comunicación funciona como un “acuerdo”: el **emisor anuncia la calidad máxima** que puede ofrecer y el **receptor indica la calidad mínima** que está dispuesto a aceptar. Si hay alguna **política incompatible**, directamente **no se entregan mensajes** (parece que “no funciona”, pero en realidad es un _mismatch_ de QoS). Elegir requisitos de QoS depende sobre todo de las **necesidades de tiempo real** y de los **recursos computacionales disponibles**.
+> 
+> Un sistema en **tiempo real** no es “más rápido”, sino aquel donde la corrección depende también del **instante** en el que llega el resultado:
+> 	- **tiempo real fuerte (hard):** llegar tarde es un fallo crítico (ej.: un sensor llega tarde y el vehículo colisiona).
+>     - **tiempo real firme (firm):** se toleran retrasos esporádicos, pero si llega tarde el resultado ya no sirve (ej.: una pieza no se coloca a tiempo en una línea).
+>     - **tiempo real blando (soft):** el resultado pierde utilidad si se retrasa, pero no es catastrófico (ej.: perder fotogramas en streaming).  
+> Por eso, el QoS se ajusta para equilibrar **fiabilidad, latencia, carga** y **robustez** según el caso.
+>    
+> **Políticas principales de QoS:**
+> - **history (historia):** define cuántas muestras se guardan.
+>     - `KEEP_LAST`: guarda solo las últimas **N** muestras (se configura con `depth`).
+>     - `KEEP_ALL`: guarda **todas** las muestras (el límite real lo impone el middleware por recursos).
+> - **reliability (fiabilidad):** define si “se garantiza entrega” o no.
+>     - `BEST_EFFORT`: no asegura que lleguen todas las muestras (típico en redes inestables o sensores con alta frecuencia donde prima latencia).
+>     - `RELIABLE`: intenta garantizar entrega (puede reintentar varias veces).
+>     - Compatibilidad típica (según la tabla): un **suscriptor best-effort** suele aceptar tanto emisores best-effort como reliable, pero un **suscriptor reliable** necesita que el emisor sea reliable (si el emisor es best-effort, no hay comunicación).
+> - **durability (durabilidad):** si el sistema “recuerda” mensajes para suscriptores que llegan tarde
+>     - `VOLATILE`: no persiste muestras; solo se entregan mensajes nuevos.
+>     - `TRANSIENT_LOCAL`: mientras el publicador exista, conserva muestras para suscriptores que se conecten después (efecto tipo “latched”).
+>     - Compatibilidad típica: si el receptor exige `TRANSIENT_LOCAL` pero el emisor es `VOLATILE`, no hay comunicación; si el emisor es `TRANSIENT_LOCAL` y el receptor `VOLATILE`, se entregan solo los mensajes nuevos; si ambos son `TRANSIENT_LOCAL`, se entregan nuevos y antiguos.    
+> - **deadline (fecha límite):** tiempo máximo permitido entre mensajes consecutivos publicados en un mismo tema. Si se excede, se considera que se incumple el requisito temporal. Para que el “acuerdo” sea válido, o se usa la política por defecto del receptor, o se fijan explícitamente ambos tiempos, y típicamente el del receptor debe ser **mayor o igual** que el del emisor.
+> - **lifespan (esperanza de vida):** tiempo máximo desde el envío hasta la recepción antes de considerar el mensaje **obsoleto**. Los mensajes caducados se eliminan silenciosamente.
+> - **liveliness (vivacidad):** cómo se detecta que un publicador “sigue vivo”.
+>     - `AUTOMATIC`: el sistema asume que el publicador está operativo y renueva el “lease” automáticamente al comunicar (con un `liveliness_lease_duration`).
+>     - `MANUAL_BY_TOPIC`: cada publicador debe “hacer señales” explícitas (llamada a la API) para renovar su concesión.
+>     - Compatibilidad típica: un receptor `AUTOMATIC` suele aceptar ambos, pero un receptor `MANUAL_BY_TOPIC` requiere emisores `MANUAL_BY_TOPIC`.
 #### 15. Ejemplo 5 - QoS
-> rellenar diapo 43
+> En el primer bloque se ve cómo asignar QoS de manera directa al crear la suscripción. Si se pasa un entero en `qos_profile=10`, se está usando el perfil por defecto con **historia `KEEP_LAST`** y **profundidad (depth) 10**, es decir, el suscriptor solo mantiene en memoria las últimas 10 muestras recibidas. Alternativamente, se puede usar un perfil predefinido de ROS 2 con `QoSPresetProfiles.SENSOR_DATA`, pensado para datos de sensores, para no tener que configurar a mano todas las políticas; es útil cuando queremos un comportamiento típico ya probado y consistente en el sistema.
 ```python
+from rclpy.qos import QoSPresetProfiles  
+# Subscriber with the default QoS profile: Keep last 10 messages  
+self._subscriber = self.create_subscription(  
+	msg_type=String,  
+	topic="hello",  
+	callback=self._listener_callback,  
+	qos_profile=10, # depth  
+)  
+# Subscriber with a preset QoS profile  
+self._subscriber = self.create_subscription(  
+	msg_type=String,  
+	topic="hello",  
+	callback=self._listener_callback,  
+	qos_profile=QoSPresetProfiles.SENSOR_DATA,  
+)
+```
+> En el segundo bloque se construye un perfil de QoS **personalizado** con `QoSProfile`, seleccionando explícitamente varias políticas: `history=KEEP_LAST` y `depth=10` controlan cuántas muestras se almacenan; `reliability=BEST_EFFORT` prioriza la fluidez/latencia aceptando posibles pérdidas (típico en streams de sensores o redes inestables); y `durability=VOLATILE` indica que no se guardan mensajes para suscriptores que se conecten tarde (solo llegan los nuevos). Una vez definido, ese `qos_profile` se pasa a `create_subscription` para que el suscriptor imponga exactamente esas condiciones de comunicación.
+```python
+from rclpy.qos import (  
+QoSDurabilityPolicy,  
+QoSHistoryPolicy,  
+QoSProfile,  
+QoSReliabilityPolicy,  
+)  
 
+qos_profile = QoSProfile(  
+	history=QoSHistoryPolicy.KEEP_LAST,  
+	depth=10,  
+	reliability=QoSReliabilityPolicy.BEST_EFFORT,  
+	durability=QoSDurabilityPolicy.VOLATILE,  
+)  
+# Subscriber with a custom QoS profile  
+self._subscriber = self.create_subscription(  
+	msg_type=String,  
+	topic="hello",  
+	callback=self._listener_callback,  
+	qos_profile=qos_profile,  
+)
 ```
