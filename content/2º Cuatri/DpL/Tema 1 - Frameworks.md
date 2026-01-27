@@ -102,14 +102,58 @@ a += b # actualiza el objeto ya existente (más eficiente)
 > Si queremos sacar algo del grafo computacional se usa el `detach` que crea un tensor separado del grafo actual, creando un nuevo nodo hoja de un nuevo grafo computacional. Por ejemplo, para pasar un tensor a numpy hace falta hacer detach.
 > Los hijos de un nodo hoja que tiene el `requires_grad` en `True` también lo tienen activado.
 > **POSIBLE PREGUTNA: QUE HACE REQUIRES_GRAD : EVITAR QUE SE CALCULE O EVITAR QUE SE GUARDE -> EVITAR QUE SE GUARDE PORQUE SI QUE SE CALCULA PERO NO LO DEVUELVE.**
-> También está `retains_grad` que si está en `True` hace que no se borren los gradientes intermedios y los guarda, se lo pones al final (de la derecha) y se auto pone en el resto.
+> También está `retains_grad` que si está en `True` hace que no se borren los gradientes intermedios  y los guarda, se lo pones al final (de la derecha) y se auto pone en el resto.
 > No se permiten in-place operations con grafos porque podemos modificar un aspecto que cambia la derivada (en el += no afecta? pero en el \*= si). -- Mirar ejemplos en las diapos de cuando si o cuando no --. 
+> Ejemplo de autograd diapo 95
 
 #### COSA DE LA PRACTICA
 > en los constructores hay que poner super inits, parametros: torch.nn.parameter (con random), mejor inference_mode que grad no sé que, copiar la linea de la gpu y pasar todo a la gpu en bucle training o bucle test. dataset y dataload, dataset -> carga cada elemento, dataload -> batches, siempre con 3 métodos (diapo "DATASET"). DataLoader, para entrenar de batches en batches, le pasamos el dataset y le damos el tamaño y el shuffle (en train siempre true), num worker (4 y ya), drop last para quitar batches incompletos. copiar el training loop.
 
-### V.
-#### 1.
+### V. PyTorch API
+#### 1. Modules
+> Un module (`nn.module`) es un callable en el que hay que definir siempre su innit (con un super()) y un forward. No solo los modelos heredan de module, también las funciones de pérdida, en ese caso vamos a ver que el forward aparte de inputs tiene también targets.
+#### 2. MLP
+> Distintos formas de llamar a las capas: 
+> - `nn.module`
+> - `torch.nn.functional` -> capas que no necesitan de una clase, cuando se llama a una de esas capas hay que pasarle tanto los inputs como los parámetros. Nosotros no lo vamos a ver, solo lo usamos para las no linealidades.
+> Para una secuencia de capas podemos usar `Sequential` para marcar que una va detrás de otra.
+#### 3. State Dicts
+> Son diccionarios que representan todo lo que tiene guardado el modelo interiormente. Se pueden acceder de varias maneras (funciones de parámetros)
+#### 4. Lazy Initialitation
+> En este tipo de capas solo vamos a indicamos la dimensión de salida, es un poquito más eficiente. Solo se puede acceder a ellos después de haber hecho una predicción
+#### 5. Parámetros del Modelo
+> Se guardan en `torch.nn.parameters()` con `nn.Parameter` (que puedes activar o no su gradiente, predeterninado si)
+> Preferiblemente usar la `inicialización de xabier`
+#### 6. Buffers del modelo
+> al cambiar varias cosas del modelo tambien se cambian aqui (cpu a gpu, float a double, ...)
+#### 7. Guardar y Cargar Tensores
+> se usa `torch.save` poniendo `tensor.pt` (se pone .pt por convención)
+> para cargar importante poner `weights_only=True` 
+> IMPORTANTE: antes de entregar guardar siempre en la cpu con `tensor.cpu()`
+#### 8. Formas de Guardar Modelos
+> 1. State Dict `load_sate_dict()`: se guardan los parámetros del modelo, es sencillo, no error, no limitaciones, pero seguimos teniendo que definir el modelo en tiempo de ejecución porque hay que inicializarlo y cargarse los pesos. Se guardan con `torch.save(model.state_dict, PATH)`
+> 2. Modelo Entero `load()`: el modelo se guarda con pickle, que es muy inestable porque se fija en la estructura de archivos en vez de en los elementos, está bien para experimentar uno solo. Se guarda con `torch.save(model, PATH)`
+> 3. TorchScript `jit.load()`: te da una traza de cómo se ejecuta el modelo, pasamos de eager mode a script mode. Aquí el modelo no se puede debuguear por dentro, pero el modelo funciona en cualquier sitio (tanto a nivel de estructura como a nivel de lenguaje). Se guarda con `torch.jit.script(model)`
+#### 9. Cambio del Estado de los Gradientes
+> podemos usar 2 estructuras:
+> - `with torch.estado_grad():` que todo lo que vaya dentro se actualizará su estado
+> - usar un decorador `@torch.estado_grad` antes de una función.
+> en `estado_grad()` se puede poner:
+> 1. `enable_grad()` ->
+> 2. `no_grad` ->
+> 3. `inference_mode()` -> si creo un tensor así no se puede activar su gradiente nunca
+#### 10. Compilar
+> `torch.compile` -> para crear una versión compilada del modelo, que va a ser más rápido. En vez de tener que ejecutar código pytorch, va a intentar crear una versión optimizada en c++ que no se puede debuguear (se guardan los pesos sin compilar). Se usa para que el training sea más corto.
+#### 11. Device
+> CPU -> pocos nucleos muy potentes para pocas tareas complejas
+> GPU -> muchos nucleos normales para muchas tareas
+> Al hacer cualquier operación todos los tensores tienen que estar en el mismo device, normalmente al entrenar se pasa el modelo a la gpu y luego los inputs.
+#### 12. Dataset y DataLoader
+> Nos permiten cargar datos de una manera flexible y genérica.
+> Dataset nos dice como cargar cada elemento de nuestros datos, tiene el constructor en el que puedes poner los datos en si, tiene  __ len __ con la longitud de los inputs, get item como tenemos que sacar los elementos en función de indices (en el constructor tiene que ordenarse si no lo está), puede devolver de todo siempre que sea algo numérico int, float o un tensor.
+> DataLoader, carga un montón de elementos y de la forma designada por Dataset, en batches, los podemos poner con shuffle, y se puede poner drop_last
+#### 13. Loops
+> Ponemos tantos elementos como haya en el get item.
 
 
-### VI. PyTorch API
+### VI. 

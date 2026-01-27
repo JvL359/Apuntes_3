@@ -1,6 +1,5 @@
 ## D2DpL 2. Preliminaries
 ### I. Visión General del Capítulo
-
 #### 1. Habilidades Previas Necesarias
 
 > Para “sumergirte” en Deep Learning, el capítulo enumera habilidades de supervivencia:
@@ -803,546 +802,527 @@ net = net.to(device=torch.device("cuda") if torch.cuda.is_available() else torch
 >     
 > - Trabajar con devices: crear tensores/modelos en GPU, mover datos, y justificar por qué minimizar transferencias es crítico.
 
-## D2DpL 3. Linear Neural Networks for Regression
-### I. Redes Neuronales Lineales para Regresión
+## DpL-wPyTorch 3. It Starts With a Tensor
+### I. Visión General del Capítulo
 
-#### 1. Motivación y Alcance del Capítulo
+#### 1. Idea Central del Capítulo
 
-> Antes de hacer redes “profundas”, el material propone implementar **redes poco profundas** donde las entradas conectan directamente con las salidas, para centrarse en lo esencial del entrenamiento: **parametrizar la capa de salida**, **manejar datos**, **definir una pérdida** y **entrenar**.  
-> También justifica estudiar modelos lineales (p. ej., regresión lineal) porque son **métodos clásicos** muy usados como **baselines** al justificar arquitecturas más complejas.
+> El capítulo parte de una idea: en deep learning, los sistemas **transforman datos** de una representación a otra (p. ej., imágenes → etiquetas, texto → texto). Esa transformación se aprende extrayendo regularidades de ejemplos.  
+> En ese marco, el capítulo introduce la estructura básica para manejar números en PyTorch: el **tensor**.
 
-#### 2. Problema de Regresión y Terminología
+#### 2. Qué Cubre el Capítulo
 
-> La **regresión** busca predecir un **valor numérico** (ejemplos: precios de casas, stocks, demanda, etc.).  
-> En terminología de ML:
+> El propio capítulo enumera sus objetivos:
 > 
-> - **Training Set**: dataset de entrenamiento.
+> - Entender **tensores** como estructura de datos básica en PyTorch.
 >     
-> - **Example / Sample**: cada fila.
+> - **Indexar** y **operar** con tensores.
 >     
-> - **Label / Target**: lo que se predice.
+> - Interoperar con **NumPy** (arrays multidimensionales).
 >     
-> - **Features / Covariates**: variables de entrada usadas para predecir.
->     
-
-#### 3. Supuestos y Notación
-
-> Regresión lineal parte de supuestos: relación aproximadamente lineal entre features (x) y target (y), y desviaciones debidas a **ruido** (habitualmente modelado como Gaussiano).  
-> Notación: (n) ejemplos; superíndices para enumerar ejemplos/targets; subíndices para coordenadas. En concreto, (x^{(i)}) es el ejemplo (i)-ésimo y (x^{(i)}_j) su coordenada (j).
-
-#### 4. Modelo Lineal
-
-> Para un ejemplo, el modelo es una función afín ( \hat{y} = w^\top x + b).  
-> Para el dataset completo, se usa la **matriz de diseño** (X \in \mathbb{R}^{n \times d}) y las predicciones se expresan como:  
-> [  
-> \hat{y} = Xw + b \quad (3.1.4)  
-> ]  
-> donde al sumar un vector y un escalar se aplica **broadcasting**.
-
-#### 5. Función de Pérdida y Objetivo
-
-> La pérdida típica en regresión es el **error cuadrático** (squared error). Para un ejemplo (i):  
-> [  
-> l^{(i)}(w,b) = \frac{1}{2}(\hat{y}^{(i)} - y^{(i)})^2 \quad (3.1.5)  
-> ]  
-> La constante (1/2) es “conveniente” porque se cancela al derivar.  
-> El error empírico medio sobre el training set:  
-> [  
-> L(w,b)=\frac{1}{n}\sum_{i=1}^{n} l^{(i)}(w,b)  
-> =\frac{1}{n}\sum_{i=1}^{n}\frac{1}{2}(w^\top x^{(i)}+b-y^{(i)})^2 \quad (3.1.6)  
-> ]  
-> Objetivo de entrenamiento:  
-> [  
-> (w^*,b^*)=\arg\min_{w,b} L(w,b) \quad (3.1.7)  
-> ]
-
-#### 6. Solución Analítica (Normal Equation)
-
-> En regresión lineal puede obtenerse una solución analítica (en training), derivando y anulando el gradiente:  
-> [  
-> \partial_w \lVert y - Xw\rVert^2 = 2X^\top(Xw-y)=0 \Rightarrow X^\top y = X^\top X w \quad (3.1.8)  
-> ]  
-> y por tanto:  
-> [  
-> w^*=(X^\top X)^{-1}X^\top y \quad (3.1.9)  
-> ]  
-> La unicidad requiere que (X^\top X) sea invertible (columnas de (X) linealmente independientes / full rank).  
-> El material avisa: no hay que “acostumbrarse” a soluciones analíticas; en deep learning casi siempre entrenaremos con métodos iterativos.
-
-#### 7. Descenso de Gradiente Estocástico por Minibatches
-
-> El capítulo contrasta: **full-batch gradient descent** (lento porque requiere pasar por todo el dataset antes de cada update) vs **SGD** (un ejemplo por update, con inconvenientes computacionales/estadísticos).  
-> Solución intermedia: **minibatches** (típicamente tamaño entre 32 y 256, preferiblemente múltiplo de una potencia de 2).  
-> Regla de actualización (minibatch SGD):  
-> [  
-> (w,b)\leftarrow (w,b) - \eta \frac{1}{|B|}\sum_{i\in B_t}\partial_{(w,b)},l^{(i)}(w,b)\quad (3.1.10)  
-> ]  
-> Para pérdidas cuadráticas y transformaciones afines, el material da la expansión cerrada:  
-> [  
-> w \leftarrow w - \frac{\eta}{|B|}\sum_{i\in B_t} x^{(i)}(w^\top x^{(i)}+b-y^{(i)})  
-> ]  
-> [  
-> b \leftarrow b - \frac{\eta}{|B|}\sum_{i\in B_t} (w^\top x^{(i)}+b-y^{(i)}) \quad (3.1.11)  
-> ]  
-> El texto introduce el término **hiperparámetros** para parámetros fijados por el usuario (p. ej., (\eta), (|B|)) y comenta que la calidad suele evaluarse en un **validation set** separado.
-
-#### 8. Predicción y Generalización
-
-> Tras entrenar, se usan (\hat{w},\hat{b}) para **predecir** etiquetas de ejemplos no vistos. El material recomienda usar “prediction” y advierte que “inference” se usa con significados distintos en otras literaturas, lo cual puede crear confusión.  
-> El texto introduce **generalization** como el reto de predecir bien en datos no vistos.
-
-#### 9. Vectorización para Velocidad
-
-> Entrenar suele procesar **minibatches completos**: para ser eficiente hay que **vectorizar** y aprovechar librerías rápidas de álgebra lineal, evitando bucles `for` en Python.  
-> El material muestra un microbenchmark sumando dos vectores (10k dims): un bucle tarda órdenes de magnitud más que `a + b`.  
-> Beneficios mencionados: speedups de orden de magnitud, menos cálculos manuales, menos errores y más portabilidad.
-
-#### 10. Distribución Normal y Pérdida Cuadrática
-
-> El capítulo conecta regresión lineal con la **Normal/Gaussiana**. Define la densidad:  
-> [  
-> p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{1}{2\sigma^2}(x-\mu)^2\right)\quad (3.1.12)  
-> ]  
-> Asume un modelo de observación con ruido gaussiano:  
-> [  
-> y = w^\top x + b + \epsilon,\quad \epsilon\sim \mathcal{N}(0,\sigma^2)\quad (3.1.13)  
-> ]  
-> Con máxima verosimilitud, se minimiza el **negative log-likelihood**; si (\sigma) es fijo, la parte relevante queda proporcional al **squared error**, por lo que **minimizar MSE equivale a MLE** bajo ruido gaussiano aditivo.
-
-#### 11. Regresión Lineal Como Red Neuronal
-
-> El material representa la regresión lineal como una **red neuronal de una sola capa fully-connected**: cada feature es una neurona de entrada conectada al output.  
-> Se menciona la Fig. 3.1.2: patrón de conectividad (no valores concretos de pesos/bias).
-
-#### 12. Biología (Analogía)
-
-> Se incluye una analogía con neuronas biológicas (Fig. 3.1.3): dendritas reciben inputs (x_i), sinapsis ponderan con (w_i), se agrega como suma ponderada (y=\sum_i x_i w_i + b), y puede aplicarse no linealidad (\sigma(y)).
-
----
-
-### II. Diseño Orientado a Objetos para Implementación
-
-#### 1. Idea General de la API
-
-> El material propone una **arquitectura orientada a objetos** para estructurar implementaciones, porque los mismos componentes (data, modelo, pérdida, optimización) reaparecen continuamente.  
-> Diseño a alto nivel: tres clases:
-> 
-> - `Module`: modelos, pérdidas y optimización.
->     
-> - `DataModule`: data loaders (train/val).
->     
-> - `Trainer`: combina ambos y ejecuta entrenamiento.
->     
-
-#### 2. Utilidades para Notebooks: `add_to_class` y `HyperParameters`
-
-> Problema en notebooks: las definiciones de clases largas dañan la legibilidad; solución: añadir métodos a una clase después de definirla con un decorador `add_to_class`.  
-> `HyperParameters` guarda argumentos de `__init__` como atributos mediante `save_hyperparameters(...)` (implementación diferida a una sección posterior).  
-> Se muestra que puede ignorar ciertos argumentos (`ignore=[...]`).
-
-#### 3. Clase `Module`
-
-> `Module` (base de modelos) requiere, como mínimo: almacenar parámetros en `__init__`, un `training_step` que devuelve pérdida para un batch, y `configure_optimizers` que devuelve el optimizador; opcionalmente `validation_step`.  
-> Es subclase de `nn.Module`; llamar `a(X)` invoca `forward` vía `__call__`.
-
-#### 4. Clase `DataModule`
-
-> `DataModule` encapsula preparación/lectura de datos: `train_dataloader` y `val_dataloader` devuelven generadores de batches; `get_dataloader(train)` define el comportamiento.
-
-#### 5. Clase `Trainer`
-
-> `Trainer.fit(model, data)` itera `max_epochs` y coordina: preparar datos, preparar modelo y ejecutar el loop por épocas (la implementación se va enriqueciendo más adelante).  
-> En el resumen se remarca que las implementaciones completas se guardan en la librería D2L para favorecer modularidad (cambiar optimizador/modelo/dataset sin reescribir todo).
-
----
-
-### III. Datos Sintéticos para Regresión
-
-#### 1. Por Qué Usar Datos Sintéticos
-
-> Aunque no importen “intrínsecamente” los patrones artificiales, sirven para docencia: evaluar algoritmos y verificar que la implementación recupera parámetros conocidos a priori.
-
-#### 2. Generación del Dataset
-
-> Se generan (1000) ejemplos con (2) features (X \in \mathbb{R}^{1000\times 2}) muestreadas de una normal estándar, y labels con:  
-> [  
-> y = Xw + b + \epsilon \quad (3.3.1)  
-> ]  
-> con (\epsilon\sim \mathcal{N}(0, 0.01^2)).  
-> Se implementa como `SyntheticRegressionData`, subclase de `d2l.DataModule`, guardando hiperparámetros con `save_hyperparameters()`.
-
-```python
-class SyntheticRegressionData(d2l.DataModule): #@save
-    """Synthetic data for linear regression."""
-    def __init__(self, w, b, noise=0.01, num_train=1000, num_val=1000,
-                 batch_size=32):
-        super().__init__()
-        self.save_hyperparameters()
-        n = num_train + num_val
-        self.X = torch.randn(n, len(w))
-        noise = torch.randn(n, 1) * noise
-        self.y = torch.matmul(self.X, w.reshape((-1, 1))) + b + noise
-```
-
-#### 3. Lectura del Dataset y Minibatches
-
-> Entrenar requiere múltiples pasadas; se implementa `get_dataloader(train)` que: en train **baraja índices** y en valid usa un orden determinista, y va devolviendo minibatches `(X_batch, y_batch)`.
-
-```python
-@d2l.add_to_class(SyntheticRegressionData)
-def get_dataloader(self, train):
-    if train:
-        indices = list(range(0, self.num_train))
-        random.shuffle(indices)
-    else:
-        indices = list(range(self.num_train, self.num_train + self.num_val))
-    for i in range(0, len(indices), self.batch_size):
-        batch_indices = torch.tensor(indices[i: i + self.batch_size])
-        yield self.X[batch_indices], self.y[batch_indices]
-```
-
-#### 4. Data Loader Conciso con API del Framework
-
-> La iteración manual es didáctica pero ineficiente (carga en memoria + accesos aleatorios). Se propone usar `TensorDataset` + `DataLoader` y encapsularlo en `get_tensorloader(...)`, más eficiente y con utilidades extra como `__len__`.
-
-```python
-@d2l.add_to_class(d2l.DataModule) #@save
-def get_tensorloader(self, tensors, train, indices=slice(0, None)):
-    tensors = tuple(a[indices] for a in tensors)
-    dataset = torch.utils.data.TensorDataset(*tensors)
-    return torch.utils.data.DataLoader(dataset, self.batch_size, shuffle=train)
-
-@d2l.add_to_class(SyntheticRegressionData) #@save
-def get_dataloader(self, train):
-    i = slice(0, self.num_train) if train else slice(self.num_train, None)
-    return self.get_tensorloader((self.X, self.y), train, i)
-```
-
----
-
-### IV. Implementación de Regresión Lineal desde Cero
-
-#### 1. Definición del Modelo y Parámetros
-
-> Se define `LinearRegressionScratch` como subclase de `d2l.Module`. Inicializa:
-> 
-> - (w\sim \mathcal{N}(0,\sigma^2)) con (\sigma=0.01) por defecto.
->     
-> - (b=0).
->     
-> - Ambos con `requires_grad=True`.  
->     El forward implementa (Xw + b) y usa broadcasting al sumar el escalar (b) al vector.
->     
-
-```python
-class LinearRegressionScratch(d2l.Module): #@save
-    """The linear regression model implemented from scratch."""
-    def __init__(self, num_inputs, lr, sigma=0.01):
-        super().__init__()
-        self.save_hyperparameters()
-        self.w = torch.normal(0, sigma, (num_inputs, 1), requires_grad=True)
-        self.b = torch.zeros(1, requires_grad=True)
-
-@d2l.add_to_class(LinearRegressionScratch) #@save
-def forward(self, X):
-    return torch.matmul(X, self.w) + self.b
-```
-
-#### 2. Definición de la Pérdida
-
-> Se usa squared loss (3.1.5). En la implementación se ajusta la forma de (y) para que coincida con (y_{\hat{}}) y se devuelve la pérdida media del minibatch.
-
-```python
-@d2l.add_to_class(LinearRegressionScratch) #@save
-def loss(self, y_hat, y):
-    l = (y_hat - y) ** 2 / 2
-    return l.mean()
-```
-
-#### 3. Algoritmo de Optimización: SGD
-
-> Aunque regresión lineal tenga solución cerrada, aquí se usa minibatch SGD para enseñar el patrón general de entrenamiento de redes.  
-> Como la pérdida es media sobre minibatch, el material indica que no hace falta ajustar el learning rate por batch size en esta implementación.  
-> Se define una clase `SGD` con `step()` y `zero_grad()` (poner gradientes a cero antes del backprop).
-
-```python
-class SGD(d2l.HyperParameters): #@save
-    """Minibatch stochastic gradient descent."""
-    def __init__(self, params, lr):
-        self.save_hyperparameters()
-    def step(self):
-        for param in self.params:
-            param -= self.lr * param.grad
-    def zero_grad(self):
-        for param in self.params:
-            if param.grad is not None:
-                param.grad.zero_()
-
-@d2l.add_to_class(LinearRegressionScratch) #@save
-def configure_optimizers(self):
-    return SGD([self.w, self.b], self.lr)
-```
-
-#### 4. Entrenamiento: Bucle por Épocas
-
-> En cada epoch se recorre el train dataloader completo (pasar una vez por todos los ejemplos, asumiendo divisibilidad por batch size). En cada iteración: calcular pérdida, backprop, update.  
-> El material registra `prepare_batch` y `fit_epoch` en `d2l.Trainer`; también pasa por validación una vez por epoch si hay `val_dataloader`.  
-> Se menciona que (\text{lr}) y `max_epochs` son hiperparámetros, y que “en general” conviene un split en tres partes (train / selección de hiperparámetros / evaluación final), aunque aquí se omite por simplicidad.
-
-```python
-@d2l.add_to_class(d2l.Trainer) #@save
-def prepare_batch(self, batch):
-    return batch
-
-@d2l.add_to_class(d2l.Trainer) #@save
-def fit_epoch(self):
-    self.model.train()
-    for batch in self.train_dataloader:
-        loss = self.model.training_step(self.prepare_batch(batch))
-        self.optim.zero_grad()
-        with torch.no_grad():
-            loss.backward()
-            if self.gradient_clip_val > 0:
-                self.clip_gradients(self.gradient_clip_val, self.model)
-            self.optim.step()
-        self.train_batch_idx += 1
-    if self.val_dataloader is None:
-        return
-    self.model.eval()
-    for batch in self.val_dataloader:
-        with torch.no_grad():
-            self.model.validation_step(self.prepare_batch(batch))
-        self.val_batch_idx += 1
-```
-
-#### 5. Evaluación Cualitativa (Parámetros Verdaderos vs Aprendidos)
-
-> Como los datos son sintéticos, se conocen los parámetros verdaderos; se propone comparar con los aprendidos para verificar que el entrenamiento “recupera” valores cercanos.  
-> El material matiza: en general (y más aún en modelos profundos) no suele haber soluciones únicas; en ML importa más predecir bien que recuperar “parámetros verdaderos”.
-
----
-
-### V. Implementación Concisa de Regresión Lineal
-
-#### 1. Motivación: APIs de Alto Nivel
-
-> El material atribuye parte del “boom” del deep learning a herramientas open-source y a frameworks modernos (autodiferenciación + conveniencia de Python) que automatizan componentes repetitivos (data iterators, losses, optimizers, layers).
-
-#### 2. Modelo con Capas Predefinidas
-
-> Para operaciones estándar se usa una capa fully-connected predefinida (en PyTorch: `Linear`/`LazyLinear`). El texto recomienda `LazyLinear` para evitar especificar shapes de entrada.  
-> `LinearRegression` usa `nn.LazyLinear(1)` y fija inicialización: pesos (\sim \mathcal{N}(0, 0.01)), bias a 0.
-
-```python
-class LinearRegression(d2l.Module): #@save
-    """The linear regression model implemented with high-level APIs."""
-    def __init__(self, lr):
-        super().__init__()
-        self.save_hyperparameters()
-        self.net = nn.LazyLinear(1)
-        self.net.weight.data.normal_(0, 0.01)
-        self.net.bias.data.fill_(0)
-
-@d2l.add_to_class(LinearRegression) #@save
-def forward(self, X):
-    return self.net(X)
-```
-
-#### 3. Pérdida con `MSELoss`
-
-> `MSELoss` computa MSE (sin el factor (1/2) de (3.1.5)) y por defecto promedia sobre ejemplos; el material dice que es más rápido y más fácil que implementarla a mano.
-
-```python
-@d2l.add_to_class(LinearRegression) #@save
-def loss(self, y_hat, y):
-    fn = nn.MSELoss()
-    return fn(y_hat, y)
-```
-
-#### 4. Optimización con `torch.optim.SGD`
-
-> Para optimizar se instancia `torch.optim.SGD` sobre `self.parameters()` y el learning rate.
-
-```python
-@d2l.add_to_class(LinearRegression) #@save
-def configure_optimizers(self):
-    return torch.optim.SGD(self.parameters(), self.lr)
-```
-
-#### 5. Entrenamiento
-
-> El material recalca que, aunque el modelo y componentes auxiliares se simplifican, el **training loop** sigue la misma estructura (se llama a `fit`, apoyándose en `fit_epoch`).
-
----
-
-### VI. Generalización
-
-#### 1. Error de Entrenamiento y Error de Generalización
-
-> En aprendizaje supervisado estándar, el material asume que datos de **entrenamiento** y **test** se extraen de manera independiente de la **misma distribución** (supuesto **IID**). Sin este tipo de supuesto, no habría base para extrapolar de (P(X,Y)) a otra distribución (Q(X,Y)).
-> 
-> Diferencia clave:
-> 
-> - **Error de entrenamiento** (R_{\text{emp}}): estadístico calculado sobre el dataset de entrenamiento.
->     
-> - **Error de generalización** (R): **esperanza** respecto a la distribución subyacente (P); intuitivamente, lo que verías sobre un “flujo infinito” de datos nuevos de la misma distribución.
->     
-> 
-> Definiciones formales (misma notación que en la Sección 3.1):  
-> [  
-> R_{\text{emp}}[X,y,f] = \frac{1}{n}\sum_{i=1}^{n} l\big(x^{(i)}, y^{(i)}, f(x^{(i)})\big) \quad (3.6.1)  
-> ]  
-> [  
-> R[p,f] = \mathbb{E}_{(x,y)\sim P},[l(x,y,f(x))] = \int!!\int l(x,y,f(x)),p(x,y),dx,dy \quad (3.6.2)  
-> ]
-> 
-> Problema práctico: **no podemos calcular (R) exactamente** (no conocemos (p(x,y)) y no podemos muestrear infinitos datos). Por eso se estima aplicando el modelo a un **test set independiente** (o conjunto retenido) usando la misma fórmula que para el error empírico.
-> 
-> Matiz importante: al evaluar en test, el clasificador/modelo se considera **fijo** (no depende de la muestra de test), así que estimar su error es “solo” un problema de **estimar una media**; en cambio, el modelo sí depende del training set, y por eso el training error suele ser un **estimador sesgado** del error poblacional.
-
-#### 2. Complejidad del Modelo y Por Qué el Training Error No Basta
-
-> En teoría “clásica”, con modelos simples y datos abundantes, training y generalization tienden a estar cerca; con modelos más complejos y/o menos datos, esperas que el training error baje pero que crezca el **generalization gap**.
-> 
-> Caso extremo: si tu clase de modelos puede ajustar **etiquetas arbitrarias** (incluso aleatorias), entonces encajar perfecto el training set no te permite concluir nada fiable sobre generalización (podrías estar cerca de “adivinar al azar” fuera de muestra).
-> 
-> Mensaje fuerte del material: **bajo training error no implica necesariamente bajo error de generalización**, pero tampoco implica necesariamente que generalice mal; lo único seguro es que el training error por sí solo **no certifica** generalización. En modelos muy potentes (menciona deep nets), hay que apoyarse más en datos retenidos; el error sobre holdout/validation se llama **validation error**.
-> 
-> Sobre “qué es complejidad”: no es trivial. A veces más parámetros ⇒ más capacidad de ajustar etiquetas arbitrarias, pero no siempre (ej.: kernel methods con infinitos parámetros controlados por otros medios). Una noción útil es el **rango de valores** que pueden tomar los parámetros.
-> 
-> El material conecta esto con la idea de **falsabilidad** (Popper): una hipótesis que explica “cualquier cosa” no informa realmente sobre el mundo; preferimos hipótesis que podrían fallar en principio pero que aun así encajan los datos observados.
-
-#### 3. Underfitting u Overfitting
-
-> Al comparar **training error** vs **validation error**, el material destaca dos situaciones comunes:
-> 
-> - **Underfitting**: training y validation son ambos altos, con **poca brecha**. Si el modelo no logra bajar el training error, suele indicar que es demasiado **simple / poco expresivo**; como el gap ((R_{\text{emp}}-R)) es pequeño, “podrías permitirte” un modelo más complejo.
->     
-> - **Overfitting**: training mucho más bajo que validation, indicando un gap grande.
->     
-> 
-> Matiz del material: overfitting **no siempre es “malo”**; a menudo (especialmente en deep learning) los mejores modelos predicen mucho mejor en training que en holdout. Lo importante es bajar el **error de generalización**; el gap importa en la medida en que impida ese objetivo. Si el training error es 0, entonces el gap coincide exactamente con el error de generalización y solo avanzas reduciendo el gap.
-
-#### 4. Ajuste de Curvas Polinómicas Como Ejemplo
-
-> Para ilustrar intuición clásica sobre complejidad y overfitting, el material propone **regresión polinómica** con una sola feature (x):  
-> [  
-> \hat{y}=\sum_{i=0}^{d} x^i w_i \quad (3.6.3)  
-> ]
-> 
-> Interpretación: es regresión lineal donde las features son (x^i), los pesos son (w_i) y el sesgo es (w_0) porque (x^0=1). Se puede usar squared error como loss.
-> 
-> Relación grado–complejidad: un polinomio de mayor grado es más complejo (más parámetros y mayor “rango de selección” de funciones). Con el training set fijo, aumentar el grado no empeora el training error (como mucho lo deja igual). Además, si cada ejemplo tiene un (x) distinto, un polinomio con grado igual al número de ejemplos puede ajustar el training set perfectamente.
-
-#### 5. Tamaño del Dataset
-
-> A igualdad de modelo: con **menos muestras** es más probable (y más severo) el overfitting; al aumentar datos, típicamente baja el error de generalización, y “en general, más datos nunca perjudican”.
-> 
-> Regla cualitativa del material: para una tarea y distribución fijadas, la complejidad del modelo no debería crecer más rápido que la cantidad de datos; con más datos puedes intentar modelos más complejos, pero sin datos suficientes es difícil batir modelos simples. Menciona que en muchas tareas deep learning supera a modelos lineales cuando hay **muchos miles** de ejemplos, y atribuye parte del éxito actual a la disponibilidad de datasets masivos.
-
-#### 6. Selección de Modelos
-
-> En la práctica, se elige el modelo final tras comparar varios que difieren en arquitectura, objetivo, features, preprocesado, learning rates, etc.; a esto se le llama **model selection**.
-> 
-> Principio: **no se debe tocar el test set** hasta haber fijado todos los hiperparámetros; si lo usas para seleccionar, puedes “sobreajustar el test” y entonces pierdes el árbitro final.
-> 
-> Pero tampoco basta con training para seleccionar, porque no puedes estimar generalización sobre los mismos datos con los que entrenas. Por eso se introduce un **validation set** adicional (split en tres: train/val/test).
-> 
-> Nota práctica del material: en el mundo real el test se reutiliza con frecuencia, y las fronteras entre validation y test pueden volverse ambiguas. En los experimentos del libro (si no se dice lo contrario), en realidad se trabaja con **training + validation**, sin “true test set”; por tanto, la “accuracy” reportada es realmente **validation accuracy**, no test accuracy.
-
-#### 7. Validación Cruzada
-
-> Si el training data es escaso y no puedes reservar suficiente validation, una solución popular es **(K)-fold cross-validation**:
-> 
-> - dividir el training original en (K) subconjuntos no solapados
->     
-> - repetir (K) veces: entrenar con (K-1) folds y validar en el fold restante
->     
-> - estimar training y validation errors promediando sobre los (K) experimentos
->     
-
-#### 8. Resumen de la Sección
-
-> Reglas “de pulgar” que deja el material:
-> 
-> 1. Usar validation sets (o (K)-fold cross-validation) para model selection.
->     
-> 2. Modelos más complejos suelen requerir más datos.
->     
-> 3. Nociones relevantes de complejidad incluyen número de parámetros **y** el rango de valores permitidos.
->     
-> 4. Manteniendo lo demás igual, más datos casi siempre mejoran generalización.
->     
-> 5. Todo este discurso presupone el supuesto IID; si hay shift entre train y test, no puedes decir nada sin suposiciones adicionales.
->     
-
-#### 9. Ejercicios Propuestos
-
-> El material propone, entre otros: cuándo se puede resolver exactamente regresión polinómica; ejemplos donde IID no aplica; cuándo esperar training error 0 o generalization error 0; por qué (K)-fold es caro y por qué su estimación puede estar sesgada; y reflexiones sobre VC dimension como medida de complejidad.
-
----
-
-### VII. Decaimiento de Pesos
-
-#### 1. Actualización con Penalización (\ell_2) y “Weight Decay”
-
-> El material contrasta (\ell_2) vs (\ell_1): las penalizaciones (\ell_1) tienden a concentrar pesos en pocas features (selección de variables), mientras que (\ell_2) “encoge” pesos de forma continua.  
-> Para regresión con regularización (\ell_2), da el update de SGD:  
-> [  
-> w \leftarrow (1-\eta\lambda)w - \frac{\eta}{|B|}\sum_{i\in B} x^{(i)}(w^\top x^{(i)}+b-y^{(i)})\quad (3.7.3)  
-> ]  
-> Interpretación del texto: además del término de ajuste por error, se **reduce** (w) hacia 0, de ahí el nombre **weight decay**. (\lambda) controla la fuerza de la restricción: menor (\lambda) → menos constrain; mayor (\lambda) → más constrain.  
-> Se comenta que regularizar el bias puede variar; a menudo no se regulariza.
-
-#### 2. Ejemplo Sintético de Alta Dimensión
-
-> Se ilustra el beneficio con un caso sintético:  
-> [  
-> y = 0.05 + \sum_{i=1}^{d} 0.01 x_i + \epsilon,\quad \epsilon\sim \mathcal{N}(0,0.01^2)\quad (3.7.4)  
-> ]  
-> El ejemplo fuerza overfitting aumentando dimensionalidad a (d=200) y usando un training set pequeño (20 ejemplos).
-
-```python
-class Data(d2l.DataModule):
-    def __init__(self, num_train, num_val, num_inputs, batch_size):
-        self.save_hyperparameters()
-        n = num_train + num_val
-        self.X = torch.randn(n, num_inputs)
-        noise = torch.randn(n, 1) * 0.01
-        w, b = torch.ones((num_inputs, 1)) * 0.01, 0.05
-        self.y = torch.matmul(self.X, w) + b + noise
-    def get_dataloader(self, train):
-        i = slice(0, self.num_train) if train else slice(self.num_train, None)
-        return self.get_tensorloader([self.X, self.y], train, i)
-```
-
-#### 3. Contenido Parcial del Resto de la Sección
-
-> El fragmento recuperado indica que después se aborda la “Implementation from Scratch” añadiendo la penalización (\ell_2) a la pérdida original, pero **no dispongo aquí del texto completo** para detallarlo paso a paso.
-
----
-
-### VIII. Checklist de Verificación
-
-#### 1. Lo Que Deberías Poder Hacer Tras Este Fragmento
-
-> - Formular el modelo ( \hat{y}=w^\top x + b ) y su forma matricial ( \hat{y}=Xw+b ).
->     
-> - Escribir y justificar la squared loss (3.1.5) y el objetivo empírico (3.1.6–3.1.7).
->     
-> - Derivar/interpretar la solución analítica (3.1.8–3.1.9) y su condición de full rank.
->     
-> - Explicar minibatch SGD y escribir updates (3.1.10–3.1.11).
->     
-> - Justificar por qué vectorizar acelera (benchmark bucle vs `a + b`).
->     
-> - Explicar la equivalencia MSE ↔ MLE bajo ruido gaussiano.
->     
-> - Implementar (o entender) `SyntheticRegressionData`, `LinearRegressionScratch` y la versión concisa con `LazyLinear`, `MSELoss`, `torch.optim.SGD`.
->     
-> - Interpretar “weight decay” como encogimiento de (w) y reconocer el update (3.7.3).
+> - Mover cómputo a **GPU** para velocidad.
 >     
 
 ---
 
-Si quieres, en el siguiente mensaje puedo **reintentar** extraer la Sección 3.6 (Generalization) y completar esa parte manteniendo el mismo formato (sin cambiar nada del resto).
+### II. Mundo Como Números en Coma Flotante
+
+#### 1. Representaciones Intermedias en Redes Neuronales
+
+> Una red neuronal aprende una transformación por etapas: entre capas aparecen **representaciones intermedias** (colecciones de números en coma flotante) que capturan estructura relevante del input (ej.: en visión, representaciones tempranas pueden parecer detección de bordes/texturas, y más profundas capturan estructuras más complejas).  
+> También se remarca un principio: **inputs similares deberían inducir representaciones similares**, especialmente en niveles más profundos (figura del capítulo).
+
+#### 2. Qué Es un Tensor en Este Contexto
+
+> En este libro, “tensor” **no** se usa con las connotaciones de física (espacios, sistemas de referencia, etc.). Aquí significa la **generalización de vectores y matrices a N dimensiones**, equivalente a “array multidimensional”.  
+> La **dimensionalidad** coincide con el número de índices necesarios para referirse a un escalar dentro del tensor.
+
+---
+
+### III. Tensores Como Arrays Multidimensionales
+
+#### 1. De Listas Python a Tensores
+
+> El capítulo empieza comparando el acceso por índice en listas (índices desde 0, asignación por índice) con el acceso por índice en tensores.
+
+```python
+a = [1.0, 2.0, 1.0]
+a[0]
+a[2] = 3.0
+```
+
+#### 2. Construcción de Tensores Básicos
+
+> Se muestra la creación de un tensor 1D con `torch.ones(3)` y cómo se indexa/convierte un escalar tensor a `float`.
+
+```python
+import torch
+a = torch.ones(3)
+a[1]
+float(a[1])
+a[2] = 2.0
+```
+
+#### 3. Esencia de los Tensores: Memoria y Eficiencia
+
+> Diferencia conceptual clave:
+> 
+> - Listas/tuplas Python son colecciones de **objetos Python** (cada elemento suele estar asignado por separado en memoria).
+>     
+> - Tensores de PyTorch (y arrays de NumPy) son **vistas** sobre bloques de memoria (típicamente) **contiguos**, con tipos numéricos C “sin boxing”.
+>     
+> 
+> Consecuencia que el texto cuantifica: un tensor 1D de 1,000,000 floats de 32 bits ocupa exactamente 4,000,000 bytes contiguos (más un overhead pequeño de metadatos como dimensiones y tipo).
+
+#### 4. Ejemplo Guiado: Puntos 2D
+
+> Se usa un ejemplo didáctico (triángulo 2D) para pasar de una codificación 1D (x,y intercalados) a una representación 2D (cada fila es un punto y cada columna una coordenada).
+
+```python
+points = torch.tensor([4.0, 1.0, 5.0, 3.0, 2.0, 1.0])
+float(points[0]), float(points[1])
+
+points = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]])
+points.shape
+points[0, 1]
+points[0]
+```
+
+> El capítulo subraya que al hacer `points[0]` se obtiene **otra vista** del mismo dato subyacente (no “copia” por defecto), y lo retomará más adelante al hablar de views y storage.
+
+---
+
+### IV. Indexación y Slicing de Tensores
+
+#### 1. Rango de Índices al Estilo Python
+
+> Se recuerda el slicing tipo `start:stop:step` y se muestra que PyTorch permite aplicar slicing **por dimensión** (igual que NumPy).
+
+```python
+points[1:]
+points[1:, :]
+points[1:, 0]
+points[None]
+```
+
+> Se menciona que además existe **advanced indexing** y se aplaza al siguiente capítulo.
+
+---
+
+### V. Tensores con Nombres
+
+#### 1. Motivación
+
+> Problema: al transformar datos (p. ej., imágenes con dimensiones como batch/canales/alto/ancho), recordar el orden exacto de ejes es fácil de romper y genera errores de alineación.
+
+#### 2. Ejemplo: Pasar a Escala de Grises y Broadcasting
+
+> Se construye un ejemplo con un tensor de imagen `img_t` y un batch `batch_t`. Se muestra:
+> 
+> - Media “ingenua” contando desde el final (`mean(-3)`) para promediar canales.
+>     
+> - Media ponderada usando pesos RGB y **broadcasting** (haciendo `unsqueeze`).
+>     
+> - Alternativa con `einsum` (mini-lenguaje de índices), pero el libro avisa que no se usará después.
+>     
+
+```python
+img_t = torch.randn(3, 5, 5)              # [channels, rows, columns]
+weights = torch.tensor([0.2126, 0.7152, 0.0722])
+
+batch_t = torch.randn(2, 3, 5, 5)         # [batch, channels, rows, columns]
+img_gray_naive = img_t.mean(-3)
+batch_gray_naive = batch_t.mean(-3)
+
+unsqueezed_weights = weights.unsqueeze(-1).unsqueeze_(-1)
+img_gray_weighted = (img_t * unsqueezed_weights).sum(-3)
+batch_gray_weighted = (batch_t * unsqueezed_weights).sum(-3)
+
+img_gray_weighted_fancy = torch.einsum('...chw,c->...hw', img_t, weights)
+batch_gray_weighted_fancy = torch.einsum('...chw,c->...hw', batch_t, weights)
+```
+
+#### 3. Named Tensors: Qué Aportan y Limitaciones
+
+> PyTorch añadió (en el momento de escritura del libro) **named tensors** como característica experimental: puedes asignar nombres a ejes, y entonces PyTorch también comprueba **coherencia de nombres** al operar.  
+> Puntos prácticos que muestra el capítulo:
+> 
+> - Crear tensores con `names=[...]`.
+>     
+> - Añadir nombres a un tensor existente con `refine_names(..., ...)`.
+>     
+> - Alinear explícitamente dimensiones con `align_as`.
+>     
+> - Reducir por dimensión nombrada con `sum('channels')`.
+>     
+> - Si se combinan dimensiones con nombres incompatibles, aparece un error.
+>     
+> - Para volver al mundo “sin nombres”, se usa `rename(None)`.
+>     
+> - Dada su naturaleza experimental, el libro decide **no usarlos** en el resto.
+>     
+
+```python
+weights_named = torch.tensor([0.2126, 0.7152, 0.0722], names=['channels'])
+
+img_named = img_t.refine_names(..., 'channels', 'rows', 'columns')
+weights_aligned = weights_named.align_as(img_named)
+gray_named = (img_named * weights_aligned).sum('channels')
+gray_plain = gray_named.rename(None)
+```
+
+---
+
+### VI. Tipos de Elemento y `dtype`
+
+#### 1. Por Qué Importa el Tipo Numérico
+
+> Razones que da el libro para preferir tensores/arrays frente a tipos numéricos Python y listas:
+> 
+> - En Python, los números son objetos (boxing) → ineficiente para millones de valores.
+>     
+> - Las listas no traen operaciones numéricas vectorizadas eficientes (dot product, sumas vectoriales, etc.) ni layout de memoria optimizado.
+>     
+> - El intérprete de Python es lento frente a código compilado para matemáticas masivas.  
+>     Por eso PyTorch mantiene explícitamente el tipo numérico del tensor.
+>     
+
+#### 2. `dtype`: Qué Es y Valores Típicos
+
+> `dtype` define el tipo numérico y el tamaño en bytes (y si es entero con signo o no, como `uint8`). El capítulo lista:
+> 
+> - `torch.float32` / `torch.float`
+>     
+> - `torch.float64` / `torch.double`
+>     
+> - `torch.float16` / `torch.half`
+>     
+> - `torch.int8`, `torch.uint8`, `torch.int16`/`short`, `torch.int32`/`int`, `torch.int64`/`long`
+>     
+> - `torch.bool`  
+>     Y afirma que el **dtype por defecto** en PyTorch es **float32**.
+>     
+
+#### 3. Elección Práctica de Tipos
+
+> El libro destaca:
+> 
+> - En redes neuronales, típicamente se computa con **32-bit float**; usar 64-bit suele aumentar coste sin mejorar precisión del modelo.
+>     
+> - `float16` es útil sobre todo en GPUs modernas para reducir huella con impacto menor en precisión.
+>     
+> - Tensores usados como índices suelen requerir **int64**.
+>     
+> - Predicados (`points > 1.0`) producen tensores `bool`.
+>     
+
+#### 4. Gestión del `dtype` en PyTorch
+
+> El capítulo muestra tres vías:
+> 
+> - Pasar `dtype=` al constructor.
+>     
+> - Convertir con métodos tipo `.double()`, `.short()`.
+>     
+> - Usar `.to(dtype=...)` (y señala que `to` comprueba si hace falta convertir).  
+>     También indica que al mezclar tipos en operaciones, PyTorch promueve a un tipo “más grande”, así que si quieres cálculo en 32-bit debes vigilar los inputs.
+>     
+
+```python
+double_points = torch.ones(10, 2, dtype=torch.double)
+short_points = torch.tensor([[1, 2], [3, 4]], dtype=torch.short)
+
+short_points.dtype
+
+double_points = torch.zeros(10, 2).double()
+short_points = torch.ones(10, 2).short()
+
+double_points = torch.zeros(10, 2).to(torch.double)
+short_points = torch.ones(10, 2).to(dtype=torch.short)
+
+points_64 = torch.rand(5, dtype=torch.double)
+points_short = points_64.to(torch.short)
+points_64 * points_short
+```
+
+---
+
+### VII. API de Tensores
+
+#### 1. Doble Forma: Función `torch.*` y Método del Tensor
+
+> El libro enfatiza que la mayoría de operaciones existen como:
+> 
+> - funciones en el módulo `torch`
+>     
+> - métodos en el objeto tensor  
+>     y son intercambiables (ej.: `torch.transpose(a, 0, 1)` vs `a.transpose(0, 1)`).
+>     
+
+```python
+a = torch.ones(3, 2)
+a_t1 = torch.transpose(a, 0, 1)
+a_t2 = a.transpose(0, 1)
+```
+
+#### 2. Cómo Está Organizada la Documentación
+
+> El capítulo no lista todas las ops, pero dice que la documentación online está organizada en grupos: creación, indexado/slicing/reshape/stride, matemáticas (pointwise, reductions, comparaciones, espectrales, BLAS/LAPACK), muestreo aleatorio, serialización, paralelismo, etc.
+
+---
+
+### VIII. Storage y Views
+
+#### 1. Idea Base: Storage y Vistas
+
+> El capítulo define: los valores viven en un `torch.Storage` (array 1D contiguo de números). Un `Tensor` es una **vista** sobre ese storage que indexa con **offset** y **strides** por dimensión.  
+> Consecuencia: múltiples tensores pueden referenciar el **mismo storage** con distintas formas/strides, y crear vistas puede ser barato incluso con datos grandes.
+
+#### 2. Indexar un Storage y Efectos Laterales
+
+> Se accede al storage con `.storage()`. El storage es 1D, aunque el tensor sea 2D/3D. Cambiar el storage cambia el tensor que lo referencia.
+
+```python
+points = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]])
+points_storage = points.storage()
+points_storage[0]
+points_storage[0] = 2.0
+points
+```
+
+#### 3. Operaciones In-Place y Sufijo `_`
+
+> Regla de nomenclatura: métodos que terminan en `_` operan **in-place**, modificando el tensor en vez de devolver uno nuevo (ej.: `zero_`). Los métodos sin `_` no modifican el original y devuelven un tensor nuevo.
+
+```python
+a = torch.ones(3, 2)
+a.zero_()
+a
+```
+
+---
+
+### IX. Metadatos: Size, Offset y Stride
+
+#### 1. Definiciones Operativas
+
+> El capítulo define tres piezas que, junto con el storage, “definen” el tensor:
+> 
+> - **Size/Shape**: cuántos elementos por dimensión.
+>     
+> - **Storage Offset**: índice del primer elemento del tensor dentro del storage.
+>     
+> - **Stride**: cuántos elementos del storage hay que “saltar” al incrementar el índice en cada dimensión.
+>     
+
+#### 2. Subtensores Como Views (Sin Copiar)
+
+> Ejemplo: `second_point = points[1]` es un subtensor que referencia el mismo storage con otro offset/stride. Se muestra que modificar el subtensor puede modificar el tensor original; si no lo quieres, usa `.clone()`.
+
+```python
+points = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]])
+second_point = points[1]
+second_point.storage_offset()
+second_point.size()
+second_point.stride()
+
+second_point[0] = 10.0
+points
+
+second_point = points[1].clone()
+second_point[0] = 10.0
+points
+```
+
+#### 3. Transposición Sin Copiar (2D y N-D)
+
+> Se enseña que `.t()` es un atajo para transponer tensores 2D, y que la transposición puede lograrse cambiando strides (sin nueva memoria), verificando que comparten el mismo storage.
+
+```python
+points = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]])
+points_t = points.t()
+
+id(points.storage()) == id(points_t.storage())
+points.stride()
+points_t.stride()
+```
+
+> Para más dimensiones, se usa `transpose(dim0, dim1)` intercambiando shape/stride en esas dimensiones.
+
+```python
+some_t = torch.ones(3, 4, 5)
+transpose_t = some_t.transpose(0, 2)
+some_t.shape, transpose_t.shape
+some_t.stride(), transpose_t.stride()
+```
+
+#### 4. Contiguidad y `contiguous()`
+
+> Definición práctica del libro: un tensor es **contiguous** si sus valores están dispuestos en storage “desde la dimensión más a la derecha hacia la izquierda” (por filas en 2D).  
+> Se indica que algunas operaciones (ej.: `view`, mencionado como “próximo capítulo”) requieren contiguidad; si no, PyTorch pide llamar a `contiguous()`. Si ya es contiguo, `contiguous()` no hace nada.
+
+```python
+points = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]])
+points_t = points.t()
+points.is_contiguous()
+points_t.is_contiguous()
+
+points_t_cont = points_t.contiguous()
+points_t.stride(), points_t_cont.stride()
+points_t.storage()
+points_t_cont.storage()
+```
+
+---
+
+### X. Mover Tensores a la GPU
+
+#### 1. Atributo `device` y Creación/Copia
+
+> Además de `dtype`, un tensor tiene un **device** (dónde vive el dato: CPU o GPU). Se puede crear directamente en GPU con `device='cuda'` o mover un tensor con `.to(device='cuda')`.  
+> El capítulo enfatiza que la API es prácticamente la misma en CPU y GPU, para escribir código agnóstico a dónde corre el “heavy compute”.
+
+```python
+points = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]])
+points_gpu = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]], device='cuda')
+points_gpu = points.to(device='cuda')
+points_gpu = points.to(device='cuda:0')
+```
+
+#### 2. Persistencia en GPU y Volver a CPU
+
+> El libro describe qué ocurre en una operación típica: se copia a GPU, se aloca un tensor resultado en GPU, y se devuelve un handle a ese tensor; el resultado **no vuelve** a CPU salvo que lo fuerces (p. ej., imprimir/acceder o mover explícitamente).  
+> Para volver a CPU: `.to(device='cpu')` o `.cpu()`. Atajos: `.cuda()` / `.cuda(0)`.  
+> También menciona que `to` permite cambiar **device y dtype** a la vez.
+
+```python
+points_gpu = 2 * points.to(device='cuda')
+points_gpu = points_gpu + 4
+points_cpu = points_gpu.to(device='cpu')
+
+points_gpu = points.cuda()
+points_gpu = points.cuda(0)
+points_cpu = points_gpu.cpu()
+```
+
+> Nota contextual del propio texto (fecha de escritura): PyTorch se acelera principalmente con GPUs CUDA; menciona ROCm y TPU como soporte adicional con distintos grados de madurez en ese momento.
+
+---
+
+### XI. Interoperabilidad con NumPy
+
+#### 1. Conversión y “Zero-Copy” en CPU
+
+> Convertir a NumPy: `points.numpy()`. Convertir desde NumPy: `torch.from_numpy(...)`.  
+> El capítulo afirma que en CPU la conversión comparte el mismo buffer (costo casi cero) y modificar el NumPy array modifica el tensor original. Si el tensor está en GPU, PyTorch hace una **copia** a CPU para crear el NumPy array.
+
+```python
+points = torch.ones(3, 4)
+points_np = points.numpy()
+points2 = torch.from_numpy(points_np)
+```
+
+> Nota del libro: dtype por defecto de NumPy suele ser 64-bit, mientras que en PyTorch es float32; se sugiere vigilar y convertir a `torch.float` cuando proceda.
+
+---
+
+### XII. Tensores “Generalizados” y Dispatcher
+
+#### 1. Separación entre API y Backend
+
+> El capítulo “levanta el capó”: la forma de almacenar datos está separada del **contrato del API tensor**; cualquier implementación que cumpla ese contrato puede considerarse tensor.  
+> Se menciona un mecanismo de **dispatching**: PyTorch invoca kernels correctos según device y tipo, y eso permite otros tipos de tensores (ej.: sparse, quantized, u otros backends/hardware).
+
+---
+
+### XIII. Serialización de Tensores
+
+#### 1. Guardar y Cargar con PyTorch
+
+> Para persistir tensores, se usa `torch.save` y `torch.load`. El libro dice que usa `pickle` para el objeto tensor y código dedicado para el storage.  
+> Advierte: el formato resultante no es interoperable fuera de PyTorch.
+
+```python
+torch.save(points, '../data/p1ch3/ourpoints.t')
+points = torch.load('../data/p1ch3/ourpoints.t')
+
+with open('../data/p1ch3/ourpoints.t','wb') as f:
+    torch.save(points, f)
+
+with open('../data/p1ch3/ourpoints.t','rb') as f:
+    points = torch.load(f)
+```
+
+#### 2. Serialización Interoperable con HDF5 (h5py)
+
+> Para interoperabilidad, propone HDF5 con `h5py`, que trabaja con NumPy arrays. Se guarda como dataset (clave, incluso anidada) y se puede **indexar en disco** sin cargar todo a memoria.  
+> Al convertir desde HDF5 a tensor con `torch.from_numpy(dset[-2:])`, en este caso el texto indica que los datos se copian al storage del tensor.  
+> También remarca que al cerrar el archivo HDF5, los datasets quedan inválidos.
+
+```python
+import h5py
+
+f = h5py.File('../data/p1ch3/ourpoints.hdf5', 'w')
+dset = f.create_dataset('coords', data=points.numpy())
+f.close()
+
+f = h5py.File('../data/p1ch3/ourpoints.hdf5', 'r')
+dset = f['coords']
+last_points = torch.from_numpy(dset[-2:])
+f.close()
+```
+
+---
+
+### XIV. Trampas Típicas del Capítulo
+
+#### 1. Errores de “Vista” vs “Copia”
+
+> Si extraes un subtensor (indexado/slicing), puede ser una **vista** sobre el mismo storage: modificarlo puede modificar el tensor original. Si quieres independencia, usa `.clone()`.
+
+#### 2. Confusión con Contiguidad
+
+> Un tensor transpuesto puede no ser contiguo; algunas operaciones requieren llamar a `contiguous()` para materializar un layout contiguo (con nuevo storage).
+
+#### 3. Sorpresas con `dtype` al Mezclar Librerías
+
+> NumPy tiende a usar 64-bit por defecto; PyTorch usa float32. Si mezclas sin vigilar, puedes acabar computando en float64 “sin querer”.
+
+#### 4. GPU No Implica “Vuelve Solo” a CPU
+
+> Tras operar en GPU, el resultado sigue en GPU; si necesitas CPU (o NumPy), debes moverlo explícitamente.
+
+---
+
+### XV. Checklist de Dominio
+
+#### 1. Antes de Pasar al Siguiente Capítulo
+
+> Comprueba que puedes, sin dudar:
+> 
+> - Explicar “tensor” como array N-D y relacionarlo con representaciones en coma flotante.
+>     
+> - Crear tensores (`ones`, `zeros`, `tensor([...])`), inspeccionar `shape` y hacer indexing/slicing por dimensión.
+>     
+> - Entender broadcasting en el ejemplo de pesos RGB y por qué aparecen `unsqueeze`.
+>     
+> - Decidir/convertir `dtype` y justificar por qué float32 es estándar en redes.
+>     
+> - Explicar storage/view/offset/stride y predecir efectos laterales al modificar vistas.
+>     
+> - Verificar contiguidad y usar `contiguous()` cuando sea necesario.
+>     
+> - Mover tensores a GPU/CPU con `to`, `cuda`, `cpu` y entender qué se copia y qué no.
+>     
+> - Convertir a/desde NumPy y saber cuándo hay buffer compartido vs copia.
+>     
+> - Guardar/cargar con `torch.save/load` y, si hace falta interoperabilidad, usar HDF5 con `h5py`.
+>     
+
+---
+
+### XVI. Siguiente Paso Recomendado
+
+#### 1. Práctica Dirigida con Ejercicios del Libro
+
+> El capítulo propone ejercicios sobre predecir `size/offset/stride` tras `view` y slicing, y buscar operaciones matemáticas en `torch` (incluyendo versiones in-place con `_`). Si quieres, te los convierto en una “hoja de práctica” en formato Obsidian (pregunta → espacio para respuesta → solución).
