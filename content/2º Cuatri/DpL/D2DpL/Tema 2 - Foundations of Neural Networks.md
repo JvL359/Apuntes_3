@@ -247,8 +247,272 @@
 > Desde un punto de vista neurocientífico, el material interpreta softmax como un mecanismo de “competencia” porque las salidas suman 1: subir una implica bajar otras, análogo a la inhibición lateral; en el extremo se vuelve tipo _winner-take-all_.  
 > El texto comenta que el nombre puede confundir: está más relacionado con (\arg\max) que con (\max); “soft” viene de que softmax es continua y diferenciable, a diferencia de (\arg\max) (one-hot), y menciona que podría llamarse “softargmax”, pero el nombre actual es convención arraigada.
 
+## D2DpL 3. Linear Neural Networks for Regression - Linear Regression y Generalización
 
-## D2DpL 3. Linear Neural Networks for Regression
+### I. Regresión Lineal
+
+#### 1. Problema de Regresión y Terminología Básica
+
+> La regresión aparece cuando queremos **predecir un valor numérico** (p. ej., precios, duración de estancia hospitalaria, demanda).  
+> En el ejemplo del material, se predice el **precio de una casa** a partir de **área** y **edad**.  
+> Terminología:
+> 
+> - Un **training set** es el dataset de entrenamiento.
+>     
+> - Cada fila es un **example** (data point/instance/sample).
+>     
+> - Lo que se predice es la **label** (target).
+>     
+> - Las variables de entrada son **features** (covariates).
+>     
+
+#### 2. Supuestos del Modelo
+
+> El material presenta dos supuestos típicos:
+> 
+> - La relación entre features (x) y target (y) es **aproximadamente lineal**, en el sentido de que la media condicional (E[Y\mid X=x]) es una suma ponderada de las features.
+>     
+> - El ruido de observación es “bien comportado”, siguiendo una **distribución Gaussiana**.
+>     
+
+#### 3. Modelo Lineal
+
+> Modelo en forma “larga” (ejemplo de precio):  
+> [  
+> \text{price}=w_{\text{area}}\cdot \text{area}+w_{\text{age}}\cdot \text{age}+b.  
+> ]  
+> Interpretación:
+> 
+> - Los **weights** determinan la influencia de cada feature.
+>     
+> - El **bias** permite representar funciones afines generales (no solo rectas que pasan por el origen).  
+>     Forma vectorial para (d) features:  
+>     [  
+>     \hat{y}=w^\top x+b.  
+>     ]  
+>     Para (n) ejemplos (matriz de diseño (X\in\mathbb{R}^{n\times d})):  
+>     [  
+>     \hat{y}=Xw+b.  
+>     ]
+>     
+
+#### 4. Función de Pérdida y Objetivo de Entrenamiento
+
+> La pérdida más común en regresión es el **error cuadrático**. Para el ejemplo (i):  
+> [  
+> \ell^{(i)}(w,b)=\frac{1}{2}\big(\hat{y}^{(i)}-y^{(i)}\big)^2.  
+> ]  
+> El factor (\tfrac{1}{2}) se usa por conveniencia notacional al derivar.  
+> La pérdida promedio en el dataset:  
+> [  
+> L(w,b)=\frac{1}{n}\sum_{i=1}^{n}\frac{1}{2}\big(w^\top x^{(i)}+b-y^{(i)}\big)^2.  
+> ]  
+> Objetivo: encontrar ((w^*,b^*)) que minimicen (L(w,b)).  
+> El material advierte que la penalización cuadrática hace que errores grandes contribuyan mucho más (beneficio: evita grandes errores; riesgo: sensibilidad a anomalías).
+
+#### 5. Solución Analítica (Ecuaciones Normales)
+
+> A diferencia de muchos modelos posteriores, aquí puede obtenerse una solución analítica. El material indica que se puede incorporar (b) en (w) añadiendo una columna de 1s a (X) y minimizar (\lVert y-Xw\rVert^2).  
+> Si (X) tiene **rango completo**, hay un único punto crítico que coincide con el mínimo global. Derivando e igualando a cero:  
+> [  
+> \partial_w\lVert y-Xw\rVert^2=2X^\top(Xw-y)=0  
+> \quad\Rightarrow\quad  
+> X^\top y=X^\top X w.  
+> ]  
+> Solución:  
+> [  
+> w^*=(X^\top X)^{-1}X^\top y,  
+> ]  
+> que es única si (X^\top X) es invertible (columnas de (X) linealmente independientes).
+
+#### 6. Descenso por Gradiente Estocástico con Minibatches
+
+> El material presenta **minibatch SGD** como técnica central para optimizar (en general) modelos de deep learning: actualizar iterativamente parámetros para reducir la pérdida.  
+> En cada iteración (t), se muestrea un minibatch (B_t), se computa el gradiente promedio y se actualiza con tasa (\eta):  
+> [  
+> (w,b)\leftarrow (w,b)-\frac{\eta}{|B|}\sum_{i\in B_t}\partial_{(w,b)}\ell^{(i)}(w,b).  
+> ]  
+> Para pérdida cuadrática y transformación afín, el material escribe las actualizaciones explícitas:  
+> [  
+> w \leftarrow w -\frac{\eta}{|B|}\sum_{i\in B_t} x^{(i)}\big(w^\top x^{(i)}+b-y^{(i)}\big),  
+> \quad  
+> b \leftarrow b -\frac{\eta}{|B|}\sum_{i\in B_t}\big(w^\top x^{(i)}+b-y^{(i)}\big).  
+> ]  
+> Se introducen **hiperparámetros** (p. ej., minibatch size, learning rate) y se menciona la evaluación sobre un **validation set**.  
+> Nota del material: aunque en regresión lineal hay mínimo global (si (X) tiene rango completo), en redes profundas abundan puntos de silla y mínimos; en la práctica suele bastar con parámetros que den buena predicción.
+
+#### 7. Predicción y Terminología de “Inference”
+
+> Para un nuevo ejemplo, la predicción es (\hat{w}^\top x+\hat{b}).  
+> El material comenta que en deep learning se usa “inference” para la fase de predicción, pero lo califica como término confuso porque en estadística “inference” suele referirse más a inferencia de parámetros. El texto propone usar “prediction” cuando sea posible.
+
+#### 8. Vectorización para Velocidad
+
+> El material insiste en procesar minibatches de forma eficiente vectorizando cálculos y usando librerías de álgebra lineal.  
+> En un ejemplo de suma de vectores de dimensión 10 000, el bucle Python tarda del orden de (0.178) s, mientras que la suma vectorizada tarda del orden de (0.00036) s (valores reportados en el texto).  
+> Conclusión del material: vectorizar puede dar mejoras de orden(es) de magnitud y reduce errores al delegar operaciones en la librería.
+
+#### 9. Distribución Normal y Pérdida Cuadrática Como MLE
+
+> Se recuerda la densidad de una normal (\mathcal{N}(\mu,\sigma^2)):  
+> [  
+> p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp!\left(-\frac{1}{2\sigma^2}(x-\mu)^2\right).  
+> ]  
+> Para motivar formalmente el MSE, el material asume ruido Gaussiano aditivo:  
+> [  
+> y=w^\top x+b+\epsilon,\quad \epsilon\sim\mathcal{N}(0,\sigma^2).  
+> ]  
+> Entonces:  
+> [  
+> P(y\mid x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp!\left(-\frac{1}{2\sigma^2}(y-w^\top x-b)^2\right).  
+> ]  
+> La verosimilitud total factoriza por independencia y el material pasa a minimizar la **negative log-likelihood**:  
+> [  
+> -\log P(y\mid X)=\sum_{i=1}^{n}\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2\sigma^2}\big(y^{(i)}-w^\top x^{(i)}-b\big)^2.  
+> ]  
+> Si (\sigma) es fija, el primer término se ignora (no depende de (w,b)) y el segundo coincide con la pérdida cuadrática salvo una constante, concluyendo que minimizar MSE equivale a MLE bajo ruido Gaussiano aditivo.
+
+#### 10. Regresión Lineal Como Red Neuronal
+
+> El material describe la regresión lineal como una red con una sola capa: cada feature es una neurona de entrada conectada directamente a una única neurona de salida (red fully connected de una capa).  
+> También incluye una analogía biológica (dendritas, soma, axón) para ilustrar la idea de combinar entradas ponderadas y un posible postprocesamiento no lineal, y matiza que la inspiración actual en deep learning viene de muchas disciplinas además de neurociencia.
+
+#### 11. Resumen y Ejercicios de la Sección
+
+> Resumen del material:
+> 
+> - Regresión lineal: elegir parámetros para minimizar pérdida cuadrática.
+>     
+> - Motivación del objetivo: consideraciones prácticas + interpretación como MLE con ruido Gaussiano.
+>     
+> - Componentes clave reutilizables: forma paramétrica, objetivo diferenciable, optimización con minibatch SGD, evaluación en datos no vistos.  
+>     Ejercicios (lista del material, a alto nivel):
+>     
+> - Minimización de (\sum_i (x_i-b)^2) y relación con normal.
+>     
+> - Equivalencia entre funciones afines y funciones lineales en ((x,1)).
+>     
+> - Extender a funciones cuadráticas y formulación en red.
+>     
+> - Qué ocurre si (X^\top X) no tiene rango completo y cómo “arreglarlo”.
+>     
+> - Derivar NLL con ruido exponencial y proponer SGD.
+>     
+> - Por qué componer dos capas lineales no aporta expresividad.
+>     
+> - Problemas de aplicar regresión a precios realistas y a conteos (aparece Poisson en ejercicios).
+>     
+
+---
+
+### II. Generalización
+
+#### 1. Motivación: Memorizar vs. Descubrir Patrones
+
+> El material introduce la generalización con una analogía de dos estudiantes:
+> 
+> - “Extraordinary Ellie” memoriza exámenes pasados y puede fallar ante preguntas nuevas.
+>     
+> - “Inductive Irene” infiere patrones y mantiene rendimiento más estable en preguntas no vistas.  
+>     Idea central: en machine learning buscamos **patrones**; la predicción es útil cuando generaliza a datos no vistos (p. ej., precios de mañana, enfermedades no diagnosticadas, pacientes nuevos).
+>     
+
+#### 2. Overfitting y Regularización
+
+> El material define **overfitting** como ajustar más a los datos de entrenamiento que a la distribución subyacente, y llama **regularization methods** a técnicas para combatirlo.  
+> También advierte que incluso con datasets enormes, el número de ejemplos puede ser minúsculo frente al espacio de posibilidades (p. ej., el espacio de imágenes posibles).
+
+#### 3. Error de Entrenamiento y Error de Generalización
+
+> Se asume el caso supervisado estándar con train y test i.i.d. (IID).  
+> El material distingue:
+> 
+> - **Training error** (R_{\text{emp}}): estadístico calculado en el training set.  
+>     [  
+>     R_{\text{emp}}[X,y,f]=\frac{1}{n}\sum_{i=1}^{n}\ell!\big(x^{(i)},y^{(i)},f(x^{(i)})\big).  
+>     ]
+>     
+> - **Generalization error** (R): expectativa respecto a la distribución subyacente (P).  
+>     [  
+>     R[p,f]=\mathbb{E}_{(x,y)\sim P},[\ell(x,y,f(x))]  
+>     =\int!!\int \ell(x,y,f(x)),p(x,y),dx,dy.  
+>     ]  
+>     Problema clave: (R) no puede calcularse exactamente; se estima usando un **test set** independiente.  
+>     Matiz del material: el modelo depende de la muestra de entrenamiento, por lo que el training error suele ser un estimador **sesgado** del error poblacional. La pregunta central es cuándo esperar que training error esté cerca del error poblacional.
+>     
+
+#### 4. Complejidad del Modelo y Qué Puede Concluirse del Training Error
+
+> El material explica que, con modelos simples y muchos datos, training y generalization suelen ser cercanos; con modelos más complejos y/o pocos ejemplos, el training error baja pero la brecha puede crecer.  
+> Si una clase de modelos puede ajustar etiquetas arbitrarias (incluso aleatorias), ajustar train perfectamente no certifica nada sobre generalización.  
+> Se conecta con la idea de **falsabilidad** (Popper): una hipótesis que explica cualquier observación “no dice nada” porque no descarta posibilidades.  
+> El texto comenta que “más parámetros” suele aumentar capacidad de ajuste, pero no siempre (menciona métodos kernel con infinitos parámetros cuya complejidad se controla de otra forma). Otro criterio útil es el **rango de valores** permitidos a los parámetros.
+
+#### 5. Validación y Uso de Holdout Data
+
+> Cuando no puede concluirse mucho solo con el training error (caso típico en deep networks), el material enfatiza certificar generalización “a posteriori” con datos retenidos (_holdout_). El error en el holdout se denomina **validation error**.
+
+#### 6. Underfitting y Overfitting en Términos de Errores
+
+> Dos situaciones típicas al comparar training y validation error:
+> 
+> - **Underfitting**: ambos errores son altos y la brecha es pequeña; sugiere modelo demasiado simple para capturar el patrón.
+>     
+> - **Overfitting severo**: training error mucho menor que validation error.  
+>     El material matiza que overfitting no es “siempre malo”: en deep learning el mejor modelo predictivo puede rendir mucho mejor en train que en holdout; el objetivo final es reducir el error de generalización.
+>     
+
+#### 7. Ajuste de Curvas Polinomiales Como Ejemplo de Complejidad
+
+> Ejemplo del material: ajustar un polinomio de grado (d) para una feature (x):  
+> [  
+> \hat{y}=\sum_{i=0}^{d}x^{i}w_i.  
+> ]  
+> Se interpreta como regresión lineal donde las features son potencias de (x), con pérdida cuadrática.  
+> A mayor grado (más parámetros), menor training error (o igual) para un dataset fijo; con grado suficiente (igual al número de ejemplos, si (x) distintos) puede ajustarse perfecto el training set.
+
+#### 8. Tamaño del Dataset
+
+> El material destaca que, manteniendo el modelo fijo, cuantos menos ejemplos hay, más probable y severo es el overfitting; al aumentar datos, el error de generalización suele disminuir, y “más datos casi nunca perjudica”.  
+> También señala que, para una tarea y distribución fijas, la complejidad del modelo no debería crecer más rápido que la cantidad de datos; deep learning suele superar a modelos lineales cuando hay miles de ejemplos, y parte del éxito actual se atribuye a la abundancia de datasets masivos.
+
+#### 9. Selección de Modelos y Validación Cruzada
+
+> **Model selection**: elegir el modelo final comparando alternativas (arquitecturas, objetivos, features, preprocesado, learning rates, etc.).  
+> Regla del material: no se debe usar el **test set** para selección de hiperparámetros porque se puede sobreajustar al test; por eso se introduce un **validation set** (split train/val/test), aunque en la práctica los límites entre validation y test pueden ser “borrosos” y el material comenta que muchos experimentos del libro usan en realidad train + validation sin un test “verdadero”.  
+> Cuando los datos son escasos y no se puede reservar suficiente validación, se propone **K-fold cross-validation**: dividir en (K) subconjuntos, entrenar (K) veces usando (K-1) para entrenar y 1 para validar, y promediar.
+
+#### 10. Resumen y Reglas Prácticas
+
+> Reglas de pulgar que da el material:
+> 
+> - Usar validation sets (o (K)-fold cross-validation) para model selection.
+>     
+> - Modelos más complejos suelen requerir más datos.
+>     
+> - Complejidad relevante: número de parámetros y rango permitido de valores.
+>     
+> - Manteniendo lo demás constante, más datos suele mejorar generalización.
+>     
+> - Todo depende del supuesto IID; si hay _distribution shift_, no puede afirmarse nada sin supuestos adicionales.
+>     
+
+#### 11. Ejercicios de la Sección
+
+> Ejercicios (lista del material):
+> 
+> - Cuándo puede resolverse exactamente la regresión polinómica.
+>     
+> - Ejemplos donde variables dependientes rompen el supuesto IID.
+>     
+> - Cuándo esperar training error cero y cuándo generalization error cero.
+>     
+> - Por qué (K)-fold cross-validation es costoso y por qué su estimación puede ser sesgada.
+>     
+> - Por qué la VC dimension puede ser mala medida de complejidad (pista: magnitud de las funciones).
+>     
+> - Cómo justificar la necesidad de más datos (pista del material: no puedes aumentar los datos, pero puedes disminuirlos).
+## D2DpL 3. Linear Neural Networks for Regression (Complete)
 ### I. Redes Neuronales Lineales para Regresión
 
 #### 1. Motivación y Alcance del Capítulo
@@ -789,3 +1053,564 @@ class Data(d2l.DataModule):
 >     
 
 ---
+
+## D2DpL 4. Linear Neural Networks for Classification
+
+### I. Softmax Regression
+
+#### 1. Clasificación y Representación de Etiquetas
+
+> En clasificación, no hay un orden natural entre clases. El material usa **one-hot encoding** para representar categorías: un vector con un 1 en la clase correcta y 0 en el resto. Por ejemplo, con 3 clases:  
+> [  
+> y \in {(1,0,0),(0,1,0),(0,0,1)}.  
+> ]  
+> 
+> Para obtener probabilidades condicionales sobre todas las clases con un modelo lineal, se construye una salida (logit) por clase mediante funciones afines. En forma compacta:  
+> [  
+> o = Wx + b.  
+> ]  
+
+#### 2. Softmax Como Normalización a Probabilidades
+
+> Para convertir logits (o) en una distribución de probabilidad válida sobre (q) clases, el material define:  
+> [  
+> \hat y = \mathrm{softmax}(o), \qquad \hat y_i = \frac{\exp(o_i)}{\sum_j \exp(o_j)}.  
+> ]  
+> 
+> Como **softmax preserva el orden** de sus argumentos, la clase más probable se obtiene sin calcular probabilidades explícitas:  
+> [  
+> \arg\max_j \hat y_j = \arg\max_j o_j.  
+> ]  
+> 
+> Para un minibatch (X \in \mathbb{R}^{n\times d}), con (W \in \mathbb{R}^{d\times q}), (b \in \mathbb{R}^{1\times q}):  
+> [  
+> O = XW + b,\qquad \hat Y=\mathrm{softmax}(O).  
+> ]  
+
+#### 3. Función de Pérdida: Log-Verosimilitud y Entropía Cruzada
+
+> Interpretando (\hat y) como probabilidades condicionales (\mathbb{P}(y \mid x)), y asumiendo independencia por ejemplo, la verosimilitud sobre el dataset factoriza:  
+> [  
+> \mathbb{P}(Y\mid X)=\prod_{i=1}^n \mathbb{P}(y^{(i)}\mid x^{(i)}).  
+> ]  
+> Minimizar la **negative log-likelihood** equivale a minimizar la suma de pérdidas por ejemplo:  
+> [  
+> -\log \mathbb{P}(Y\mid X)=\sum_{i=1}^n -\log \mathbb{P}(y^{(i)}\mid x^{(i)})=\sum_{i=1}^n \ell(y^{(i)},\hat y^{(i)}).  
+> ]  
+> 
+> Con etiquetas one-hot sobre (q) clases:  
+> [  
+> \ell(y,\hat y) = -\sum_{j=1}^q y_j \log \hat y_j,  
+> ]  
+> que el material llama **cross-entropy loss**. Al ser one-hot, solo queda el término de la clase correcta. Además, (\ell \ge 0) y (\ell=0) solo si la clase correcta tiene probabilidad 1 (algo inalcanzable con parámetros finitos en softmax).
+> 
+> Sustituyendo softmax en la pérdida, el material reescribe:  
+> [  
+> \ell(y,\hat y)=\log\sum_{k=1}^q \exp(o_k) - \sum_{j=1}^q y_j o_j.  
+> ]  
+
+#### 4. Teoría de la Información
+
+> El material indica que esta sección conecta softmax + entropía cruzada con **teoría de la información** (y también con ideas de física estadística), y que la derivada de la entropía cruzada combinada con softmax “se parece” a la de MSE en el sentido de operar como diferencia entre comportamiento esperado y predicción.
+> 
+> **[RELLENAR: fórmulas y definiciones explícitas de “Information Theory Basics” (subsección 4.1.3) — no he podido recuperar ese fragmento literal del PDF en este momento.]**
+
+#### 5. Resumen de la Sección
+
+> Ideas clave del material:
+> 
+> - En clasificación discreta se adopta un enfoque probabilista: clases como resultados de una distribución.
+>     
+> - **Softmax** convierte logits en una distribución sobre clases.
+>     
+> - La pérdida asociada se justifica por **maximum likelihood** → **negative log-likelihood / cross-entropy**.
+>     
+> - Se anticipan cuestiones computacionales (coste (O(dq)) de capas fully-connected) y conexiones con teoría de la información/física.
+>     
+
+---
+
+### II. Implementación de Softmax Regression Desde Cero
+
+#### 1. Softmax en Tensores y Advertencia de Estabilidad Numérica
+
+> Para calcular softmax por filas en una matriz (X), el material lo describe como: (i) exponenciar, (ii) sumar por fila para normalizar, (iii) dividir por esa suma, de forma que cada fila sume 1:  
+> [  
+> \mathrm{softmax}(X)_{ij}=\frac{\exp(X_{ij})}{\sum_k \exp(X_{ik})}.  
+> ]  
+> También advierte: la implementación directa **no es robusta** para argumentos muy grandes/pequeños; es solo ilustrativa, y los frameworks incluyen protecciones.
+
+```python
+def softmax(X):
+    X_exp = torch.exp(X)
+    partition = X_exp.sum(1, keepdims=True)
+    return X_exp / partition  # The broadcasting mechanism is applied here
+```
+
+#### 2. Pérdida de Entropía Cruzada “Desde Cero”
+
+> Con (\hat y) ya calculado, el material implementa la entropía cruzada seleccionando (por índice) la probabilidad asignada a la clase correcta y aplicando (-\log).
+
+```python
+def cross_entropy(y_hat, y):
+    return -torch.log(y_hat[list(range(len(y_hat))), y]).mean()
+```
+
+#### 3. Entrenamiento y Predicción
+
+> El entrenamiento reutiliza el método `fit` (definido previamente en el capítulo de regresión lineal) y remarca que **épocas**, **minibatch size** y **learning rate** son hiperparámetros ajustables, que afectan tanto a entrenamiento como a generalización; en práctica se eligen con un split de validación y la evaluación final debería hacerse en un verdadero test set (aunque en el libro, por convenio, se usa Fashion-MNIST “test” como validación).
+> 
+> Para predicción, tras entrenar se calcula `argmax` por fila para obtener la etiqueta predicha y se inspeccionan ejemplos mal clasificados visualizándolos.
+
+#### 4. Resumen de la Sección
+
+> El material cierra destacando que, con regresión lineal + esta clasificación lineal, se llega a lo que sería “state of the art” de modelado estadístico de los 60–70, y que la siguiente sección mostrará cómo hacerlo más eficientemente con frameworks.
+> 
+> Ejercicios destacados en el propio texto: inestabilidades numéricas del softmax “naive”, implementar corrección relativa al máximo, e implementar una cross-entropy literal (y discutir por qué es más lenta y cuándo tendría sentido).
+
+---
+
+### III. Implementación Concisa de Softmax Regression
+
+#### 1. Definición del Modelo con APIs de Alto Nivel
+
+> El material define el modelo usando una capa fully-connected “built-in” y una `Flatten` para convertir un tensor 4D de imágenes en 2D manteniendo el eje batch. También recuerda que `__call__` invoca `forward` al aplicar la red.
+
+```python
+class SoftmaxRegression(d2l.Classifier):  #@save
+    """The softmax regression model."""
+    def __init__(self, num_outputs, lr):
+        super().__init__()
+        self.save_hyperparameters()
+        self.net = nn.Sequential(nn.Flatten(),
+                                 nn.LazyLinear(num_outputs))
+    def forward(self, X):
+        return self.net(X)
+```
+
+#### 2. Softmax Revisitado: Underflow/Overflow y Truco del “Máximo”
+
+> El material enfatiza que calcular (\exp(o_k)) puede producir **overflow** (si (o_k) es muy grande) o **underflow** (si son muy negativos). Da el rango aproximado de FP32 ((10^{-38}) a (10^{38})) y concluye que si el mayor logit sale de ([-90,90]), la operación no será estable.
+> 
+> Una corrección es restar (\bar o = \max_k o_k) a todos los logits:  
+> [  
+> \hat y_j=\frac{\exp(o_j-\bar o)}{\sum_k \exp(o_k-\bar o)}.  
+> ]  
+> Esto evita overflow (numerador (\le 1), denominador (\in[1,q])). Pero aún puede haber problemas al calcular (\log \hat y_j) si numéricamente (\hat y_j=0) (NaNs).
+> 
+> La idea clave del material: como en entropía cruzada se usa (\log), conviene **combinar softmax + log** de forma estable:  
+> [  
+> \log \hat y_j = (o_j-\bar o) - \log \sum_k \exp(o_k-\bar o),  
+> ]  
+> evitando underflow/overflow (menciona el “LogSumExp trick”). En práctica: pasar **logits** a `cross_entropy` en lugar de probabilidades softmax.
+
+```python
+@d2l.add_to_class(d2l.Classifier)  #@save
+def loss(self, Y_hat, Y, averaged=True):
+    Y_hat = Y_hat.reshape((-1, Y_hat.shape[-1]))
+    Y = Y.reshape((-1,))
+    return F.cross_entropy(
+        Y_hat, Y, reduction='mean' if averaged else 'none')
+```
+
+#### 3. Entrenamiento
+
+> El material entrena con Fashion-MNIST (flatten a 784 features), y remarca que converge con menos líneas que la versión “from scratch”.
+
+#### 4. Resumen de la Sección
+
+> Conclusión explícita: las APIs de alto nivel son convenientes y además **ocultan bordes peligrosos** como la estabilidad numérica; eso facilita empezar, pero puede penalizar la familiaridad necesaria para extender o arreglar corner cases cuando el framework no cubre todo.
+
+---
+
+### IV. Generalización en Clasificación
+
+#### 1. Conjunto de Test: Error Empírico vs Error Poblacional
+
+> Para un clasificador fijo (f) y un dataset nuevo (D={(x^{(i)},y^{(i)})}_{i=1}^n), el material define el **error empírico** (en el test set) como fracción de desacuerdos:  
+> [  
+> \epsilon_D(f)=\frac{1}{n}\sum_{i=1}^n \mathbf{1}(f(x^{(i)})\ne y^{(i)}).  
+> ]  
+> 
+> El **error poblacional** es la esperanza respecto a la distribución real (P(X,Y)):  
+> [  
+> \epsilon(f)=\mathbb{E}_{(x,y)\sim P}\mathbf{1}(f(x)\ne y)  
+> =\int!!\int \mathbf{1}(f(x)\ne y),p(x,y),dx,dy.  
+> ]  
+> 
+> El material encuadra estimar (\epsilon(f)) con (\epsilon_D(f)) como un problema clásico de estimación de medias. El CLT sugiere que el error del estimador decrece como (O(1/\sqrt{n})): para duplicar precisión, necesitas cuadruplicar (n).
+
+#### 2. Tamaño del Test Set y Cotas (Asintóticas vs Finitas)
+
+> Como (\mathbf{1}(f(X)\ne Y)) es Bernoulli, su varianza es (\epsilon(f)(1-\epsilon(f))), y el material usa esto para dar cifras “de orden de magnitud”:
+> 
+> - Para que 1 desviación típica sea (\pm 0.01): ~2500 muestras.
+>     
+> - Para ~95% (≈ 2 desviaciones típicas) en (\pm 0.01): ~10,000 muestras.
+>     
+> 
+> Para garantías de muestra finita, usa Hoeffding:  
+> [  
+> \mathbb{P}(\epsilon_D(f)-\epsilon(f)\ge t) < \exp(-2nt^2),  
+> ]  
+> y concluye que para 95% y (t=0.01) se requieren ~15,000 ejemplos (más conservador que el análisis asintótico).
+
+#### 3. Reutilización del Test Set: Falsos Descubrimientos y Overfitting Adaptativo
+
+> El material plantea el problema práctico: tras evaluar (f_1) con un test “santo”, quieres evaluar (f_2) pero ya no tienes test nuevo. Si evalúas muchos modelos (f_1,\dots,f_k) en el mismo test, aparece el problema de **false discovery** (múltiples hipótesis): aunque cada evaluación tenga 5% de probabilidad de ser engañosa, con muchos modelos puedes perder capacidad para descartar que “alguno” salió bien por azar.
+> 
+> Además, (f_2) se elige _después_ de ver el resultado de (f_1) en test: ya hay fuga de información y el test deja de ser “verdadero” (problema de **adaptive overfitting**). Recomendaciones explícitas: crear test sets reales, consultarlos lo menos posible, ajustar por múltiples hipótesis al reportar intervalos, y mantener varios test sets (degradando antiguos a validación tras cada ronda).
+
+#### 4. Teoría del Aprendizaje Estadístico y Dimensión VC
+
+> Como alternativa, el material describe la idea de **uniform convergence**: que el error empírico de _todos_ los modelos en una clase (F) converja simultáneamente al error real (con alta probabilidad), permitiendo elegir el mejor en entrenamiento con garantías.
+> 
+> Presenta la **dimensión VC** como medida de complejidad y una cota típica que liga brecha de generalización con VC y tamaño (n):  
+> [  
+> \mathbb{P}\big(R[p,f]-R_{\mathrm{emp}}[X,Y,f] < \alpha\big) \ge 1-\delta,\quad  
+> \alpha \ge c\sqrt{\frac{\mathrm{VC}-\log\delta}{n}}.  
+> ]  
+> Además, afirma que modelos lineales en dimensión (d) tienen VC (d+1), y advierte que estas cotas suelen ser **poco ajustadas** (p. ej., para redes profundas).
+> 
+> Resumen del material: el test set es la base de evaluación, pero rara vez es “puro”; la reutilización complica controlar falsos descubrimientos; la teoría busca garantías uniformes pero no explica bien por qué generalizan redes profundas.
+
+---
+
+### V. Entorno y Cambio de Distribución
+
+#### 1. Idea Central: Train y Test Pueden No Seguir la Misma Distribución
+
+> El material define **distribution shift** como el caso en que train y test no provienen de la misma distribución. Señala un caso patológico: misma distribución de entradas pero etiquetas “invertidas”, lo que hace imposible distinguir “hubo shift” vs “no hubo shift” sin supuestos adicionales.
+
+#### 2. Tipos de Cambio de Distribución
+
+###### 1) Cambio de Covariables
+
+> **Covariate shift**: cambia la distribución de entradas (P(x)), pero la distribución condicional (P(y\mid x)) se mantiene. Se motiva como una asunción natural cuando creemos que (x) causa (y). Ejemplo: entrenar con fotos de gatos/perros y testear con caricaturas.
+
+###### 2) Cambio de Etiquetas
+
+> **Label shift**: cambia la marginal (P(y)), pero se mantiene (P(x\mid y)). Se motiva cuando creemos que (y) causa (x), como diagnósticos (enfermedad → síntomas) con prevalencias cambiantes.
+
+###### 3) Cambio de Concepto
+
+> **Concept shift**: cambia la propia definición/uso de etiquetas a lo largo del tiempo o geografía (ejemplos: criterios diagnósticos, moda, títulos laborales; y el caso de nombres de refrescos por región). También menciona traducción automática como ejemplo donde (P(y\mid x)) puede depender de la localización.
+
+#### 3. Ejemplos de Cambio de Distribución
+
+> El material aporta casos concretos:
+> 
+> - **Diagnóstico médico**: un muestreo sesgado (p. ej. controles sanos de universitarios vs pacientes enfermos en hospital) produce diferencias sistemáticas ajenas a la enfermedad → covariate shift extremo y no necesariamente corregible; se ilustra como un fallo costoso.
+>     
+> - **Coches autónomos**: entrenar con datos sintéticos de motor gráfico puede funcionar “en ese dominio” pero fallar en coche real si el modelo aprende artefactos del render.
+>     
+> - **Tanques en el bosque**: el clasificador aprendió sombras (hora del día) en lugar de tanques.
+>     
+> - **Distribuciones no estacionarias**: cambios lentos sin reentrenar (publicidad, spam, recomendaciones estacionales).
+>     
+
+#### 4. Corrección del Cambio de Distribución
+
+###### 1) Riesgo Empírico vs Riesgo
+
+> El material formaliza entrenamiento como minimización del **riesgo empírico**:  
+> [  
+> \min_f \frac{1}{n}\sum_{i=1}^n \ell(f(x_i),y_i),  
+> ]  
+> y define el **riesgo** como esperanza sobre la distribución real:  
+> [  
+> \mathbb{E}_{p(x,y)}[\ell(f(x),y)] = \int!!\int \ell(f(x),y),p(x,y),dx,dy.  
+> ]  
+
+###### 2) Corrección por Cambio de Covariables
+
+> El material propone un algoritmo prototípico usando un clasificador binario “source vs target”:
+> 
+> 1. Construir dataset binario ({(x_i,-1)}\cup{(u_j,1)}) con train (x_i) (source) y test sin etiqueta (u_j) (target).
+>     
+> 2. Entrenar un clasificador logístico y obtener una función (h).
+>     
+> 3. Reponderar train con (\beta_i=\exp(h(x_i))) o truncado (\min(\exp(h(x_i)),c)).
+>     
+> 4. Entrenar el modelo original con esos pesos.
+>     
+> 
+> Supuesto crítico explícito: todo ejemplo posible en target debe tener probabilidad no nula en source; si existe (p(x)>0) pero (q(x)=0), el peso debería ser infinito y el esquema falla.
+
+###### 3) Corrección por Cambio de Etiquetas
+
+> Si (q(y)\ne p(y)) pero (q(x\mid y)=p(x\mid y)), el material reescribe el riesgo con pesos de razón de verosimilitudes de etiquetas:  
+> [  
+> \beta_i=\frac{p(y_i)}{q(y_i)}.  
+> ]  
+> También destaca que, a diferencia de covariate shift, aquí (si el modelo en source es razonable) se pueden estimar consistentemente estos pesos sin tratar con la alta dimensionalidad de (x).
+
+###### 4) Corrección por Cambio de Concepto
+
+> **[RELLENAR: desarrollo algorítmico de “Concept Shift Correction” — no he podido recuperar el texto literal de esta subsección del PDF en este momento.]**
+
+#### 5. Taxonomía de Problemas de Aprendizaje
+
+> **[RELLENAR: contenido de “A Taxonomy of Learning Problems” (batch / online / bandits / control / reinforcement / considering the environment) — no he podido recuperar el texto literal de esta subsección del PDF en este momento.]**
+
+#### 6. Equidad, Responsabilidad y Transparencia
+
+> El material insiste en que desplegar ML no es solo optimizar predicción: se automatizan **decisiones** que afectan a personas. Esto obliga a reconsiderar evaluación: la **accuracy rara vez es la métrica correcta** cuando importan los costes asimétricos de error y valores sociales.
+> 
+> También advierte sobre **feedback loops** en sistemas de decisión. Ejemplo de “predictive policing”, donde más patrullas → más delitos detectados → datos sesgados → el modelo refuerza la misma zona, generando “runaway feedback loops”.
+
+#### 7. Resumen de la Sección
+
+> Resumen explícito del material:
+> 
+> - Train y test pueden no venir de la misma distribución (**distribution shift**).
+>     
+> - **Riesgo** = esperanza de la pérdida sobre la población; **riesgo empírico** = media sobre train (aproximación práctica).
+>     
+> - Bajo supuestos adecuados, **covariate shift** y **label shift** pueden detectarse y corregirse; ignorarlo puede fallar en test.
+>     
+> - El entorno puede “recordar” acciones automatizadas y responder de formas inesperadas; hay que monitorizar sistemas en producción y asumir que modelo y entorno pueden quedar **entrelazados**.
+
+## D2DpL 5. Multilayer Perceptrons
+
+### I. Contexto del Capítulo y Objetivo
+
+#### 1. Qué Introduce Este Capítulo
+
+> El capítulo introduce la primera red “verdaderamente profunda” del curso: los **perceptrones multicapa (MLP)**, formados por **múltiples capas** de neuronas totalmente conectadas.  
+> Además de presentar la arquitectura, el material profundiza en: (i) **cómo se calculan los gradientes** en redes profundas (backprop), (ii) **estabilidad numérica e inicialización**, y (iii) el riesgo de **overfitting** y la relación con generalización (que se retoma más adelante en el capítulo, fuera de este fragmento).
+
+---
+
+### II. Perceptrones Multicapa
+
+#### 1. Motivación: Limitaciones de los Modelos Lineales
+
+> El material recuerda que softmax regression aplica una única transformación afín (más softmax) y que esto es suficiente solo si las etiquetas están relacionadas con los inputs por una relación aproximadamente afín.  
+> Señala que la linealidad implica supuestos fuertes (p. ej., **monotonía** por feature) y que en problemas como visión (gatos vs perros) la “importancia” de un píxel depende de su **contexto**, lo que hace inviable corregirlo con un simple preprocesado “a mano”.  
+> La idea clave: usar redes profundas para **aprender** (a la vez) una **representación** mediante capas ocultas y un predictor lineal encima.
+
+#### 2. Capas Ocultas y Por Qué Hace Falta No Linealidad
+
+> Un MLP con una capa oculta (de (h) unidades) puede escribirse con:  
+> [  
+> H = XW^{(1)} + b^{(1)},\qquad O = HW^{(2)} + b^{(2)}.  
+> ]  
+> pero el material remarca que así **no se gana expresividad**: una afín de una afín sigue siendo afín. De hecho, se puede “colapsar” la capa oculta:  
+> [  
+> O = (XW^{(1)} + b^{(1)})W^{(2)} + b^{(2)} = XW + b.  
+> ]  
+> Para que la arquitectura sea realmente más potente, hace falta aplicar una **función de activación no lineal** (\sigma) tras la parte afín:  
+> [  
+> H=\sigma(XW^{(1)}+b^{(1)}),\qquad O=HW^{(2)}+b^{(2)}.  
+> ]  
+> Esto ya no se puede colapsar a un modelo lineal.
+
+#### 3. Profundidad y Aproximación Universal
+
+> El material menciona resultados clásicos (p. ej., para redes de una capa oculta) que sugieren que, con suficientes nodos, se puede aproximar cualquier función, pero subraya que **aprender** esa función (encontrar pesos adecuados) es la parte difícil.  
+> También destaca que, aunque una sola capa oculta puede ser universal, muchas funciones se representan de forma más compacta con redes **más profundas** (no solo más anchas).
+
+#### 4. Funciones de Activación Presentadas
+
+##### 1) ReLU y pReLU
+
+> ReLU se define como:  
+> [  
+> \mathrm{ReLU}(x)=\max(x,0).  
+> ]  
+> El material discute su derivada (0 para (x<0), 1 para (x>0), y se adopta 0 en (x=0)) y motiva su uso por gradientes “bien comportados”, conectándolo con el problema de **vanishing gradients**.  
+> También presenta pReLU:  
+> [  
+> \mathrm{pReLU}(x)=\max(0,x)+\alpha\min(0,x).  
+> ]  
+
+##### 2) Sigmoid
+
+> La sigmoide “aplasta” (\mathbb{R}\to(0,1)):  
+> [  
+> \mathrm{sigmoid}(x)=\frac{1}{1+\exp(-x)}.  
+> ]  
+> El material la conecta con neuronas tipo umbral y con clasificación binaria (salida interpretable como probabilidad), pero advierte que en capas ocultas suele entrenar peor que ReLU porque su gradiente **se desvanece** para entradas grandes en valor absoluto.  
+> Da la derivada:  
+> [  
+> \frac{d}{dx}\mathrm{sigmoid}(x)=\mathrm{sigmoid}(x)\big(1-\mathrm{sigmoid}(x)\big).  
+> ]  
+
+##### 3) Tanh
+
+> Tanh “aplasta” a ((-1,1)):  
+> [  
+> \tanh(x)=\frac{1-\exp(-2x)}{1+\exp(-2x)},  
+> \qquad  
+> \frac{d}{dx}\tanh(x)=1-\tanh^2(x).  
+> ]  
+> El material comenta su simetría respecto al origen y que, como sigmoid, también sufre gradientes pequeños lejos de 0.
+
+#### 5. Resumen y Ejercicios de la Sección
+
+> El material cierra esta parte destacando: (i) sin no linealidades, apilar capas no aumenta expresividad; (ii) ReLU facilita optimización frente a sigmoid/tanh; (iii) existen activaciones modernas (menciona ejemplos) que pueden mejorar accuracy.  
+> Incluye ejercicios como: demostrar que redes lineales profundas no ganan poder expresivo, derivar pReLU y Swish, relacionar tanh y sigmoid, y discutir problemas de no linealidades que operan “por minibatch” (ej. batch norm).
+
+---
+
+### III. Implementación de Perceptrones Multicapa
+
+#### 1. Implementación Desde Cero
+
+> El material implementa un MLP para Fashion-MNIST con 784 entradas, 10 salidas y una capa oculta de 256 unidades; enfatiza que número de capas y anchura son **hiperparámetros**, y comenta que anchos potencias de 2 suelen ser eficientes por razones de hardware.  
+> También recuerda el uso de `nn.Parameter` para registrar tensores como parámetros que autograd debe trackear.
+
+```python
+class MLPScratch(d2l.Classifier):
+    def __init__(self, num_inputs, num_outputs, num_hiddens, lr, sigma=0.01):
+        super().__init__()
+        self.save_hyperparameters()
+        self.W1 = nn.Parameter(torch.randn(num_inputs, num_hiddens) * sigma)
+        self.b1 = nn.Parameter(torch.zeros(num_hiddens))
+        self.W2 = nn.Parameter(torch.randn(num_hiddens, num_outputs) * sigma)
+        self.b2 = nn.Parameter(torch.zeros(num_outputs))
+```
+
+> El material implementa ReLU “a mano” y define el `forward` reordenando imágenes a vectores (se ignora estructura espacial).
+
+```python
+def relu(X):
+    a = torch.zeros_like(X)
+    return torch.max(X, a)
+
+@d2l.add_to_class(MLPScratch)
+def forward(self, X):
+    X = X.reshape((-1, self.num_inputs))
+    H = relu(torch.matmul(X, self.W1) + self.b1)
+    return torch.matmul(H, self.W2) + self.b2
+```
+
+> El bucle de entrenamiento se reutiliza (misma mecánica que en softmax regression) usando `Trainer` y `fit`.
+
+```python
+model = MLPScratch(num_inputs=784, num_outputs=10, num_hiddens=256, lr=0.1)
+data = d2l.FashionMNIST(batch_size=256)
+trainer = d2l.Trainer(max_epochs=10)
+trainer.fit(model, data)
+```
+
+#### 2. Implementación Concisa con APIs de Alto Nivel
+
+> La versión concisa usa `nn.Sequential` con `Flatten`, `LazyLinear`, `ReLU` y otra `LazyLinear`.  
+> El material destaca que aquí no se escribe `forward` explícito: se hereda el `forward` del módulo base que invoca la secuencia de transformaciones.
+
+```python
+class MLP(d2l.Classifier):
+    def __init__(self, num_outputs, num_hiddens, lr):
+        super().__init__()
+        self.save_hyperparameters()
+        self.net = nn.Sequential(nn.Flatten(), nn.LazyLinear(num_hiddens),
+                                 nn.ReLU(), nn.LazyLinear(num_outputs))
+```
+
+#### 3. Resumen y Ejercicios de la Sección
+
+> El material concluye que pasar de una capa a varias es conceptualmente directo si reutilizas dataloader y entrenamiento, pero que “from scratch” se vuelve rápidamente engorroso por el seguimiento manual de parámetros (y complica optimizaciones del framework).  
+> Propone ejercicios: variar `num_hiddens`, añadir capas, estudiar efectos de learning rate y épocas, optimizar hiperparámetros conjuntamente, comparar rendimiento “framework vs scratch”, y explorar inicializaciones/activaciones.
+
+---
+
+### IV. Propagación Hacia Delante, Propagación Hacia Atrás y Grafos Computacionales
+
+#### 1. Forward Propagation con Variables Intermedias
+
+> El material define forward propagation como el cálculo y almacenamiento de variables intermedias desde entrada a salida. Para un MLP con una capa oculta (sin bias en la oculta, para simplificar):  
+> [  
+> z = W^{(1)}x,\qquad h=\phi(z),\qquad o=W^{(2)}h,\qquad L=\ell(o,y).  
+> ]  
+> Introduce además un término de regularización (\ell_2) con hiperparámetro (\lambda):  
+> [  
+> s=\frac{\lambda}{2}\big(|W^{(1)}|_F^2+|W^{(2)}|_F^2\big),\qquad J=L+s.  
+> ]  
+
+#### 2. Grafo Computacional
+
+> El material usa grafos computacionales para visualizar dependencias entre operadores y variables (variables como cuadrados y operadores como círculos), con flujo desde input (abajo-izquierda) a output (arriba-derecha).
+
+#### 3. Backpropagation y Regla de la Cadena
+
+> Backpropagation recorre el grafo en orden inverso aplicando la regla de la cadena.  
+> El material introduce un operador (\mathrm{prod}(\cdot,\cdot)) para representar “multiplicar derivadas” ocultando el detalle notacional (transposiciones, etc.).  
+> Para funciones (Y=f(X)) y (Z=g(Y)):  
+> [  
+> \frac{\partial Z}{\partial X}=\mathrm{prod}!\left(\frac{\partial Z}{\partial Y},\frac{\partial Y}{\partial X}\right).  
+> ]  
+> A partir de ahí deriva gradientes para (W^{(2)}) y (W^{(1)}) (incluyendo la contribución de la regularización):  
+> [  
+> \frac{\partial s}{\partial W^{(1)}}=\lambda W^{(1)},\qquad \frac{\partial s}{\partial W^{(2)}}=\lambda W^{(2)},  
+> ]  
+> [  
+> \frac{\partial J}{\partial W^{(2)}}=\frac{\partial J}{\partial o}h^\top+\lambda W^{(2)},  
+> \qquad  
+> \frac{\partial J}{\partial h} = (W^{(2)})^\top \frac{\partial J}{\partial o}.  
+> ]  
+> Como (\phi) es elemento a elemento, el material usa un producto elemento a elemento (denotado en el texto) para:  
+> [  
+> \frac{\partial J}{\partial z}=\frac{\partial J}{\partial h}\ \odot\ \phi'(z),  
+> \qquad  
+> \frac{\partial J}{\partial W^{(1)}}=\frac{\partial J}{\partial z}x^\top+\lambda W^{(1)}.  
+> ]  
+
+#### 4. Entrenamiento, Reutilización de Intermedios y Memoria
+
+> El material enfatiza que forward y backward dependen mutuamente: backward necesita valores intermedios de forward para evitar recomputar.  
+> Consecuencia: durante entrenamiento hay que **guardar** intermedios hasta completar backprop, por lo que entrenar requiere mucha más memoria que predecir; el consumo crece aproximadamente con número de capas y batch size, y esto puede llevar a errores de memoria (OOM) en redes profundas con batches grandes.
+
+#### 5. Resumen y Ejercicios de la Sección
+
+> Resumen: forward calcula y almacena intermedios; backprop calcula gradientes en orden inverso; entrenar alterna ambos y consume mucha memoria por el almacenamiento de intermedios.  
+> Ejercicios: dimensión de gradientes para entradas matriciales, añadir bias a la oculta y derivar ecuaciones, estimar huella de memoria, discutir segundas derivadas, y qué hacer si el grafo no cabe en GPU (partición vs minibatches más pequeños).
+
+---
+
+### V. Estabilidad Numérica e Inicialización
+
+#### 1. Gradientes que Desaparecen y Explotan
+
+> El material considera una red profunda de (L) capas y expresa la derivada como producto de muchas matrices (derivadas capa a capa). La idea central: al multiplicar muchos términos, los gradientes pueden volverse **muy pequeños** (vanishing) o **muy grandes** (exploding), análogo a problemas de underflow al multiplicar muchas probabilidades.  
+> Para vanishing gradients, destaca como culpable frecuente a **sigmoid**, cuyo gradiente se hace casi 0 para entradas grandes en valor absoluto; al encadenar muchas capas, a menos que se esté en la “zona Goldilocks” (inputs cerca de 0), el producto total tiende a 0. Esto motivó el uso de **ReLU** como opción por defecto en práctica.  
+> Para exploding gradients, ilustra que multiplicar muchas matrices aleatorias puede explotar, lo que haría inviable que un optimizador por gradiente converja.
+
+#### 2. Romper Simetrías en la Parametrización
+
+> El material explica una simetría por permutación en una capa oculta: si permutas unidades ocultas y ajustas pesos posteriores de forma coherente, representas la misma función.  
+> Problema práctico: si inicializas pesos de una capa oculta “todos iguales” (p. ej., constantes), entonces las activaciones serán iguales y los gradientes también, y el entrenamiento no romperá esa simetría: la capa se comporta como si tuviera una sola unidad.  
+> Nota del material: dropout (introducido después) sí podría romper esta simetría.
+
+#### 3. Inicialización de Parámetros y Xavier
+
+> El material propone mitigar los problemas anteriores con inicialización cuidadosa.  
+> Parte de analizar una capa fully-connected sin no linealidad:  
+> [  
+> o_i=\sum_{j=1}^{n_{in}} w_{ij}x_j,  
+> ]  
+> con pesos i.i.d. de media 0 y varianza (\sigma^2), e inputs de media 0 y varianza (\gamma^2). Entonces:  
+> [  
+> \mathbb{E}[o_i]=0,\qquad \mathrm{Var}[o_i]=n_{in}\sigma^2\gamma^2.  
+> ]  
+> Para mantener varianza estable en forward se sugiere (n_{in}\sigma^2\approx 1), y para backward aparece una condición análoga con (n_{out}\sigma^2\approx 1); como no se pueden satisfacer ambas a la vez, el material elige un compromiso:  
+> [  
+> \frac{1}{2}(n_{in}+n_{out})\sigma^2 = 1,  
+> \qquad  
+> \sigma=\sqrt{\frac{2}{n_{in}+n_{out}}}.  
+> ]  
+> Esto motiva la **inicialización Xavier** (Glorot & Bengio): muestrear de una Gaussiana con varianza (\sigma^2=\frac{2}{n_{in}+n_{out}}), o adaptar a uniforme usando que (\mathrm{Var}(\mathcal{U}(-a,a))=\frac{a^2}{3}), obteniendo:  
+> [  
+> \mathcal{U}!\left(-\sqrt{\frac{6}{n_{in}+n_{out}}},\ \sqrt{\frac{6}{n_{in}+n_{out}}}\right).  
+> ]  
+> El material avisa que el razonamiento asume ausencia de no linealidades (supuesto violable), pero que Xavier funciona bien en la práctica.
+
+#### 4. Más Allá y Resumen
+
+> El material indica que frameworks incluyen muchas heurísticas de inicialización y que sigue siendo un área activa (menciona ejemplos de escenarios especializados y trabajos que permiten entrenar redes extremadamente profundas con inicializaciones diseñadas).  
+> Resumen explícito: vanishing/exploding gradients son comunes; la inicialización (y aleatoriedad) es clave para controlar magnitudes y romper simetrías; Xavier busca estabilizar varianzas; ReLU ayuda con vanishing gradients y puede acelerar convergencia.
+
+#### 5. Ejercicios de la Sección
+
+> El material propone ejercicios como: diseñar otras simetrías que requieran romperse, discutir inicializaciones iguales en regresión lineal/softmax, buscar cotas analíticas sobre eigenvalores de productos de matrices, y explorar cómo corregir términos divergentes (menciona LARS como inspiración).

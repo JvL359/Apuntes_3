@@ -155,5 +155,3 @@ a += b # actualiza el objeto ya existente (más eficiente)
 #### 13. Loops
 > Ponemos tantos elementos como haya en el get item.
 
-
-### VI. 
