@@ -179,7 +179,7 @@ a, a.item(), float(a), int(a)
 > - Explicar y usar `shape`, `numel`, `reshape` (incluyendo `-1`).
 > - Leer y escribir con indexación/slicing (incluyendo asignación por rangos).
 > - Distinguir operaciones elemento a elemento, concatenación con `cat`, y saber qué hace `X.sum()`.
-> - Describir el procedimiento de broadcasting en dos pasos y reconocer el patrón ($3\times1 + 1\times2 \rightarrow 3\times2$).
+> - Describir el procedimiento de broadcasting en dos pasos y reconocer el patrón                               ($3\times1 + 1\times2 \rightarrow 3\times2$).
 > - Justificar por qué `+=` y `Y[:] = ...` ahorran memoria frente a `Y = Y + X` (según lo explicado con `id()`).
 > - Convertir entre PyTorch y NumPy y saber que comparten memoria (implicación: cuidado con in-place).
 

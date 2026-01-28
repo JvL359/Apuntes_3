@@ -1,2 +1,3 @@
 - [[Tema 1 - Language Models I]]
+- [[Tema 2 - Text Classification]]
 - [[Guía Docente - NLP]]

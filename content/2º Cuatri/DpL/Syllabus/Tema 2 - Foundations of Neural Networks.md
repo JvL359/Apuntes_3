@@ -1,22 +1,13 @@
 ## DpL-IGF 5. Machine Learning Basics - Maximum Likelihood Estimation
 ### I. Principio y Derivación de Máxima Verosimilitud
-
 #### 1. Motivación del Principio
-
 > El material plantea que, en vez de “adivinar” estimadores y luego analizar sesgo y varianza, interesa disponer de un **principio** que permita **derivar** funciones estimadoras “buenas” para distintos modelos; el principio más común es el de **máxima verosimilitud**.
-
 #### 2. Planteamiento y Definición del Estimador
-
-> Se considera un conjunto de (m) ejemplos (X={x^{(1)},\dots,x^{(m)}}) extraídos **independientemente** de la distribución verdadera (desconocida) (p_{\text{data}}(x)).  
-> Se define una familia paramétrica (p_{\text{model}}(x;\theta)) sobre el mismo espacio, indexada por (\theta).  
-> El estimador de máxima verosimilitud se define como:  
-> [  
-> \theta_{\text{ML}}=\arg\max_{\theta}; p_{\text{model}}(X;\theta)  
-> =\arg\max_{\theta}; \prod_{i=1}^{m} p_{\text{model}}(x^{(i)};\theta).  
-> ]
-
+> Se considera un conjunto de $m$ ejemplos $X={x^{(1)},\dots,x^{(m)}}$ extraídos **independientemente** de la distribución verdadera desconocida $p_{\text{data}}(x)$.  
+> Se define una familia paramétrica $p_{\text{model}}(x;\theta)$ sobre el mismo espacio, indexada por $\theta$.  
+> El estimador de máxima verosimilitud se define como: $$\theta_{\text{ML}}=\arg\max_{\theta}\left[p_{\text{model}}(X;\theta)\right]
+=\arg\max_{\theta}\left[\prod_{i=1}^{m} p_{\text{model}}\!\left(x^{(i)};\theta\right)\right]$$que se usa para ajustar los parámetros del modelo a los datos observados.
 #### 3. Log-Verosimilitud y Forma de Expectativa Empírica
-
 > El producto de muchas probabilidades es poco conveniente (por ejemplo, por **subdesbordamiento numérico**), así que el texto toma logaritmos para convertir el producto en suma sin cambiar el (\arg\max).  
 > [  
 > \theta_{\text{ML}}=\arg\max_{\theta}; \sum_{i=1}^{m}\log p_{\text{model}}(x^{(i)};\theta).  
