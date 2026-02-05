@@ -8,101 +8,56 @@
 > El estimador de máxima verosimilitud se define como: $$\theta_{\text{ML}}=\arg\max_{\theta}\left[p_{\text{model}}(X;\theta)\right]
 =\arg\max_{\theta}\left[\prod_{i=1}^{m} p_{\text{model}}\!\left(x^{(i)};\theta\right)\right]$$que se usa para ajustar los parámetros del modelo a los datos observados.
 #### 3. Log-Verosimilitud y Forma de Expectativa Empírica
-> El producto de muchas probabilidades es poco conveniente (por ejemplo, por **subdesbordamiento numérico**), así que el texto toma logaritmos para convertir el producto en suma sin cambiar el (\arg\max).  
-> [  
-> \theta_{\text{ML}}=\arg\max_{\theta}; \sum_{i=1}^{m}\log p_{\text{model}}(x^{(i)};\theta).  
-> ]  
-> Como el (\arg\max) no cambia al reescalar, se divide por (m) y se expresa como esperanza respecto a la distribución empírica (\hat{p}_{\text{data}}) definida por el training set:  
-> [  
-> \theta_{\text{ML}}=\arg\max_{\theta}; \mathbb{E}_{x\sim \hat{p}_{\text{data}}}\log p_{\text{model}}(x;\theta).  
-> ]
-
+> El producto de muchas probabilidades es poco conveniente (por ejemplo, por **subdesbordamiento numérico**), así que el texto toma logaritmos para convertir el producto en suma sin cambiar el $\arg\max$.
+> $\theta_{\text{ML}}=\arg\max_{\theta}\sum_{i=1}^{m}\log p_{\text{model}}\left(x^{(i)};\theta\right).$
+> Como el $\arg\max$ no cambia al reescalar, se divide por $m$ y se expresa como esperanza respecto a la distribución empírica $\hat{p}_{\text{data}}$ definida por el _training set_:
+> $\theta_{\text{ML}}=\arg\max_{\theta} \mathbb{E}_{x\sim \hat{p}_{\text{data}}}\log p_{\text{model}}(x;\theta).$
 #### 4. Interpretación con Divergencia KL y Entropía Cruzada
-
-> El material interpreta máxima verosimilitud como minimizar la disimilitud entre (\hat{p}_{\text{data}}) y (p_{\text{model}}) medida por la divergencia KL:  
-> [  
-> D_{\text{KL}}(\hat{p}_{\text{data}}|p_{\text{model}})  
-> =\mathbb{E}_{x\sim \hat{p}_{\text{data}}}\big[\log \hat{p}_{\text{data}}(x)-\log p_{\text{model}}(x)\big].  
-> ]  
-> Como el término (\mathbb{E}_{x\sim \hat{p}_{\text{data}}}[\log \hat{p}_{\text{data}}(x)]) no depende del modelo, minimizar KL equivale a minimizar:  
-> [  
-> -\mathbb{E}_{x\sim \hat{p}_{\text{data}}}\big[\log p_{\text{model}}(x)\big],  
-> ]  
+> El material interpreta máxima verosimilitud como minimizar la disimilitud entre $\hat{p}_{\text{data}}$ y $p_{\text{model}}$ medida por la divergencia KL:
+> $D_{\text{KL}}\left(\hat{p}_{\text{data}}\parallel p_{\text{model}}\right)=\mathbb{E}_{x\sim \hat{p}_{\text{data}}}\big[\log \hat{p}_{\text{data}}(x)-\log p_{\text{model}}(x)\big].$
+> Como el término $\mathbb{E}_{x\sim \hat{p}_{\text{data}}} \big[\log \hat{p}_{\text{data}}(x)\big]$ no depende del modelo, minimizar KL equivale a minimizar:
+> $-\mathbb{E}_{x\sim \hat{p}_{\text{data}}}\big[\log p_{\text{model}}(x)\big],$
 > que es equivalente a maximizar la log-verosimilitud empírica.  
 > El texto afirma que esto corresponde exactamente a minimizar la **entropía cruzada** entre distribuciones, y aclara que **cualquier** pérdida que sea una **log-verosimilitud negativa** es una entropía cruzada (no solo Bernoulli/softmax).  
 > También pone el ejemplo: el **MSE** es la entropía cruzada entre la distribución empírica y un **modelo Gaussiano**.
-
 #### 5. NLL en Software y Nota sobre Valores del Objetivo
-
 > El material señala que, aunque el (\theta) óptimo coincide maximizando verosimilitud o minimizando KL, los **valores** de las funciones objetivo difieren.  
 > En software, se suele formular como minimizar un coste: máxima verosimilitud se convierte en minimizar la **log-verosimilitud negativa (NLL)**, o equivalentemente minimizar la **entropía cruzada**.  
 > La perspectiva de KL ayuda porque KL tiene mínimo conocido 0, mientras que la NLL puede llegar a ser **negativa** cuando (x) es real-valuado.
 
----
-
 ### II. Log-Verosimilitud Condicional y Error Cuadrático Medio
-
 #### 1. Generalización a Probabilidades Condicionales
-
-> El material generaliza el estimador al caso en que se quiere estimar una probabilidad condicional (P(y\mid x;\theta)) para predecir (y) dado (x), que es el caso más común en aprendizaje supervisado.  
-> Si (X) son inputs y (Y) targets observados:  
-> [  
-> \theta_{\text{ML}}=\arg\max_{\theta}; P(Y\mid X;\theta).  
-> ]  
+> El material generaliza el estimador al caso en que se quiere estimar una probabilidad condicional $P(y\mid x;\theta)$ para predecir $y$ dado $x$, que es el caso más común en aprendizaje supervisado.  
+> Si $X$ son inputs y $Y$ targets observados:  
+> $\theta_{\text{ML}}=\arg\max_{\theta}; P(Y\mid X;\theta).$   
 > Asumiendo ejemplos i.i.d., se descompone como:  
-> [  
-> \theta_{\text{ML}}=\arg\max_{\theta}; \sum_{i=1}^{m}\log P(y^{(i)}\mid x^{(i)};\theta).  
-> ]
-
+> $\theta_{\text{ML}}=\arg\max_{\theta}; \sum_{i=1}^{m}\log P(y^{(i)}\mid x^{(i)};\theta).$  
 #### 2. Ejemplo: Regresión Lineal como Máxima Verosimilitud
-
-> El texto reinterpreta la regresión lineal (antes motivada como minimizar MSE “más o menos arbitrariamente”) como un procedimiento de máxima verosimilitud: el modelo produce una distribución condicional (p(y\mid x)), no solo una predicción puntual (\hat{y}).  
+> El texto reinterpreta la regresión lineal (antes motivada como minimizar MSE “más o menos arbitrariamente”) como un procedimiento de máxima verosimilitud: el modelo produce una distribución condicional $p(y\mid x)$, no solo una predicción puntual $\hat{y}$.  
 > Para recuperar el mismo algoritmo, se define:  
-> [  
-> p(y\mid x)=\mathcal{N}\big(y;\hat{y}(x;w),\sigma^{2}\big),  
-> ]  
-> donde (\hat{y}(x;w)) predice la media Gaussiana y (\sigma^{2}) se fija como constante elegida por el usuario.
-
+> $p(y\mid x)=\mathcal{N}\big(y;\hat{y}(x;w),\sigma^{2}\big)$,  
+> donde $\hat{y}(x;w)$ predice la media Gaussiana y $\sigma^{2}$ se fija como constante elegida por el usuario.
 #### 3. Relación Entre Log-Verosimilitud y MSE
-
-> Con i.i.d., la log-verosimilitud condicional es (\sum_{i=1}^{m}\log p(y^{(i)}\mid x^{(i)};\theta)).  
+> Con i.i.d., la log-verosimilitud condicional es $\sum_{i=1}^{m}\log p(y^{(i)}\mid x^{(i)};\theta)$.  
 > En el caso Gaussiano, el material la desarrolla como:  
-> [  
-> \sum_{i=1}^{m}\log p(y^{(i)}\mid x^{(i)};\theta)  
-> = -m\log\sigma - \frac{m}{2}\log(2\pi);-;\sum_{i=1}^{m}\frac{\lVert \hat{y}^{(i)}-y^{(i)}\rVert^{2}}{2\sigma^{2}}.  
-> ]  
+> $\sum_{i=1}^{m}\log p(y^{(i)}\mid x^{(i)};\theta) = -m\log\sigma - \frac{m}{2}\log(2\pi) - \sum_{i=1}^{m}\frac{\lVert \hat{y}^{(i)}-y^{(i)}\rVert^{2}}{2\sigma^{2}}.$  
 > Y compara con el error cuadrático medio de entrenamiento:  
-> [  
-> \mathrm{MSE}_{\text{train}}=\frac{1}{m}\sum_{i=1}^{m}\lVert \hat{y}^{(i)}-y^{(i)}\rVert^{2}.  
-> ]  
-> Conclusión del material: maximizar la log-verosimilitud respecto a (w) produce el **mismo** estimado de (w) que minimizar MSE; los criterios tienen valores distintos pero el **óptimo está en el mismo punto**.
-
----
+> $\mathrm{MSE}_{\text{train}}=\frac{1}{m}\sum_{i=1}^{m}\lVert \hat{y}^{(i)}-y^{(i)}\rVert^{2}.$  
+> Conclusión del material: maximizar la log-verosimilitud respecto a $w$ produce el **mismo** estimado de $w$ que minimizar MSE; los criterios tienen valores distintos pero el **óptimo está en el mismo punto**.
 
 ### III. Propiedades de Máxima Verosimilitud
-
 #### 1. Optimalidad Asintótica y Tasa de Convergencia
-
-> El material afirma que el principal atractivo del estimador de máxima verosimilitud es que puede mostrarse “el mejor” **asintóticamente** ((m\to\infty)) en términos de su **tasa de convergencia** al crecer (m).
-
+> El material afirma que el principal atractivo del estimador de máxima verosimilitud es que puede mostrarse “el mejor” **asintóticamente** $(m\to\infty)$ en términos de su **tasa de convergencia** al crecer $m$.
 #### 2. Consistencia y Condiciones
-
 > Bajo condiciones apropiadas, el estimador de máxima verosimilitud es **consistente**: cuando el número de ejemplos tiende a infinito, el estimado del parámetro converge al valor verdadero.  
 > El texto lista estas condiciones:
-> 
-> - La distribución verdadera (p_{\text{data}}) debe estar dentro de la familia del modelo (p_{\text{model}}(\cdot;\theta)).
->     
-> - (p_{\text{data}}) debe corresponder a **exactamente un** valor de (\theta); si no, máxima verosimilitud puede recuperar el (p_{\text{data}}) correcto pero no determinar qué (\theta) lo generó.
->     
-
+> - La distribución verdadera $p_{\text{data}}$ debe estar dentro de la familia del modelo $p_{\text{model}}(\cdot;\theta)$.
+> - $p_{\text{data}}$ debe corresponder a **exactamente un** valor de $\theta$; si no, máxima verosimilitud puede recuperar el $p_{\text{data}}$ correcto pero no determinar qué $\theta$ lo generó.
 #### 3. Eficiencia Estadística y Cota de Cramér-Rao
-
-> El material indica que hay otros principios inductivos además de máxima verosimilitud; muchos también son consistentes, pero pueden diferir en **eficiencia estadística** (por ejemplo, lograr menor error de generalización para un (m) fijo, o requerir menos ejemplos para un nivel dado).  
-> En el caso paramétrico, la eficiencia se estudia midiendo cercanía al parámetro verdadero mediante el **MSE esperado del parámetro** (esperanza sobre (m) muestras de entrenamiento).  
-> Para (m) grande, la **cota inferior de Cramér-Rao** (Rao, 1945; Cramér, 1946) muestra que ningún estimador consistente tiene un MSE menor que el de máxima verosimilitud.
-
+> El material indica que hay otros principios inductivos además de máxima verosimilitud; muchos también son consistentes, pero pueden diferir en **eficiencia estadística** (por ejemplo, lograr menor error de generalización para un $m$ fijo, o requerir menos ejemplos para un nivel dado).  
+> En el caso paramétrico, la eficiencia se estudia midiendo cercanía al parámetro verdadero mediante el **MSE esperado del parámetro** (esperanza sobre $m$ muestras de entrenamiento).  
+> Para $m$ grande, la **cota inferior de Cramér-Rao** (Rao, 1945; Cramér, 1946) muestra que ningún estimador consistente tiene un MSE menor que el de máxima verosimilitud.
 #### 4. Implicación Práctica y Regularización con Pocos Datos
-
 > Por consistencia y eficiencia, el material concluye que máxima verosimilitud suele considerarse el estimador preferido en _machine learning_.  
 > Si el número de ejemplos es suficientemente pequeño como para inducir **sobreajuste**, se pueden usar estrategias de **regularización** (p. ej., _weight decay_) para obtener una versión **sesgada** de máxima verosimilitud con **menor varianza** cuando los datos de entrenamiento son limitados.
 
@@ -111,350 +66,156 @@
 ## DpL-IGF 6. Deep Feedforward Networks - Bernouilli & Multinouilli Ouptut Distribution
 
 ### I. Sigmoid Units for Bernoulli Output Distributions
-
 #### 1. Problema: Predecir una Variable Binaria con una Distribución Bernoulli
-
-> El material plantea el caso de tareas donde hay que predecir una variable binaria (y) (p. ej., clasificación con dos clases) y propone definir una **distribución Bernoulli** sobre (y) condicionada en (x).  
-> Una Bernoulli queda determinada por un único número: la red solo necesita predecir (P(y=1\mid x)), que debe estar en ([0,1]).
-
+> El material plantea el caso de tareas donde hay que predecir una variable binaria $y$ (clasificación con dos clases) y propone definir una **distribución Bernoulli** sobre $y$ condicionada en $x$.  
+> Una Bernoulli queda determinada por un único número: la red solo necesita predecir $P(y=1\mid x)$, que debe estar en $[0,1]$.
 #### 2. Por Qué No Usar una Unidad Lineal Recortada
-
 > El texto considera usar una unidad lineal y **recortarla** para forzar una probabilidad válida:  
-> [  
-> P(y=1\mid x)=\max{0,\min{1,w^\top h+b}}.  
-> ]  
-> Aunque esto define una distribución condicional válida, el material advierte que entrenar con descenso por gradiente sería inefectivo: cuando (w^\top h+b) cae fuera de ([0,1]), el gradiente del output respecto a los parámetros se vuelve **0**, y el aprendizaje pierde señal para mejorar.
-
+> $P(y=1\mid x)=\max{0,\min{1,w^\top h+b}}$.   
+> Aunque esto define una distribución condicional válida, el material advierte que entrenar con descenso por gradiente sería inefectivo: cuando $w^\top h+b$ cae fuera de $[0,1]$, el gradiente del output respecto a los parámetros se vuelve **0**, y el aprendizaje pierde señal para mejorar.
 #### 3. Unidad Sigmoide y Variable Logit
-
 > La alternativa recomendada es usar **salida sigmoide** junto con máxima verosimilitud:  
-> [  
-> \hat{y}=\sigma(w^\top h+b).  
-> ]  
-> El material descompone la operación en dos pasos: primero una capa lineal produce (z=w^\top h+b), luego la sigmoide convierte (z) en una probabilidad.  
-> El texto motiva la sigmoide construyendo una distribución no normalizada (\tilde{P}(y)) con log-probabilidades lineales en (y) y (z), exponenciando y normalizando para obtener una Bernoulli controlada por una transformación sigmoidal de (z):  
-> [  
-> \log \tilde{P}(y)=yz,\quad \tilde{P}(y)=\exp(yz),\quad  
-> P(y)=\frac{\exp(yz)}{\sum_{y'=0}^{1}\exp(y'z)},\quad  
-> P(y)=\sigma((2y-1)z).  
-> ]  
+> $\hat{y}=\sigma(w^\top h+b)$.  
+> El material descompone la operación en dos pasos: primero una capa lineal produce $z=w^\top h+b$, luego la sigmoide convierte $z$ en una probabilidad.  
+> El texto motiva la sigmoide construyendo una distribución no normalizada $\tilde{P}(y)$ con log-probabilidades lineales en $y$ y $z$, exponenciando y normalizando para obtener una Bernoulli controlada por una transformación sigmoidal de $z$:  
+> $\log \tilde{P}(y)=yz,\quad \tilde{P}(y)=\exp(yz),\quad P(y)=\frac{\exp(yz)}{\sum_{y'=0}^{1}\exp(y'z)},\quad P(y)=\sigma((2y-1)z).$  
 > El texto indica que las distribuciones basadas en “exponenciar y normalizar” son comunes en modelado estadístico, y que (z) (que define la distribución binaria) se denomina **logit**.
-
 #### 4. Máxima Verosimilitud y Pérdida en Forma de Softplus
-
-> El material subraya que esta parametrización en _log-space_ encaja de forma natural con máxima verosimilitud porque la pérdida (-\log P(y\mid x)) “deshace” el (\exp) asociado a la sigmoide.  
+> El material subraya que esta parametrización en _log-space_ encaja de forma natural con máxima verosimilitud porque la pérdida $-\log P(y\mid x)$ “deshace” el $\exp$ asociado a la sigmoide.  
 > Para una Bernoulli parametrizada con sigmoide, la pérdida de máxima verosimilitud queda:  
-> [  
-> J(\theta)=-\log P(y\mid x)  
-> =-\log \sigma((2y-1)z)  
-> =\zeta((1-2y)z),  
-> ]  
-> donde (\zeta) es la función **softplus** (usando propiedades citadas por el material).
-
+> $J(\theta)=-\log P(y\mid x) =- \log \sigma((2y-1)z) = \zeta((1-2y)z)$, donde $\zeta$ es la función **softplus** (usando propiedades citadas por el material).
 #### 5. Saturación y Gradientes: Por Qué NLL Es Preferible a MSE
-
-> Al reescribir la pérdida con softplus, el material explica que la saturación solo ocurre cuando ((1-2y)z) es muy negativo, es decir, **solo cuando el modelo ya acierta**:
-> 
-> - (y=1) y (z) muy positivo, o
->     
-> - (y=0) y (z) muy negativo.  
->     Cuando (z) tiene el signo incorrecto, el argumento ((1-2y)z) se simplifica a (|z|); para (|z|) grande con signo incorrecto, softplus se aproxima a (|z|) y su derivada respecto a (z) se aproxima a (\mathrm{sign}(z)), por lo que **no reduce** el gradiente incluso si (z) es “extremadamente incorrecto”.  
->     El texto contrasta esto con usar otras pérdidas (p. ej., MSE): la pérdida puede saturar cada vez que (\sigma(z)) satura (hacia 0 o 1), haciendo que el gradiente se vuelva demasiado pequeño **tanto si el modelo acierta como si falla**. Por eso, el material afirma que máxima verosimilitud es “casi siempre” la opción preferida para entrenar salidas sigmoides.
->     
-
+> Al reescribir la pérdida con softplus, el material explica que la saturación solo ocurre cuando $(1-2y)z$  es muy negativo, es decir, **solo cuando el modelo ya acierta**:
+> - $y=1$ y $z$ muy positivo, o
+> - $y=0$ y $z$ muy negativo.  
+>     Cuando $z$ tiene el signo incorrecto, el argumento $(1-2y)z$ se simplifica a $|z|$; para $|z|$ grande con signo incorrecto, softplus se aproxima a $|z|$ y su derivada respecto a $z$ se aproxima a $\mathrm{sign}(z)$, por lo que **no reduce** el gradiente incluso si $z$ es “extremadamente incorrecto”.  
+>     El texto contrasta esto con usar otras pérdidas (p. ej., MSE): la pérdida puede saturar cada vez que $\sigma(z)$ satura (hacia 0 o 1), haciendo que el gradiente se vuelva demasiado pequeño **tanto si el modelo acierta como si falla**. Por eso, el material afirma que máxima verosimilitud es “casi siempre” la opción preferida para entrenar salidas sigmoides.
 #### 6. Nota Numérica: Mejor Expresar la NLL en Función de (z)
+> El material añade que $\log(\sigma(z))$ está bien definido y es finito porque $\sigma(z)\in(0,1)$ (intervalo abierto).  
+> Aun así, en implementaciones software recomienda escribir la **log-verosimilitud negativa** como función de $z$ no como función de $\hat{y}=\sigma(z)): si la sigmoide “underflow” a 0, entonces $\log \hat{y}$ da $-\infty$.
 
-> El material añade que (\log(\sigma(z))) está bien definido y es finito porque (\sigma(z)\in(0,1)) (intervalo abierto).  
-> Aun así, en implementaciones software recomienda escribir la **log-verosimilitud negativa** como función de (z), no como función de (\hat{y}=\sigma(z)): si la sigmoide “underflow” a 0, entonces (\log \hat{y}) da (-\infty).
+### II. Softmax Units for Multinoulli Output Distributions
+#### 1. Cuándo Aparece Softmax y Qué Generaliza
+> El material introduce softmax para representar una distribución sobre una variable discreta con (n) valores posibles, y lo presenta como una generalización de la sigmoide (usada para el caso binario).  
+> Indica que softmax se usa principalmente como salida de un clasificador para modelar probabilidades sobre (n) clases, y más raramente dentro del modelo si se quiere que el modelo elija entre (n) opciones para alguna variable interna.
+#### 2. De Bernoulli a Multinoulli: Vector de Probabilidades y Normalización
+> En el caso binario se producía un único número (\hat{y}=P(y=1\mid x)) y se prefería predecir un logit $z=\log \tilde{P}(y=1\mid x)$ para luego exponenciar y normalizar.  
+> Para generalizar al caso con (n) valores, el modelo debe producir un vector $\hat{\mathbf{y}}$ con $\hat{y}_i=P(y=i\mid x)$, donde cada componente está en $[0,1]$ y además $\sum_i \hat{y}_i=1$.  
+> El material aplica el mismo esquema: una capa lineal predice log-probabilidades no normalizadas y luego softmax exponencia y normaliza:  
+> $\mathbf{z}=W^\top h+b,\quad z_i=\log \tilde{P}(y=i\mid x), \quad \mathrm{softmax}(\mathbf{z})_i=\frac{\exp(z_i)}{\sum_j \exp(z_j)}.$  
+#### 3. Log-Softmax y Por Qué Funciona Bien con Máxima Verosimilitud
+> Para máxima log-verosimilitud con objetivo $y=i$, se maximiza $\log P(y=i;\mathbf{z})=\log \mathrm{softmax}(\mathbf{z})_i$.  
+> El texto destaca que definir softmax con $\exp$ es natural porque el $\log$ del log-likelihood “deshace” ese $\exp$:  $\log \mathrm{softmax}(\mathbf{z})_i = z_i - \log \sum_j \exp(z_j)$.  
+> El material usa esta forma para argumentar sobre gradientes: el término $z_i$ contribuye directamente al coste y **no puede saturar**, así que el aprendizaje puede progresar incluso si la contribución del segundo término se vuelve muy pequeña.  
+> También da intuición del segundo término aproximando $\log \sum_j \exp(z_j)\approx \max_j z_j$, y concluye que la NLL penaliza con fuerza la predicción incorrecta más “activa”. Si la clase correcta ya tiene el mayor $z$, los términos se cancelan aproximadamente y el ejemplo aporta poco coste.
+#### 4. Qué Aprende Softmax Bajo Máxima Verosimilitud Sin Regularizar
+> El material afirma que, globalmente, la máxima verosimilitud sin regularizar empuja al modelo a que softmax prediga la fracción de cuentas observada en el training set (condicionada a $x$):  $$\mathrm{softmax}(\mathbf{z}(x;\theta))_i \approx \frac{\sum_{j=1}^{m}\mathbf{1}_{y^{(j)}=i,\ x^{(j)}=x}} {\sum_{j=1}^{m}\mathbf{1}_{x^{(j)}=x}}$$Lo justifica diciendo que máxima verosimilitud es un estimador consistente si la familia de modelos puede representar la distribución de entrenamiento; en la práctica, capacidad limitada y optimización imperfecta hacen que solo se aproxime.
+#### 5. Por Qué Otras Pérdidas (p. ej., MSE) Funcionan Peor con Softmax
+> El texto señala que muchas funciones objetivo distintas de la log-verosimilitud no funcionan tan bien con softmax: si no usan un $\log$ para “deshacer” el $\exp$, cuando el argumento de $\exp$ es muy negativo el gradiente puede desaparecer y el modelo deja de aprender.  
+> En particular, el material afirma que el error cuadrático es una mala pérdida para unidades softmax y puede fallar incluso cuando el modelo hace predicciones incorrectas con alta confianza (citando Bridle, 1990).
+#### 6. Saturación de Softmax y Variante Numéricamente Estable
+> Como la sigmoide, softmax puede saturar, pero aquí la saturación depende de que las diferencias entre entradas se vuelvan extremas.  
+> El material destaca una propiedad clave: softmax es invariante a sumar la misma constante a todos los inputs: $$\mathrm{softmax}(\mathbf{z})=\mathrm{softmax}(\mathbf{z}+c)$$Con esa invariancia deriva una forma numéricamente estable: $$\mathrm{softmax}(\mathbf{z})=\mathrm{softmax}(\mathbf{z}-\max_i z_i)$$Usando esta reformulación, el texto describe la saturación: un output $\mathrm{softmax}(\mathbf{z})_i$ tiende a 1 cuando $z_i$ es el máximo y está muy por encima del resto; y tiende a 0 cuando $z_i$ no es máximo y el máximo es mucho mayor.
+#### 7. Parametrización: Versión Sobreparametrizada vs. Restringida
+> El material indica dos maneras de producir $\mathbf{z}$: la más común es que una capa previa produzca todos los elementos de $\mathbf{z}$ (p. ej., $\mathbf{z}=W^\top h+b)$.  
+> Señala que esto **sobreparametriza** la distribución: la restricción de que las probabilidades suman 1 implica que bastan $n-1$ parámetros; se podría fijar un elemento, por ejemplo imponer $z_n=0$.  
+> También afirma que definir $P(y=1\mid x)=\sigma(z)$ equivale a definir $P(y=1\mid x)=\mathrm{softmax}(\mathbf{z})_1$ con un $\mathbf{z}$ bidimensional y $z_1=0$.  
+> Ambas formulaciones describen el mismo conjunto de distribuciones pero con dinámicas de aprendizaje distintas; en la práctica suele haber poca diferencia y es más simple implementar la versión sobreparametrizada.
+#### 8. Intuición Extra del Texto: Competencia y Nombre “Softmax”
+> Desde un punto de vista neurocientífico, el material interpreta softmax como un mecanismo de “competencia” porque las salidas suman 1: subir una implica bajar otras, análogo a la inhibición lateral; en el extremo se vuelve tipo _winner-take-all_.  
+> El texto comenta que el nombre puede confundir: está más relacionado con $\arg\max$ que con $\max$; “soft” viene de que softmax es continua y diferenciable, a diferencia de $\arg\max$ (one-hot), y menciona que podría llamarse “softargmax”, pero el nombre actual es convención arraigada.
 
 ---
 
-### II. Softmax Units for Multinoulli Output Distributions
-
-#### 1. Cuándo Aparece Softmax y Qué Generaliza
-
-> El material introduce softmax para representar una distribución sobre una variable discreta con (n) valores posibles, y lo presenta como una generalización de la sigmoide (usada para el caso binario).  
-> Indica que softmax se usa principalmente como salida de un clasificador para modelar probabilidades sobre (n) clases, y más raramente dentro del modelo si se quiere que el modelo elija entre (n) opciones para alguna variable interna.
-
-#### 2. De Bernoulli a Multinoulli: Vector de Probabilidades y Normalización
-
-> En el caso binario se producía un único número (\hat{y}=P(y=1\mid x)) y se prefería predecir un logit (z=\log \tilde{P}(y=1\mid x)) para luego exponenciar y normalizar.  
-> Para generalizar al caso con (n) valores, el modelo debe producir un vector (\hat{\mathbf{y}}) con (\hat{y}_i=P(y=i\mid x)), donde cada componente está en ([0,1]) y además (\sum_i \hat{y}_i=1).  
-> El material aplica el mismo esquema: una capa lineal predice log-probabilidades no normalizadas y luego softmax exponencia y normaliza:  
-> [  
-> \mathbf{z}=W^\top h+b,\quad z_i=\log \tilde{P}(y=i\mid x),  
-> ]  
-> [  
-> \mathrm{softmax}(\mathbf{z})_i=\frac{\exp(z_i)}{\sum_j \exp(z_j)}.  
-> ]
-
-#### 3. Log-Softmax y Por Qué Funciona Bien con Máxima Verosimilitud
-
-> Para máxima log-verosimilitud con objetivo (y=i), se maximiza (\log P(y=i;\mathbf{z})=\log \mathrm{softmax}(\mathbf{z})_i).  
-> El texto destaca que definir softmax con (\exp) es natural porque el (\log) del log-likelihood “deshace” ese (\exp):  
-> [  
-> \log \mathrm{softmax}(\mathbf{z})_i = z_i - \log \sum_j \exp(z_j).  
-> ]  
-> El material usa esta forma para argumentar sobre gradientes: el término (z_i) contribuye directamente al coste y **no puede saturar**, así que el aprendizaje puede progresar incluso si la contribución del segundo término se vuelve muy pequeña.  
-> También da intuición del segundo término aproximando (\log \sum_j \exp(z_j)\approx \max_j z_j), y concluye que la NLL penaliza con fuerza la predicción incorrecta más “activa”. Si la clase correcta ya tiene el mayor (z), los términos se cancelan aproximadamente y el ejemplo aporta poco coste.
-
-#### 4. Qué Aprende Softmax Bajo Máxima Verosimilitud Sin Regularizar
-
-> El material afirma que, globalmente, la máxima verosimilitud sin regularizar empuja al modelo a que softmax prediga la fracción de cuentas observada en el training set (condicionada a (x)):  
-> [  
-> \mathrm{softmax}(\mathbf{z}(x;\theta))_i \approx  
-> \frac{\sum_{j=1}^{m}\mathbf{1}_{y^{(j)}=i,\ x^{(j)}=x}}  
-> {\sum_{j=1}^{m}\mathbf{1}_{x^{(j)}=x}}.  
-> ]  
-> Lo justifica diciendo que máxima verosimilitud es un estimador consistente si la familia de modelos puede representar la distribución de entrenamiento; en la práctica, capacidad limitada y optimización imperfecta hacen que solo se aproxime.
-
-#### 5. Por Qué Otras Pérdidas (p. ej., MSE) Funcionan Peor con Softmax
-
-> El texto señala que muchas funciones objetivo distintas de la log-verosimilitud no funcionan tan bien con softmax: si no usan un (\log) para “deshacer” el (\exp), cuando el argumento de (\exp) es muy negativo el gradiente puede desaparecer y el modelo deja de aprender.  
-> En particular, el material afirma que el error cuadrático es una mala pérdida para unidades softmax y puede fallar incluso cuando el modelo hace predicciones incorrectas con alta confianza (citando Bridle, 1990).
-
-#### 6. Saturación de Softmax y Variante Numéricamente Estable
-
-> Como la sigmoide, softmax puede saturar, pero aquí la saturación depende de que las diferencias entre entradas se vuelvan extremas.  
-> El material destaca una propiedad clave: softmax es invariante a sumar la misma constante a todos los inputs:  
-> [  
-> \mathrm{softmax}(\mathbf{z})=\mathrm{softmax}(\mathbf{z}+c).  
-> ]  
-> Con esa invariancia deriva una forma numéricamente estable:  
-> [  
-> \mathrm{softmax}(\mathbf{z})=\mathrm{softmax}(\mathbf{z}-\max_i z_i).  
-> ]  
-> Usando esta reformulación, el texto describe la saturación: un output (\mathrm{softmax}(\mathbf{z})_i) tiende a 1 cuando (z_i) es el máximo y está muy por encima del resto; y tiende a 0 cuando (z_i) no es máximo y el máximo es mucho mayor.
-
-#### 7. Parametrización: Versión Sobreparametrizada vs. Restringida
-
-> El material indica dos maneras de producir (\mathbf{z}): la más común es que una capa previa produzca todos los elementos de (\mathbf{z}) (p. ej., (\mathbf{z}=W^\top h+b)).  
-> Señala que esto **sobreparametriza** la distribución: la restricción de que las probabilidades suman 1 implica que bastan (n-1) parámetros; se podría fijar un elemento, por ejemplo imponer (z_n=0).  
-> También afirma que definir (P(y=1\mid x)=\sigma(z)) equivale a definir (P(y=1\mid x)=\mathrm{softmax}(\mathbf{z})_1) con un (\mathbf{z}) bidimensional y (z_1=0).  
-> Ambas formulaciones describen el mismo conjunto de distribuciones pero con dinámicas de aprendizaje distintas; en la práctica suele haber poca diferencia y es más simple implementar la versión sobreparametrizada.
-
-#### 8. Intuición Extra del Texto: Competencia y Nombre “Softmax”
-
-> Desde un punto de vista neurocientífico, el material interpreta softmax como un mecanismo de “competencia” porque las salidas suman 1: subir una implica bajar otras, análogo a la inhibición lateral; en el extremo se vuelve tipo _winner-take-all_.  
-> El texto comenta que el nombre puede confundir: está más relacionado con (\arg\max) que con (\max); “soft” viene de que softmax es continua y diferenciable, a diferencia de (\arg\max) (one-hot), y menciona que podría llamarse “softargmax”, pero el nombre actual es convención arraigada.
-
 ## D2DpL 3. Linear Neural Networks for Regression - Linear Regression y Generalización
-
 ### I. Regresión Lineal
-
 #### 1. Problema de Regresión y Terminología Básica
-
 > La regresión aparece cuando queremos **predecir un valor numérico** (p. ej., precios, duración de estancia hospitalaria, demanda).  
 > En el ejemplo del material, se predice el **precio de una casa** a partir de **área** y **edad**.  
 > Terminología:
-> 
 > - Un **training set** es el dataset de entrenamiento.
->     
 > - Cada fila es un **example** (data point/instance/sample).
->     
 > - Lo que se predice es la **label** (target).
->     
 > - Las variables de entrada son **features** (covariates).
->     
-
 #### 2. Supuestos del Modelo
-
 > El material presenta dos supuestos típicos:
-> 
-> - La relación entre features (x) y target (y) es **aproximadamente lineal**, en el sentido de que la media condicional (E[Y\mid X=x]) es una suma ponderada de las features.
->     
+> - La relación entre features $x$ y target $y$ es **aproximadamente lineal**, en el sentido de que la media condicional $E[Y\mid X=x]$ es una suma ponderada de las features.
 > - El ruido de observación es “bien comportado”, siguiendo una **distribución Gaussiana**.
->     
-
 #### 3. Modelo Lineal
-
-> Modelo en forma “larga” (ejemplo de precio):  
-> [  
-> \text{price}=w_{\text{area}}\cdot \text{area}+w_{\text{age}}\cdot \text{age}+b.  
-> ]  
-> Interpretación:
-> 
+> Modelo en forma “larga” (ejemplo de precio):  $$\text{price}=w_{\text{area}}\cdot \text{area}+w_{\text{age}}\cdot \text{age}+b$$Interpretación:
 > - Los **weights** determinan la influencia de cada feature.
->     
 > - El **bias** permite representar funciones afines generales (no solo rectas que pasan por el origen).  
->     Forma vectorial para (d) features:  
->     [  
->     \hat{y}=w^\top x+b.  
->     ]  
->     Para (n) ejemplos (matriz de diseño (X\in\mathbb{R}^{n\times d})):  
->     [  
->     \hat{y}=Xw+b.  
->     ]
->     
-
+>     Forma vectorial para $d$ features:  
+>     $\hat{y}=w^\top x+b$ 
+>     Para $n$ ejemplos (matriz de diseño $X\in\mathbb{R}^{n\times d}$):  
+>     $\hat{y}=Xw+b$     
 #### 4. Función de Pérdida y Objetivo de Entrenamiento
-
-> La pérdida más común en regresión es el **error cuadrático**. Para el ejemplo (i):  
-> [  
-> \ell^{(i)}(w,b)=\frac{1}{2}\big(\hat{y}^{(i)}-y^{(i)}\big)^2.  
-> ]  
-> El factor (\tfrac{1}{2}) se usa por conveniencia notacional al derivar.  
-> La pérdida promedio en el dataset:  
-> [  
-> L(w,b)=\frac{1}{n}\sum_{i=1}^{n}\frac{1}{2}\big(w^\top x^{(i)}+b-y^{(i)}\big)^2.  
-> ]  
-> Objetivo: encontrar ((w^*,b^*)) que minimicen (L(w,b)).  
+> La pérdida más común en regresión es el **error cuadrático**. Para el ejemplo (i):  $$\ell^{(i)}(w,b)=\frac{1}{2}\big(\hat{y}^{(i)}-y^{(i)}\big)^2$$El factor $\tfrac{1}{2}$ se usa por conveniencia notacional al derivar.  
+> La pérdida promedio en el dataset: $$L(w,b)=\frac{1}{n}\sum_{i=1}^{n}\frac{1}{2}\big(w^\top x^{(i)}+b-y^{(i)}\big)^2$$Objetivo: encontrar $(w^*,b^*)$ que minimicen $L(w,b)$.  
 > El material advierte que la penalización cuadrática hace que errores grandes contribuyan mucho más (beneficio: evita grandes errores; riesgo: sensibilidad a anomalías).
-
 #### 5. Solución Analítica (Ecuaciones Normales)
-
-> A diferencia de muchos modelos posteriores, aquí puede obtenerse una solución analítica. El material indica que se puede incorporar (b) en (w) añadiendo una columna de 1s a (X) y minimizar (\lVert y-Xw\rVert^2).  
-> Si (X) tiene **rango completo**, hay un único punto crítico que coincide con el mínimo global. Derivando e igualando a cero:  
-> [  
-> \partial_w\lVert y-Xw\rVert^2=2X^\top(Xw-y)=0  
-> \quad\Rightarrow\quad  
-> X^\top y=X^\top X w.  
-> ]  
-> Solución:  
-> [  
-> w^*=(X^\top X)^{-1}X^\top y,  
-> ]  
-> que es única si (X^\top X) es invertible (columnas de (X) linealmente independientes).
-
+> A diferencia de muchos modelos posteriores, aquí puede obtenerse una solución analítica. El material indica que se puede incorporar $b$ en $w$ añadiendo una columna de 1s a $X$ y minimizar $\lVert y-Xw\rVert^2$.  
+> Si $X$ tiene **rango completo**, hay un único punto crítico que coincide con el mínimo global. Derivando e igualando a cero: $$\partial_w\lVert y-Xw\rVert^2=2X^\top(Xw-y)=0 \quad \Rightarrow\quad X^\top y=X^\top X w$$Solución: $w^*=(X^\top X)^{-1}X^\top y$  que es única si $X^\top X$ es invertible (columnas de (X) linealmente independientes).
 #### 6. Descenso por Gradiente Estocástico con Minibatches
-
 > El material presenta **minibatch SGD** como técnica central para optimizar (en general) modelos de deep learning: actualizar iterativamente parámetros para reducir la pérdida.  
-> En cada iteración (t), se muestrea un minibatch (B_t), se computa el gradiente promedio y se actualiza con tasa (\eta):  
-> [  
-> (w,b)\leftarrow (w,b)-\frac{\eta}{|B|}\sum_{i\in B_t}\partial_{(w,b)}\ell^{(i)}(w,b).  
-> ]  
-> Para pérdida cuadrática y transformación afín, el material escribe las actualizaciones explícitas:  
-> [  
-> w \leftarrow w -\frac{\eta}{|B|}\sum_{i\in B_t} x^{(i)}\big(w^\top x^{(i)}+b-y^{(i)}\big),  
+> En cada iteración $t$, se muestrea un minibatch $B_t$, se computa el gradiente promedio y se actualiza con tasa $\eta$: $$(w,b)\leftarrow (w,b)-\frac{\eta}{|B|}\sum_{i\in B_t}\partial_{(w,b)}\ell^{(i)}(w,b)$$Para pérdida cuadrática y transformación afín, el material escribe las actualizaciones explícitas: $$w \leftarrow w -\frac{\eta}{|B|}\sum_{i\in B_t} x^{(i)}\big(w^\top x^{(i)}+b-y^{(i)}\big),  
 > \quad  
-> b \leftarrow b -\frac{\eta}{|B|}\sum_{i\in B_t}\big(w^\top x^{(i)}+b-y^{(i)}\big).  
-> ]  
-> Se introducen **hiperparámetros** (p. ej., minibatch size, learning rate) y se menciona la evaluación sobre un **validation set**.  
-> Nota del material: aunque en regresión lineal hay mínimo global (si (X) tiene rango completo), en redes profundas abundan puntos de silla y mínimos; en la práctica suele bastar con parámetros que den buena predicción.
-
+> b \leftarrow b -\frac{\eta}{|B|}\sum_{i\in B_t}\big(w^\top x^{(i)}+b-y^{(i)}\big)$$Se introducen **hiperparámetros** (p. ej., minibatch size, learning rate) y se menciona la evaluación sobre un **validation set**.  
+> Nota del material: aunque en regresión lineal hay mínimo global (si $X$ tiene rango completo), en redes profundas abundan puntos de silla y mínimos; en la práctica suele bastar con parámetros que den buena predicción.
 #### 7. Predicción y Terminología de “Inference”
-
-> Para un nuevo ejemplo, la predicción es (\hat{w}^\top x+\hat{b}).  
+> Para un nuevo ejemplo, la predicción es $\hat{w}^\top x+\hat{b}$.  
 > El material comenta que en deep learning se usa “inference” para la fase de predicción, pero lo califica como término confuso porque en estadística “inference” suele referirse más a inferencia de parámetros. El texto propone usar “prediction” cuando sea posible.
-
 #### 8. Vectorización para Velocidad
-
 > El material insiste en procesar minibatches de forma eficiente vectorizando cálculos y usando librerías de álgebra lineal.  
-> En un ejemplo de suma de vectores de dimensión 10 000, el bucle Python tarda del orden de (0.178) s, mientras que la suma vectorizada tarda del orden de (0.00036) s (valores reportados en el texto).  
+> En un ejemplo de suma de vectores de dimensión 10 000, el bucle Python tarda del orden de 0.178s, mientras que la suma vectorizada tarda del orden de 0.00036s (valores reportados en el texto).  
 > Conclusión del material: vectorizar puede dar mejoras de orden(es) de magnitud y reduce errores al delegar operaciones en la librería.
-
 #### 9. Distribución Normal y Pérdida Cuadrática Como MLE
-
-> Se recuerda la densidad de una normal (\mathcal{N}(\mu,\sigma^2)):  
-> [  
-> p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp!\left(-\frac{1}{2\sigma^2}(x-\mu)^2\right).  
-> ]  
-> Para motivar formalmente el MSE, el material asume ruido Gaussiano aditivo:  
-> [  
-> y=w^\top x+b+\epsilon,\quad \epsilon\sim\mathcal{N}(0,\sigma^2).  
-> ]  
-> Entonces:  
-> [  
-> P(y\mid x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp!\left(-\frac{1}{2\sigma^2}(y-w^\top x-b)^2\right).  
-> ]  
-> La verosimilitud total factoriza por independencia y el material pasa a minimizar la **negative log-likelihood**:  
-> [  
-> -\log P(y\mid X)=\sum_{i=1}^{n}\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2\sigma^2}\big(y^{(i)}-w^\top x^{(i)}-b\big)^2.  
-> ]  
-> Si (\sigma) es fija, el primer término se ignora (no depende de (w,b)) y el segundo coincide con la pérdida cuadrática salvo una constante, concluyendo que minimizar MSE equivale a MLE bajo ruido Gaussiano aditivo.
-
+> Se recuerda la densidad de una normal $\mathcal{N}(\mu,\sigma^2)$: $$p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp!\left(-\frac{1}{2\sigma^2}(x-\mu)^2\right)$$Para motivar formalmente el MSE, el material asume ruido Gaussiano aditivo: $$y=w^\top x+b+\epsilon,\quad \epsilon\sim\mathcal{N}(0,\sigma^2)$$Entonces: $$P(y\mid x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp!\left(-\frac{1}{2\sigma^2}(y-w^\top x-b)^2\right)$$La verosimilitud total factoriza por independencia y el material pasa a minimizar la **negative log-likelihood**:  $$-\log P(y\mid X)=\sum_{i=1}^{n}\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2\sigma^2}\big(y^{(i)}-w^\top x^{(i)}-b\big)^2$$Si $\sigma$ es fija, el primer término se ignora (no depende de $w,b$) y el segundo coincide con la pérdida cuadrática salvo una constante, concluyendo que minimizar MSE equivale a MLE bajo ruido Gaussiano aditivo.
 #### 10. Regresión Lineal Como Red Neuronal
-
 > El material describe la regresión lineal como una red con una sola capa: cada feature es una neurona de entrada conectada directamente a una única neurona de salida (red fully connected de una capa).  
 > También incluye una analogía biológica (dendritas, soma, axón) para ilustrar la idea de combinar entradas ponderadas y un posible postprocesamiento no lineal, y matiza que la inspiración actual en deep learning viene de muchas disciplinas además de neurociencia.
-
 #### 11. Resumen y Ejercicios de la Sección
-
 > Resumen del material:
-> 
 > - Regresión lineal: elegir parámetros para minimizar pérdida cuadrática.
->     
 > - Motivación del objetivo: consideraciones prácticas + interpretación como MLE con ruido Gaussiano.
->     
 > - Componentes clave reutilizables: forma paramétrica, objetivo diferenciable, optimización con minibatch SGD, evaluación en datos no vistos.  
 >     Ejercicios (lista del material, a alto nivel):
->     
-> - Minimización de (\sum_i (x_i-b)^2) y relación con normal.
->     
-> - Equivalencia entre funciones afines y funciones lineales en ((x,1)).
->     
+> - Minimización de $\sum_i (x_i-b)^2$ y relación con normal.
+> - Equivalencia entre funciones afines y funciones lineales en $(x,1)$.
 > - Extender a funciones cuadráticas y formulación en red.
->     
-> - Qué ocurre si (X^\top X) no tiene rango completo y cómo “arreglarlo”.
->     
+> - Qué ocurre si $X^\top X$ no tiene rango completo y cómo “arreglarlo”.
 > - Derivar NLL con ruido exponencial y proponer SGD.
->     
 > - Por qué componer dos capas lineales no aporta expresividad.
->     
 > - Problemas de aplicar regresión a precios realistas y a conteos (aparece Poisson en ejercicios).
->     
-
----
 
 ### II. Generalización
-
 #### 1. Motivación: Memorizar vs. Descubrir Patrones
-
 > El material introduce la generalización con una analogía de dos estudiantes:
-> 
 > - “Extraordinary Ellie” memoriza exámenes pasados y puede fallar ante preguntas nuevas.
->     
 > - “Inductive Irene” infiere patrones y mantiene rendimiento más estable en preguntas no vistas.  
 >     Idea central: en machine learning buscamos **patrones**; la predicción es útil cuando generaliza a datos no vistos (p. ej., precios de mañana, enfermedades no diagnosticadas, pacientes nuevos).
->     
-
 #### 2. Overfitting y Regularización
-
 > El material define **overfitting** como ajustar más a los datos de entrenamiento que a la distribución subyacente, y llama **regularization methods** a técnicas para combatirlo.  
 > También advierte que incluso con datasets enormes, el número de ejemplos puede ser minúsculo frente al espacio de posibilidades (p. ej., el espacio de imágenes posibles).
-
 #### 3. Error de Entrenamiento y Error de Generalización
-
 > Se asume el caso supervisado estándar con train y test i.i.d. (IID).  
 > El material distingue:
-> 
-> - **Training error** (R_{\text{emp}}): estadístico calculado en el training set.  
->     [  
->     R_{\text{emp}}[X,y,f]=\frac{1}{n}\sum_{i=1}^{n}\ell!\big(x^{(i)},y^{(i)},f(x^{(i)})\big).  
->     ]
->     
-> - **Generalization error** (R): expectativa respecto a la distribución subyacente (P).  
->     [  
->     R[p,f]=\mathbb{E}_{(x,y)\sim P},[\ell(x,y,f(x))]  
->     =\int!!\int \ell(x,y,f(x)),p(x,y),dx,dy.  
->     ]  
->     Problema clave: (R) no puede calcularse exactamente; se estima usando un **test set** independiente.  
+> - **Training error** $R_{\text{emp}}$: estadístico calculado en el training set. $$R_{\text{emp}}[X,y,f]=\frac{1}{n}\sum_{i=1}^{n}\ell!\big(x^{(i)},y^{(i)},f(x^{(i)})\big)$$
+> - **Generalization error** $R$: expectativa respecto a la distribución subyacente $P$. $$R[p,f]=\mathbb{E}_{(x,y)\sim P} [\ell(x,y,f(x))] = \int\int \ell(x,y,f(x))p(x,y)dxdy$$Problema clave: $R$ no puede calcularse exactamente; se estima usando un **test set** independiente.
 >     Matiz del material: el modelo depende de la muestra de entrenamiento, por lo que el training error suele ser un estimador **sesgado** del error poblacional. La pregunta central es cuándo esperar que training error esté cerca del error poblacional.
->     
-
 #### 4. Complejidad del Modelo y Qué Puede Concluirse del Training Error
-
 > El material explica que, con modelos simples y muchos datos, training y generalization suelen ser cercanos; con modelos más complejos y/o pocos ejemplos, el training error baja pero la brecha puede crecer.  
 > Si una clase de modelos puede ajustar etiquetas arbitrarias (incluso aleatorias), ajustar train perfectamente no certifica nada sobre generalización.  
 > Se conecta con la idea de **falsabilidad** (Popper): una hipótesis que explica cualquier observación “no dice nada” porque no descarta posibilidades.  
 > El texto comenta que “más parámetros” suele aumentar capacidad de ajuste, pero no siempre (menciona métodos kernel con infinitos parámetros cuya complejidad se controla de otra forma). Otro criterio útil es el **rango de valores** permitidos a los parámetros.
-
 #### 5. Validación y Uso de Holdout Data
-
 > Cuando no puede concluirse mucho solo con el training error (caso típico en deep networks), el material enfatiza certificar generalización “a posteriori” con datos retenidos (_holdout_). El error en el holdout se denomina **validation error**.
-
 #### 6. Underfitting y Overfitting en Términos de Errores
-
 > Dos situaciones típicas al comparar training y validation error:
-> 
 > - **Underfitting**: ambos errores son altos y la brecha es pequeña; sugiere modelo demasiado simple para capturar el patrón.
->     
 > - **Overfitting severo**: training error mucho menor que validation error.  
 >     El material matiza que overfitting no es “siempre malo”: en deep learning el mejor modelo predictivo puede rendir mucho mejor en train que en holdout; el objetivo final es reducir el error de generalización.
->     
-
 #### 7. Ajuste de Curvas Polinomiales Como Ejemplo de Complejidad
-
 > Ejemplo del material: ajustar un polinomio de grado (d) para una feature (x):  
 > [  
 > \hat{y}=\sum_{i=0}^{d}x^{i}w_i.  
@@ -503,6 +264,9 @@
 > - Por qué la VC dimension puede ser mala medida de complejidad (pista: magnitud de las funciones).
 >     
 > - Cómo justificar la necesidad de más datos (pista del material: no puedes aumentar los datos, pero puedes disminuirlos).
+
+---
+
 ## D2DpL 3. Linear Neural Networks for Regression (Complete)
 ### I. Redes Neuronales Lineales para Regresión
 

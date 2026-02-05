@@ -5,5 +5,6 @@
 ### II. Syllabus
 - [[Tema 1 - Frameworks & Technologies]]
 - [[Tema 2 - Foundations of Neural Networks]]
+- [[Tema 3 - Convolutional NNs & Modern CNNs]]
 ### III. Guía
 - [[Guía Docente - DpL]]
