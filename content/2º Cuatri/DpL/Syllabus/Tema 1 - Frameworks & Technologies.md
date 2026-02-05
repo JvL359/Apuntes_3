@@ -15,11 +15,11 @@
 ### II. Manipulación de Datos
 
 #### 1. Tensores Como Estructura Central
-> Para trabajar con datos en el ordenador se necesitan dos cosas: **(i) adquirir datos** y **(ii) procesarlos**una vez dentro del sistema.  
+> Para trabajar con datos en el ordenador se necesitan dos cosas: **i) adquirir datos** y **ii) procesarlos**una vez dentro del sistema.  
 > El fragmento introduce los **arreglos n-dimensionales**, también llamados **tensores**.
 > - **Vector**: tensor 1D (un eje).
 > - **Matriz**: tensor 2D (dos ejes).
-> - **Tensor de orden k**: cuando (k > 2), se usa el término general (sin nombre especializado).
+> - **Tensor de orden k**: cuando k > 2, se usa el término general (sin nombre especializado).
 #### 2. Tensor en Frameworks Modernos
 > El texto compara la clase tensor de frameworks modernos con `ndarray` de NumPy: se parece, pero añade dos “killer features”:
 > - Soporte de **diferenciación automática**.
@@ -419,7 +419,7 @@ layer(torch.tensor([1.0, 2, 3, 4, 5]))
 ```
 #### 3. Capas con Parámetros
 > Para capas entrenables, el material recomienda crear parámetros con utilidades built-in (gestión de acceso, inicialización, compartición, guardado/carga).  
-> Ejemplo `MyLinear`: implementa una capa tipo fully-connected con dos parámetros (`weight`, `bias`) mediante `nn.Parameter`, y mete ReLU por defecto.
+> Ejemplo `MyLinear`: implementa una capa tipo fully-connected con dos parámetros `weight` y `bias` mediante `nn.Parameter`, y mete ReLU por defecto.
 ```python
 import torch
 from torch import nn
@@ -463,7 +463,7 @@ torch.save(mydict, "mydict")
 mydict2 = torch.load("mydict")
 ```
 #### 3. Guardar y Cargar Parámetros de un Modelo
-> Punto crítico del material: se guardan **parámetros**, no “el modelo completo”. La arquitectura puede contener código arbitrario y no se serializa igual de natural; por eso, para restaurar: (i) recreas la arquitectura en código y (ii) cargas `state_dict`.  
+> Punto crítico del material: se guardan **parámetros**, no “el modelo completo”. La arquitectura puede contener código arbitrario y no se serializa igual de natural; por eso, para restaurar: i) recreas la arquitectura en código y ii) cargas `state_dict`.  
 > Se ilustra que, con mismos parámetros, para la misma entrada, el clon produce exactamente la misma salida (comparación booleana `True`).
 ```python
 import torch
