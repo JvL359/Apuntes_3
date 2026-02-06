@@ -566,9 +566,11 @@ class Data(d2l.DataModule):
 > Interpretando $\hat y$ como probabilidades condicionales $\mathbb{P}(y \mid x)$, y asumiendo independencia por ejemplo, la verosimilitud sobre el dataset factoriza: $$\mathbb{P}(Y\mid X)=\prod_{i=1}^n \mathbb{P}(y^{(i)}\mid x^{(i)})$$Minimizar la **negative log-likelihood** equivale a minimizar la suma de pérdidas por ejemplo:  $$-\log \mathbb{P}(Y\mid X)=\sum_{i=1}^n -\log \mathbb{P}(y^{(i)}\mid x^{(i)})=\sum_{i=1}^n \ell(y^{(i)},\hat y^{(i)})$$Con etiquetas one-hot sobre $q$ clases: $\ell(y,\hat y) = -\sum_{j=1}^q y_j \log \hat y_j$, que el material llama **cross-entropy loss**. Al ser one-hot, solo queda el término de la clase correcta. Además, $\ell \ge 0$ y $\ell=0$ solo si la clase correcta tiene probabilidad 1 (algo inalcanzable con parámetros finitos en softmax).
 > Sustituyendo softmax en la pérdida, el material reescribe: $\ell(y,\hat y)=\log\sum_{k=1}^q \exp(o_k) - \sum_{j=1}^q y_j o_j$ 
 #### 4. Teoría de la Información
-> El material indica que esta sección conecta softmax + entropía cruzada con **teoría de la información** (y también con ideas de física estadística), y que la derivada de la entropía cruzada combinada con softmax “se parece” a la de MSE en el sentido de operar como diferencia entre comportamiento esperado y predicción.
-> 
-> **[RELLENAR: fórmulas y definiciones explícitas de “Information Theory Basics” (subsección 4.1.3) — no he podido recuperar ese fragmento literal del PDF en este momento.]**
+> El material introduce un “survival guide” de **teoría de la información** para interpretar términos e intuiciones usados en deep learning. Indica que la teoría de la información estudia problemas de **codificar, decodificar, transmitir y manipular información** (datos).
+> - **Entropía**
+> Para una distribución discreta $P$, su entropía $H[P]$ se define como: $$H[P] = \sum_j -P(j)\log P(j)$$El material cita un resultado fundamental: para codificar datos muestreados aleatoriamente de $P$, se necesitan al menos $H[P]$ **“nats”** (Shannon, 1948). Si se usa base 2, la unidad equivalente es el **bit**. Relación: $$1\ \text{nat}=\frac{1}{\log(2)} \approx 1.44\ \text{bits}$$- **Sorpresa (Surprisal)**
+> La sorpresa es mayor cuando al evento se le asigna **menor probabilidad**. La entropía es la **sorpresa esperada** cuando se asignan las probabilidades correctas que coinciden con el proceso generador de datos. El material define la “sorpresa” al observar un evento $j$ con probabilidad subjetiva $P(j)$ como: $$\log\!\left(\frac{1}{P(j)}\right) = -\log P(j)$$- **Entropía Cruzada Revisitada**
+> Si $P$ es la distribución “verdadera” (que genera los datos) y $Q$ son probabilidades subjetivas (las del modelo), la **entropía cruzada** de $P$ a $Q$, denotada $H(P,Q)$, es la sorpresa esperada al observar datos de $P$ usando $Q$: $$H(P,Q)=\mathbb{E}_{j\sim P}\big[-\log Q(j)\big] = \sum_j -P(j)\log Q(j)$$El material afirma que la menor entropía cruzada posible se logra cuando $P=Q$. En ese caso: $$H(P,P)=H(P)$$Interpretación final del material para clasificación con entropía cruzada: puede verse i) como **maximizar la verosimilitud** de los datos observados y ii) como **minimizar la sorpresa** (y, por tanto, el número de bits) necesarios para comunicar las etiquetas.
 #### 5. Resumen de la Sección
 > Ideas clave del material:
 > - En clasificación discreta se adopta un enfoque probabilista: clases como resultados de una distribución.
@@ -678,9 +680,20 @@ def loss(self, Y_hat, Y, averaged=True):
 > Si $q(y)\ne p(y)$ pero $q(x\mid y)=p(x\mid y)$, el material reescribe el riesgo con pesos de razón de verosimilitudes de etiquetas: $\beta_i=\frac{p(y_i)}{q(y_i)}$.
 > También destaca que, a diferencia de covariate shift, aquí (si el modelo en source es razonable) se pueden estimar consistentemente estos pesos sin tratar con la alta dimensionalidad de $x$.
 ###### 4) Corrección por Cambio de Concepto
-> **[RELLENAR: desarrollo algorítmico de “Concept Shift Correction” — no he podido recuperar el texto literal de esta subsección del PDF en este momento.]**
+> El material indica que el **concept shift** es mucho más difícil de corregir “de forma principiada”. Por ejemplo, si el problema cambia _de repente_ de distinguir **gatos vs perros** a distinguir **animales blancos vs negros**, no es razonable asumir que podamos hacerlo mucho mejor que **recolectar nuevas etiquetas** y **entrenar desde cero**.
+> También matiza que, en la práctica, estos cambios extremos son raros: lo habitual es que la tarea **cambie lentamente**. Da ejemplos: 
+> - En **publicidad computacional**, aparecen productos nuevos y otros pierden popularidad; la distribución de anuncios y su popularidad cambia gradualmente, así que un predictor de **click-through rate** debe cambiar con ella.
+> - Las **lentes de cámaras de tráfico** se degradan poco a poco por el entorno, afectando progresivamente la calidad de imagen.
+> - El **contenido de noticias** cambia gradualmente (la mayor parte permanece, pero aparecen historias nuevas).
+> En esos casos, el texto propone reutilizar el mismo enfoque de entrenamiento para adaptarse al cambio: **partir de los pesos actuales** de la red y hacer **unos pocos pasos de actualización** con los nuevos datos, en lugar de entrenar desde cero.
 #### 5. Taxonomía de Problemas de Aprendizaje
-> **[RELLENAR: contenido de “A Taxonomy of Learning Problems” (batch / online / bandits / control / reinforcement / considering the environment) — no he podido recuperar el texto literal de esta subsección del PDF en este momento.]**
+> El material resume varias “familias” de problemas según **cómo llegan los datos** y si el **entorno tiene memoria** o se **adapta**:
+> - **Batch learning**: se entrena con un dataset fijo $\{(x_i,y_i)\}$ y luego se despliega el modelo asumiendo misma distribución.
+> - **Online learning**: los datos llegan secuencialmente; se predice con $x_t$​, luego se observa $y_t$​, se incurre en pérdida y se actualiza a $f_{t+1}$​.
+> - **Bandits**: caso de online con un **conjunto finito de acciones** (“brazos”), con garantías teóricas más fuertes.
+> - **Control**: el entorno “recuerda” acciones pasadas; la respuesta depende de lo anterior (ejemplos: PID, comportamiento de usuarios).
+> - **Reinforcement learning**: entornos con memoria donde se interactúa con objetivos a largo plazo (juegos, conducción autónoma).
+> - **Considerar el entorno**: una estrategia válida en un entorno estacionario puede fallar si el entorno se adapta; la velocidad del cambio condiciona qué algoritmos tienen sentido (relevante para concept shift).
 #### 6. Equidad, Responsabilidad y Transparencia
 > El material insiste en que desplegar ML no es solo optimizar predicción: se automatizan **decisiones** que afectan a personas. Esto obliga a reconsiderar evaluación: la **accuracy rara vez es la métrica correcta** cuando importan los costes asimétricos de error y valores sociales.
 > También advierte sobre **feedback loops** en sistemas de decisión. Ejemplo de “predictive policing”, donde más patrullas → más delitos detectados → datos sesgados → el modelo refuerza la misma zona, generando “runaway feedback loops”.
@@ -807,3 +820,5 @@ class MLP(d2l.Classifier):
 > Resumen explícito: vanishing/exploding gradients son comunes; la inicialización (y aleatoriedad) es clave para controlar magnitudes y romper simetrías; Xavier busca estabilizar varianzas; ReLU ayuda con vanishing gradients y puede acelerar convergencia.
 #### 5. Ejercicios de la Sección
 > El material propone ejercicios como: diseñar otras simetrías que requieran romperse, discutir inicializaciones iguales en regresión lineal/softmax, buscar cotas analíticas sobre eigenvalores de productos de matrices, y explorar cómo corregir términos divergentes (menciona LARS como inspiración).
+
+Estos apuntes continúan en [[Tema 3 - Convolutional NNs & Modern CNNs]]
