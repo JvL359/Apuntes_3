@@ -279,7 +279,7 @@ trainer.fit(model, data)
 > - **Evolución hacia Reutilización de Modelos.** El texto añade que, con el tiempo, esta abstracción ha avanzado hasta reutilizar **modelos entrenados completos** para tareas relacionadas; a estos modelos grandes preentrenados se les denomina **foundation models**.
 > - **Idea Operativa.** La clave práctica es que los **bloques repetibles** se implementan fácilmente en frameworks modernos mediante **bucles** y **subrutinas**, haciendo el diseño más sistemático y menos artesanal.
 #### 8.2.2 Bloques VGG
-> - **Bloque Básico y Problema de Fondo.** Un patrón clásico en CNNs es repetir: (i) convolución con padding (mantener resolución), (ii) no linealidad (p. ej., ReLU), (iii) pooling (p. ej., max-pooling) para reducir resolución. El problema es que la resolución espacial puede caer **demasiado rápido**: el texto señala un límite duro de orden **log₂(d)** capas convolucionales antes de “agotar” dimensiones; para ImageNet, de este modo sería imposible superar ~**8 capas** convolucionales.
+> - **Bloque Básico y Problema de Fondo.** Un patrón clásico en CNNs es repetir: i) convolución con padding (mantener resolución), ii) no linealidad (p. ej., ReLU), iii) pooling (p. ej., max-pooling) para reducir resolución. El problema es que la resolución espacial puede caer **demasiado rápido**: el texto señala un límite duro de orden **log₂(d)** capas convolucionales antes de “agotar” dimensiones; para ImageNet, de este modo sería imposible superar ~**8 capas** convolucionales.
 > - **Idea de VGG: Varias Convoluciones Antes de Submuestrear.** Simonyan y Zisserman proponen agrupar **múltiples convoluciones** entre pasos de downsampling (max-pooling), formando un **bloque**. El objetivo era estudiar si conviene más **profundidad** o **anchura**; su análisis concluye que redes **profundas y estrechas** superan significativamente a las más superficiales.
 > - **Equivalencia Receptiva y Comparación de Parámetros.** El material destaca que aplicar **dos 3×3** “toca” los mismos píxeles que una **5×5**. Además, una 5×5 usa ~**25·c²** parámetros, mientras que **tres 3×3** usan **3·9·c²** (mismo orden), favoreciendo apilar convoluciones pequeñas. A partir de aquí, apilar **3×3** se convierte en un “gold standard”.
 > - **Definición del Bloque VGG (Concreto).** Un bloque VGG consiste en:
@@ -301,8 +301,8 @@ trainer.fit(model, data)
 #### 8.3.1 Idea Central (NiN Blocks)
 > - **Patrón Común Previo (LeNet/AlexNet/VGG).** El material resume que estas redes siguen el patrón: extraer features con convoluciones/pooling y luego post-procesar con **fully-connected** al final.
 > - **Dos Problemas del Patrón.**
->   - **(1) Explosión de Parámetros al Final.** Las fully-connected finales consumen enormes cantidades de parámetros. El texto pone como ejemplo que incluso un modelo como **VGG-11** necesita una matriz “monstruosa” que ocupa ~**400 MB** en FP32, lo que es un problema serio para móviles/embebidos.
->   - **(2) No Puedes Meter FC Antes “sin Romper” la Estructura.** Añadir fully-connected antes destruiría la estructura espacial y además podría requerir todavía más memoria.
+>   - **1) Explosión de Parámetros al Final.** Las fully-connected finales consumen enormes cantidades de parámetros. El texto pone como ejemplo que incluso un modelo como **VGG-11** necesita una matriz “monstruosa” que ocupa ~**400 MB** en FP32, lo que es un problema serio para móviles/embebidos.
+>   - **2) No Puedes Meter FC Antes “sin Romper” la Estructura.** Añadir fully-connected antes destruiría la estructura espacial y además podría requerir todavía más memoria.
 > - **Solución NiN (Insight del Material).** Los bloques NiN resuelven ambos problemas con una estrategia simple:
 >   - **i)** usar convoluciones **1×1** para añadir **no linealidad local** entre canales (por localización),
 >   - **ii)** usar **global average pooling** para integrar información de todas las localizaciones al final.
@@ -320,8 +320,8 @@ trainer.fit(model, data)
 > Se entrena en Fashion-MNIST con `resize=(224,224)`; se muestra un ajuste con `lr=0.05`, `batch_size=128`, `max_epochs=10`.
 #### 8.3.4 Resumen y Ejercicios
 > - Se recalca que la gran reducción de parámetros viene de eliminar las fully-connected gigantes y sustituirlas por **global average pooling**.
-> - Se destaca que 1×1 conv + global average pooling influyeron en diseños posteriores.  
->     Ejercicios: variar nº de 1×1 conv por bloque, sustituir 1×1 por 3×3, reemplazar global average pooling por fully-connected y medir impacto (velocidad/parámetros/precisión), etc.
+> - Se destaca que $1×1$ conv + global average pooling influyeron en diseños posteriores.  
+>     Ejercicios: variar nº de $1×1$ conv por bloque, sustituir $1×1$ por $3×3$, reemplazar global average pooling por fully-connected y medir impacto (velocidad/parámetros/precisión), etc.
 
 ### V. 8.4 Redes Multi-Rama (GoogLeNet)
 #### 8.4.1 Contexto y Patrón Stem–Body–Head
@@ -331,11 +331,11 @@ trainer.fit(model, data)
 > En la construcción concreta del modelo, se discute cómo se asignan canales a ramas y cómo se usan reducciones intermedias para controlar dimensionalidad/coste en ramas más caras.
 #### 8.4.3 Esqueleto del Modelo (Módulos b1–b5)
 > Se implementa por módulos:
-> - **b1 (stem)**: conv 7×7 con 64 canales, stride 2, padding 3 + ReLU + max-pooling.
-> - **b2**: conv 1×1 (64 canales) → conv 3×3 (192 canales) + max-pooling.
+> - **b1 (stem)**: conv $7×7$ con 64 canales, stride 2, padding 3 + ReLU + max-pooling.
+> - **b2**: conv $1×1$ (64 canales) → conv $3×3$ (192 canales) + max-pooling.
 > - **b3/b4/b5**: secuencias de bloques tipo Inception y max-pooling entre módulos; al final se aplica **global average pooling** (como en NiN) y una capa final para clases.
 #### 8.4.4 Entrenamiento en el Material
-> Se entrena en Fashion-MNIST reescalado a **96×96**, con `lr=0.01`, `batch_size=128`, `max_epochs=10`, y se muestra inicialización y ajuste con `Trainer`.
+> Se entrena en Fashion-MNIST reescalado a **96×96**, con `lr=0.01, batch_size=128, max_epochs=10` y se muestra inicialización y ajuste con `Trainer`.
 #### 8.4.5 Discusión y Ejercicios
 > - **Más Precisión con Menor Coste.** El material afirma como rasgo clave que GoogLeNet es **más barato de computar** que sus predecesores y a la vez ofrece **mejor precisión**, marcando un giro hacia un diseño deliberado que intercambia coste de evaluación por reducción de error.
 > - **Diseño Manual y Complejidad.** También se remarca que GoogLeNet es computacionalmente complejo y tiene muchos hiperparámetros relativamente “arbitrarios” (canales, número de bloques antes de reducir dimensionalidad, partición de capacidad entre ramas, etc.).
@@ -344,48 +344,30 @@ trainer.fit(model, data)
 > - **Ejercicios del Material (Ideas).**
 >   - Implementar iteraciones históricas (p. ej., añadir batch norm, ajustar Inception, label smoothing, añadir residuales).
 >   - Determinar el tamaño mínimo de imagen para que funcione.
->   - Diseñar una versión para 28×28 modificando stem/body/head si hiciera falta.
+>   - Diseñar una versión para $28×28$ modificando stem/body/head si hiciera falta.
 >   - Comparar tamaño de parámetros y cómputo con AlexNet/VGG/NiN.
 
 ### VI. 8.5 Normalización por Lotes (Batch Normalization)
 #### 8.5.1 Entrenamiento de Redes Profundas
 > Entrenar redes profundas puede ser difícil por problemas de convergencia; **batch normalization** se presenta como una técnica popular y efectiva que **acelera la convergencia** y, junto con **bloques residuales** (Sección 8.6), ha hecho rutinario entrenar redes con **más de 100 capas**. Además, tiene un efecto de **regularización** “serendípico”.
 > El texto conecta BN con una idea clásica de _preprocesado_: al trabajar con datos reales, es habitual **estandarizar** _features_ para que tengan **media cero** y **varianza unidad** (y variantes como normalizar a norma 1 o media cero por observación) para mantener el problema “bien controlado”.
-> La motivación clave es trasladar este principio al interior de la red: controlar la escala/centrado de activaciones intermedias para facilitar la optimización. La transformación central se expresa como:
-> [  
-> \mathrm{BN}(\mathbf{x}) = \boldsymbol{\gamma} \odot \frac{\mathbf{x}-\boldsymbol{\mu}_\mathcal{B}}{\sqrt{\boldsymbol{\sigma}^2_\mathcal{B}+\epsilon}} + \boldsymbol{\beta}  
-> ]
-> Donde (\boldsymbol{\mu}_\mathcal{B}) y (\boldsymbol{\sigma}^2_\mathcal{B}) se estiman en el minibatch (\mathcal{B}), (\epsilon>0) evita divisiones por cero y (\boldsymbol{\gamma}, \boldsymbol{\beta}) son parámetros aprendibles de **escala** y **desplazamiento**.
+> La motivación clave es trasladar este principio al interior de la red: controlar la escala/centrado de activaciones intermedias para facilitar la optimización. La transformación central se expresa como: $$\mathrm{BN}(\mathbf{x}) = \boldsymbol{\gamma} \odot \frac{\mathbf{x}-\boldsymbol{\mu}_\mathcal{B}}{\sqrt{\boldsymbol{\sigma}^2_\mathcal{B}+\epsilon}} + \boldsymbol{\beta}$$Donde $\boldsymbol{\mu}_\mathcal{B}$ y $\boldsymbol{\sigma}^2_\mathcal{B}$ se estiman en el minibatch $\mathcal{B}$, $\epsilon>0$ evita divisiones por cero y $\boldsymbol{\gamma}, \boldsymbol{\beta}$ son parámetros aprendibles de **escala** y **desplazamiento**.
 #### 8.5.2 Capas de Batch Normalization
-> **Capas Fully-Connected.** Para un minibatch (\mathcal{B}) de tamaño (m), el material define:
-> [  
-> \boldsymbol{\mu}_\mathcal{B} \stackrel{\mathrm{def}}{=} \frac{1}{m}\sum_{i=1}^m \mathbf{x}_i,\qquad  
-> \boldsymbol{\sigma}_\mathcal{B}^2 \stackrel{\mathrm{def}}{=} \frac{1}{m}\sum_{i=1}^m(\mathbf{x}_i-\boldsymbol{\mu}_\mathcal{B})^2  
-> ]
-> y la normalización por ejemplo queda:
-> [  
-> \hat{\mathbf{x}}_i = \frac{\mathbf{x}_i-\boldsymbol{\mu}_\mathcal{B}}{\sqrt{\boldsymbol{\sigma}_\mathcal{B}^2+\epsilon}}  
-> ]
-
-> Tras esto se aplica el **re-escalado y desplazamiento** con (\boldsymbol{\gamma},\boldsymbol{\beta}) (la ecuación de BN). El texto recuerda explícitamente que **media y varianza se computan en el mismo minibatch** al que se aplica la transformación.
-> **Capas Convolucionales.** Se aplica BN **después de la convolución y antes de la activación**, pero (a diferencia de FC) se hace **por canal**, agregando estadísticas sobre **todas las localizaciones espaciales**. Si hay (m) ejemplos y para cada canal la salida tiene alto (p) y ancho (q), BN se calcula sobre los (m\cdot p\cdot q) elementos por canal, usando la **misma media/varianza dentro del canal** para normalizar cada localización. Cada canal tiene sus propios parámetros de escala y desplazamiento.
-> **Layer Normalization (Contraste).** El material introduce layer norm como alternativa motivada por casos donde el tamaño de minibatch puede ser pequeño: se aplica **por observación**, no depende del minibatch ni cambia entre entrenamiento y test. Para (\mathbf{x}\in\mathbb{R}^n):
-> [  
-> \mathrm{LN}(\mathbf{x})=\frac{\mathbf{x}-\hat{\mu}}{\hat{\sigma}},\quad  
+> **Capas Fully-Connected.** Para un minibatch $\mathcal{B}$ de tamaño $m$, el material define: $$\boldsymbol{\mu}_\mathcal{B} \stackrel{\mathrm{def}}{=} \frac{1}{m}\sum_{i=1}^m \mathbf{x}_i,\qquad \boldsymbol{\sigma}_\mathcal{B}^2 \stackrel{\mathrm{def}}{=} \frac{1}{m}\sum_{i=1}^m(\mathbf{x}_i-\boldsymbol{\mu}_\mathcal{B})^2$$y la normalización por ejemplo queda: $$\hat{\mathbf{x}}_i = \frac{\mathbf{x}_i-\boldsymbol{\mu}_\mathcal{B}}{\sqrt{\boldsymbol{\sigma}_\mathcal{B}^2+\epsilon}}$$Tras esto se aplica el **re-escalado y desplazamiento** con $\boldsymbol{\gamma},\boldsymbol{\beta}$ (la ecuación de BN). El texto recuerda explícitamente que **media y varianza se computan en el mismo minibatch** al que se aplica la transformación.
+> **Capas Convolucionales.** Se aplica BN **después de la convolución y antes de la activación**, pero (a diferencia de FC) se hace **por canal**, agregando estadísticas sobre **todas las localizaciones espaciales**. Si hay $m$ ejemplos y para cada canal la salida tiene alto $p$ y ancho $q$, BN se calcula sobre los $m\cdot p\cdot q$ elementos por canal, usando la **misma media/varianza dentro del canal** para normalizar cada localización. Cada canal tiene sus propios parámetros de escala y desplazamiento.
+> **Layer Normalization (Contraste).** El material introduce layer norm como alternativa motivada por casos donde el tamaño de minibatch puede ser pequeño: se aplica **por observación**, no depende del minibatch ni cambia entre entrenamiento y test. Para $\mathbf{x}\in\mathbb{R}^n:$ $$\mathrm{LN}(\mathbf{x})=\frac{\mathbf{x}-\hat{\mu}}{\hat{\sigma}},\quad  
 > \hat{\mu}\stackrel{\mathrm{def}}{=}\frac{1}{n}\sum_{i=1}^n x_i,\quad  
-> \hat{\sigma}^2\stackrel{\mathrm{def}}{=}\frac{1}{n}\sum_{i=1}^n(x_i-\hat{\mu})^2+\epsilon  
-> ]
-> Se destaca como ventaja práctica que (ignorando (\epsilon)) LN es aproximadamente **invariante a escala**: (\mathrm{LN}(\mathbf{x})\approx \mathrm{LN}(\alpha\mathbf{x})) para (\alpha\neq 0), lo que ayuda a prevenir divergencia.
+> \hat{\sigma}^2\stackrel{\mathrm{def}}{=}\frac{1}{n}\sum_{i=1}^n(x_i-\hat{\mu})^2+\epsilon$$Se destaca como ventaja práctica que (ignorando $\epsilon$) LN es aproximadamente **invariante a escala**: $\mathrm{LN}(\mathbf{x})\approx \mathrm{LN}(\alpha\mathbf{x})$ para $\alpha\neq 0$, lo que ayuda a prevenir divergencia.
 #### 8.5.3 Implementación Desde Cero
 > El material implementa `batch_norm` desde cero con dos regímenes:
-> - **Predicción (test):** usa `moving_mean` y `moving_var` acumuladas por media móvil para obtener (X_{\text{hat}}).
-> - **Entrenamiento:** calcula media y varianza según la forma de (X):
->     - si (X) es 2D (FC), media/varianza en la dimensión de _features_;
->     - si (X) es 4D (Conv2D), media/varianza por canal agregando sobre ((\text{batch}, H, W)) (con `keepdim=True` para _broadcasting_).
-> Luego escala y desplaza con (Y=\gamma X_{\text{hat}}+\beta) y actualiza estadísticas con **media móvil** controlada por `momentum` (aclarando que este “momentum” **no** es el del optimizador, aunque se use el mismo nombre por convención de APIs).
+> - **Predicción (test):** usa `moving_mean` y `moving_var` acumuladas por media móvil para obtener $X_{\text{hat}}$.
+> - **Entrenamiento:** calcula media y varianza según la forma de $X$:
+>     - si $X$ es 2D (FC), media/varianza en la dimensión de _features_;
+>     - si $X$ es 4D (Conv2D), media/varianza por canal agregando sobre $(\text{batch}, H, W)$ (con `keepdim=True` para _broadcasting_).
+> Luego escala y desplaza con $Y=\gamma X_{\text{hat}}+\beta$ y actualiza estadísticas con **media móvil** controlada por `momentum` (aclarando que este “momentum” **no** es el del optimizador, aunque se use el mismo nombre por convención de APIs).
 > Se remarca el patrón de diseño: i) matemática en una función (`batch_norm`) y ii) una capa `BatchNorm` que hace _bookkeeping_ (dispositivo, buffers, inicialización, medias móviles).
 #### 8.5.4 LeNet con Batch Normalization
-> Se aplica BN en un LeNet “tradicional” recordando la regla: **BN va después de conv/FC y antes de la activación**. Se construye `BNLeNetScratch` insertando `BatchNorm` tras `LazyConv2d` y `LazyLinear`, y se entrena en Fashion-MNIST con `max_epochs=10`, `batch_size=128` y `lr=0.1` (con GPU). Luego se inspeccionan (\gamma) y (\beta) aprendidos en la primera capa BN.
+> Se aplica BN en un LeNet “tradicional” recordando la regla: **BN va después de conv/FC y antes de la activación**. Se construye `BNLeNetScratch` insertando `BatchNorm` tras `LazyConv2d` y `LazyLinear`, y se entrena en Fashion-MNIST con `max_epochs=10`, `batch_size=128` y `lr=0.1` (con GPU). Luego se inspeccionan $\gamma$ y $\beta$ aprendidos en la primera capa BN.
 #### 8.5.5 Implementación Concisa
 > Se sustituye la implementación manual por las capas del framework (`LazyBatchNorm2d`, `LazyBatchNorm1d`), manteniendo una estructura casi idéntica del modelo. El texto subraya que la variante de alto nivel corre **mucho más rápido** por estar compilada (C++/CUDA) frente a la versión interpretada en Python.
 #### 8.5.6 Discusión
@@ -399,20 +381,20 @@ trainer.fit(model, data)
 > - Para modelos más robustos y menos sensibles a perturbaciones, se sugiere considerar **eliminar BN** (según referencia citada en el texto).
 #### 8.5.7 Ejercicios
 > 1. ¿Debe eliminarse el sesgo (_bias_) de la capa FC o conv antes de BN? ¿Por qué?
-> 2. Comparar _learning rates_ para LeNet con y sin BN: (i) graficar aumento de _val accuracy_; (ii) máximo LR antes de que falle la optimización.
+> 2. Comparar _learning rates_ para LeNet con y sin BN: i) graficar aumento de _val accuracy_; ii) máximo LR antes de que falle la optimización.
 > 3. ¿Se necesita BN en cada capa? Experimentar.
 > 4. Implementar una versión “lite” que solo quite la media (o solo la varianza) y analizar comportamiento.
-> 5. Fijar (\beta) y (\gamma) y observar resultados.
+> 5. Fijar $\gamma$ y $\beta$ y observar resultados.
 
 ### VII. 8.6 Redes Residuales (ResNet) y ResNeXt
 #### 8.6.1 Clases de Funciones
 > El material motiva ResNet con una idea sobre **clases de funciones**: si al hacer una red más profunda la clase de funciones “no contiene” a la anterior, se puede empeorar por el mero hecho de aumentar profundidad. La formulación residual busca que aprender la identidad sea fácil (reformular como “aprender la corrección”).
 #### 8.6.2 Bloques Residuales
 > - **Qué Problema Ataca.** El texto argumenta que, si al aumentar profundidad no garantizas que la clase de funciones “nueva” contenga a la anterior, puedes empeorar. Para evitarlo, conviene que el modelo más grande pueda comportarse como el más pequeño (p. ej., aprendiendo la identidad).
-> - **Reformulación Residual.** Dado un mapeo deseado f(x), un bloque residual hace que el bloque dentro de la “caja” aprenda:
->   - En red “directa”: aprender f(x) directamente.
->   - En residual: aprender g(x)=f(x)−x, y devolver x+g(x).
-> - **Caso Identidad: Por Qué Es Más Fácil.** Si el mapeo deseado es la identidad f(x)=x, entonces g(x)=0. El material dice que esto es más fácil de aprender: basta con empujar pesos/sesgos de las capas dentro del bloque hacia cero.
+> - **Reformulación Residual.** Dado un mapeo deseado $f(x)$, un bloque residual hace que el bloque dentro de la “caja” aprenda:
+>   - En red “directa”: aprender $f(x)$ directamente.
+>   - En residual: aprender $g(x)=f(x)−x$, y devolver $x+g(x)$.
+> - **Caso Identidad: Por Qué Es Más Fácil.** Si el mapeo deseado es la identidad $f(x)=x$, entonces $g(x)=0$. El material dice que esto es más fácil de aprender: basta con empujar pesos/sesgos de las capas dentro del bloque hacia cero.
 > - **Conexión Residual (Atajo).** La línea que lleva x hasta el sumador es la **residual/shortcut connection**. Con estos atajos, las entradas pueden propagarse hacia delante más rápido a través de conexiones residuales entre capas.
 #### 8.6.3 Modelo ResNet
 > Se construye un **ResNet-18** con una organización por bloques (módulos `b1`–`b5`): un _stem_ inicial seguido de grupos de bloques residuales que van reduciendo resolución y aumentando canales, terminando con _global average pooling_ y una capa final para clasificación.
@@ -420,18 +402,15 @@ trainer.fit(model, data)
 > En el ejemplo didáctico se entrena el modelo sobre **Fashion-MNIST reescalado a 96×96**, usando el mismo patrón de entrenamiento que en secciones anteriores (con `Trainer`, `batch_size=128`, `max_epochs=10`, GPU).
 #### 8.6.5 ResNeXt
 > - **Motivación en el Material.** Se plantea el trade-off típico en ResNet dentro de un bloque: añadir no linealidad aumentando capas o aumentando anchura. ResNeXt introduce un eje adicional: **agregar transformaciones** mediante **grouped convolutions**.
-> - **Grouped Convolution: Ahorro en Cómputo y Parámetros.** El texto define grouped convolution como partir una conv de cᵢ→cₒ en g grupos de tamaño cᵢ/g, produciendo g salidas de tamaño cₒ/g. El coste proporcional baja de O(cᵢ·cₒ) a O(cᵢ·cₒ/g), es decir, es **g veces más rápido**; y el número de parámetros también se reduce en un factor **g** (g matrices pequeñas en lugar de una grande).
-> - **Problema y Arreglo: Mezcla entre Grupos.** La dificultad es que no se intercambia información entre grupos. ResNeXt lo corrige “encajando” la conv 3×3 agrupada entre dos conv **1×1**:
->   - pagas el coste O(c·b) en las 1×1,
->   - y solo O(b²/g) en la 3×3,
->   donde b es el número de canales intermedios (bottleneck).
+> - **Grouped Convolution: Ahorro en Cómputo y Parámetros.** El texto define grouped convolution como partir una conv de $cᵢ→cₒ$ en g grupos de tamaño $cᵢ/g$, produciendo $g$ salidas de tamaño $cₒ/g$. El coste proporcional baja de $O(cᵢ·cₒ)$ a $O(cᵢ·cₒ/g)$, es decir, es **g veces más rápido**; y el número de parámetros también se reduce en un factor **g** ($g$ matrices pequeñas en lugar de una grande).
+> - **Problema y Arreglo: Mezcla entre Grupos.** La dificultad es que no se intercambia información entre grupos. ResNeXt lo corrige “encajando” la conv $3×3$ agrupada entre dos conv **1×1**:        pagas el coste $O(c·b)$ en las $1×1$, y solo $O(b²/g)$ en la $3×3$, donde $b$ es el número de canales intermedios (bottleneck).
 > - **Atajo Generalizado.** El material indica que la conexión residual puede **reemplazarse/generalizarse** por una conv **1×1** cuando hay que casar dimensiones (p. ej., al bajar resolución).
 > - **Nota Histórica.** Se menciona que la idea de grouped convolutions ya estaba en AlexNet: al repartir el modelo entre dos GPUs con memoria limitada, se trató cada GPU como su “propio canal” sin efectos adversos.
 #### 8.6.6 Resumen y Discusión
 > El material resume que los **bloques residuales** hacen práctico entrenar redes muy profundas, y que variantes como **ResNeXt** explotan la agregación (vía grupos) para mejorar diseños sin complicar excesivamente la plantilla del bloque.
 #### 8.6.7 Ejercicios
 > 1. Practicar con `ResNeXtBlock` y revisar salida a nivel de bloque/red; entender hiperparámetros de diseño.
-> 2. ¿Por qué ResNet funciona bien incluso cuando (f(x)=0)? Relacionarlo con identidad y facilidad de optimización.
+> 2. ¿Por qué ResNet funciona bien incluso cuando $f(x)=0$? Relacionarlo con identidad y facilidad de optimización.
 > 3. Comparar ResNet/ResNeXt con distintas profundidades/ancho y discutir coste vs precisión.
 > 4. Añadir operaciones tipo “shift” (se menciona ShiftNet como ejemplo) y estudiar impacto.
 > 5. Probar/variar cardinalidad en ResNeXt y analizar resultados.
@@ -439,17 +418,17 @@ trainer.fit(model, data)
 ### VIII. 8.7 Redes Densamente Conectadas (DenseNet)
 #### 8.7.1 De ResNet a DenseNet
 > DenseNet reemplaza la suma residual por **concatenación** de características: cada capa recibe como entrada todas las salidas previas concatenadas. El material contrasta explícitamente:
-> - ResNet: (\mathbf{x}_\ell = f_\ell(\mathbf{x}_{\ell-1}) + \mathbf{x}_{\ell-1}).
-> - DenseNet: (\mathbf{x}_\ell = H_\ell([\mathbf{x}_0,\mathbf{x}_1,\dots,\mathbf{x}_{\ell-1}])), donde ([\cdot]) denota concatenación.
+> - ResNet: $\mathbf{x}_\ell = f_\ell(\mathbf{x}_{\ell-1}) + \mathbf{x}_{\ell-1}$.
+> - DenseNet: $\mathbf{x}_\ell = H_\ell([\mathbf{x}_0,\mathbf{x}_1,\dots,\mathbf{x}_{\ell-1}])$, donde $[\cdot]$ denota concatenación.
 > La motivación práctica es promover **reutilización de _features_** y facilitar flujo de información/gradiente al conectar densamente capas.
 #### 8.7.2 Bloques Densos
 > Un **dense block** apila varias capas donde cada nueva capa produce un número fijo de mapas de características (la **growth rate**) y estos se concatenan con todo lo anterior, haciendo crecer el número de canales conforme avanza el bloque.
 #### 8.7.3 Capas de Transición
-> Entre dense blocks se insertan **transition layers** para controlar el crecimiento: típicamente una conv (1\times1) para reducir canales y un _pooling_ para reducir resolución, evitando explosión de coste/memoria.
+> Entre dense blocks se insertan **transition layers** para controlar el crecimiento: típicamente una conv $1\times1$ para reducir canales y un _pooling_ para reducir resolución, evitando explosión de coste/memoria.
 #### 8.7.4 Modelo DenseNet
 > El modelo se construye como: capa inicial → secuencia de (dense block → transition layer) → bloque final → _global average pooling_ → capa lineal de salida.
 #### 8.7.5 Entrenamiento
-> Se entrena sobre Fashion-MNIST reescalado a 96×96 con el mismo esquema de entrenamiento estándar del capítulo (con `Trainer`, `batch_size=128`, `max_epochs=10`, GPU).
+> Se entrena sobre Fashion-MNIST reescalado a $96×96$ con el mismo esquema de entrenamiento estándar del capítulo (con `Trainer`, `batch_size=128`, `max_epochs=10`, GPU).
 #### 8.7.6 Resumen y Discusión
 > El texto destaca como ventaja que DenseNet es **eficiente en parámetros** gracias a la reutilización de representaciones, pero avisa de un coste importante: el diseño con concatenaciones tiende a requerir **mucho consumo de memoria GPU**.
 #### 8.7.7 Ejercicios
@@ -471,26 +450,26 @@ trainer.fit(model, data)
 > - **Objetivo de 8.8.** Pasar de “arquitecturas una a una” a **espacios de diseño** y estrategias más sistemáticas (lo que conduce a RegNetX/Y).
 #### 8.8.1 Espacio de Diseño AnyNet
 > El material presenta una estrategia (inspirada en Radosavovic et al.) que combina diseño manual y NAS: operar sobre **distribuciones de redes** y optimizar dichas distribuciones, buscando que muchas redes muestreadas sean buenas y que el soporte sea conciso.
-> **Estructura AnyNet:** patrón **stem–body–head**. El _stem_ toma imágenes RGB con una conv (3\times3) stride 2 + batch norm para **halvar resolución**, generando (c_0) canales. El _body_ reduce (para ImageNet) de 224×224 a 7×7 a través de **4 stages**, cada uno con stride efectivo 2; el _head_ usa _global average pooling_ + capa fully-connected para clasificación.
-> El _body_ se organiza en **stages** formados por bloques (en el material, tipo ResNeXt): el primer bloque de un stage reduce resolución (stride 2) y requiere conv (1\times1) en la rama residual para casar dimensiones; luego siguen bloques sin cambio de resolución/canales. Se define además el **bottleneck ratio** (k_i) (nota: el texto dice que “no es realmente efectivo” y conviene omitirlo) y el número de grupos (g_i) por stage.
-> **Hiperparámetros del espacio:** (c_0,\dots,c_4) (anchos), (d_1,\dots,d_4) (profundidades por stage), (k_1,\dots,k_4) (bottleneck ratios), (g_1,\dots,g_4) (group widths). En total: **17 parámetros**, haciendo el espacio enorme.
+> **Estructura AnyNet:** patrón **stem–body–head**. El _stem_ toma imágenes RGB con una conv $3\times3$ stride 2 + batch norm para **halvar resolución**, generando $c_0$ canales. El _body_ reduce (para ImageNet) de $224×224$ a $7×7$ a través de **4 stages**, cada uno con stride efectivo 2; el _head_ usa _global average pooling_ + capa fully-connected para clasificación.
+> El _body_ se organiza en **stages** formados por bloques (en el material, tipo ResNeXt): el primer bloque de un stage reduce resolución (stride 2) y requiere conv $1\times1$ en la rama residual para casar dimensiones; luego siguen bloques sin cambio de resolución/canales. Se define además el **bottleneck ratio** $k_i$ (nota: el texto dice que “no es realmente efectivo” y conviene omitirlo) y el número de grupos $g_i$ por stage.
+> **Hiperparámetros del espacio:** $c_0,\dots,c_4$ (anchos), $d_1,\dots,d_4$ (profundidades por stage), $k_1,\dots,k_4$ (bottleneck ratios), $g_1,\dots,g_4$ (group widths). En total: **17 parámetros**, haciendo el espacio enorme.
 #### 8.8.2 Distribuciones y Parámetros de Espacios de Diseño
-> Se argumenta que buscar la “mejor” configuración exhaustivamente es inviable (con solo 2 opciones por parámetro serían (2^{17}=131072) combinaciones) y además aporta poco conocimiento transferible.
-> El enfoque se apoya en cuatro supuestos: (1) existen principios generales (muchas buenas redes, no una aguja única); (2) no hace falta entrenar a convergencia para discriminar (multi-fidelity con proxies); (3) lo hallado a pequeña escala generaliza; (4) el efecto de aspectos del diseño se puede factorizar aproximadamente.
-> Para comparar elecciones se propone evaluar **distribuciones de error** mediante CDF:
-> [  
-> F(e,p)\stackrel{\mathrm{def}}{=}\mathbb{P}_{\text{net}\sim p}{e(\text{net})\le e},\qquad  
-> \hat{F}(e,Z)=\frac{1}{n}\sum_{i=1}^n \mathbf{1}(e_i\le e)  
-> ]
-> El texto afirma que si la CDF de una elección **mayoriza** a otra, es superior (o indiferente si empata). Con este criterio se muestran simplificaciones: **atar** (k_i=k) no afecta a la distribución, **atar** (g_i=g) tampoco; en cambio imponer que el ancho por stage **aumente** mejora, y que la profundidad por stage **aumente** también mejora (según comparación de CDFs en Fig. 8.8.2).
+> Se argumenta que buscar la “mejor” configuración exhaustivamente es inviable (con solo 2 opciones por parámetro serían $2^{17}=131072$ combinaciones) y además aporta poco conocimiento transferible.
+> El enfoque se apoya en cuatro supuestos: 
+> - i) existen principios generales (muchas buenas redes, no una aguja única) 
+> - ii) no hace falta entrenar a convergencia para discriminar (multi-fidelity con proxies) 
+> - iii lo hallado a pequeña escala generaliza 
+> - iv el efecto de aspectos del diseño se puede factorizar aproximadamente.
+> Para comparar elecciones se propone evaluar **distribuciones de error** mediante CDF: $$F(e,p)\stackrel{\mathrm{def}}{=}\mathbb{P}_{\text{net}\sim p}{e(\text{net})\le e},\qquad  
+> \hat{F}(e,Z)=\frac{1}{n}\sum_{i=1}^n \mathbf{1}(e_i\le e)$$El texto afirma que si la CDF de una elección **mayoriza** a otra, es superior (o indiferente si empata). Con este criterio se muestran simplificaciones: **atar** $k_i=k$ no afecta a la distribución, **atar** $g_i=g$ tampoco; en cambio imponer que el ancho por stage **aumente** mejora, y que la profundidad por stage **aumente** también mejora (según comparación de CDFs en Fig. 8.8.2).
 #### 8.8.3 RegNet
-> El resultado es un espacio AnyNetX(_E) con principios de diseño explícitos:
-> - Compartir bottleneck ratio: (k_i=k) para todos los stages.
-> - Compartir group width: (g_i=g) para todos los stages.
-> - Ancho no decreciente por stage: (c_i \le c_{i+1}).
-> - Profundidad no decreciente por stage: (d_i \le d_{i+1}).
-> Además, al estudiar las mejores redes de la distribución, se observa que el ancho ideal crece aproximadamente **lineal** con el índice de bloque: (c_j \approx c_0 + c_a j) (y se aproxima con una función por tramos al elegir un ancho constante por stage). Experimentalmente se indica que (k=1) rinde mejor (recomendación: **no usar bottleneck**).
-> Se da un ejemplo concreto (RegNetX32): (k=1), (g=16), `stem_channels=32`, con dos stages de canales ((32,80)) y profundidades ((4,6)). También se menciona que el mismo principio se mantiene al escalar y que aplica a diseños con SE (RegNetY).
+> El resultado es un espacio $AnyNetX_E$ con principios de diseño explícitos:
+> - Compartir bottleneck ratio: $k_i=k$ para todos los stages.
+> - Compartir group width: $g_i=g$ para todos los stages.
+> - Ancho no decreciente por stage: $c_i \le c_{i+1}$.
+> - Profundidad no decreciente por stage: $d_i \le d_{i+1}$.
+> Además, al estudiar las mejores redes de la distribución, se observa que el ancho ideal crece aproximadamente **lineal** con el índice de bloque: $c_j \approx c_0 + c_a j$ (y se aproxima con una función por tramos al elegir un ancho constante por stage). Experimentalmente se indica que $k=1$ rinde mejor (recomendación: **no usar bottleneck**).
+> Se da un ejemplo concreto $RegNetX32: k=1, g=16$, `stem_channels=32`, con dos stages de canales $(32,80)$ y profundidades $(4,6)$. También se menciona que el mismo principio se mantiene al escalar y que aplica a diseños con SE (RegNetY).
 #### 8.8.4 Entrenamiento (Ejemplo en el Material)
 > El ejemplo entrena `RegNetX32` en Fashion-MNIST con `batch_size=128`, `resize=(96,96)`, `max_epochs=10` y GPU; en el snippet mostrado se instancia con `lr=0.05`.
 #### 8.8.5 Discusión (Cierre del Capítulo)
@@ -502,64 +481,50 @@ trainer.fit(model, data)
 > 4. Diseñar variantes aumentando nº de _stages_ y analizar.
 > 5. Probar cambios “anti-principios” (mencionado como “VioNet”) y observar degradación.
 > 6. Extrapolar principios a MLPs y discutir límites.
-#### Tabla Comparativa de Arquitecturas (8.1–8.4, 8.6, 8.7) y Cierre con Ideas de Diseño
-> **Tabla Comparativa (Resumen Operativo)**
-> 
-> |Arquitectura|Idea Estructural|Cómo Reduce Coste/Parámetros|Nota del Material|
-> |---|---|---|---|
-> |AlexNet (8.1)|5 conv + 2 FC ocultas grandes + ReLU + dropout|Coste alto en FC (matrices enormes); regulariza con dropout|Se reescala a 224×224 en Fashion-MNIST “por fidelidad”, aunque es ineficiente|
-> |VGG (8.2)|Diseño por **bloques**: varias 3×3 antes de _pooling_|Bloques repetibles; familias con trade-off; pero computacionalmente exigente|VGG-11 como ejemplo de familia parametrizada por `arch`|
-> |NiN (8.3)|**MLP por parche** con 1×1 conv + **global average pooling**|Elimina FC gigantes → muchos menos parámetros|Global average pooling como sustitución directa de FC final|
-> |GoogLeNet (8.4)|**Multi-rama** (Inception), patrón stem–body–head|Control de coste vía diseño de ramas y reducciones intermedias|Se destaca como diseño deliberado para precisión con menor coste|
-> |ResNet / ResNeXt (8.6)|**Bloques residuales** (atajo identidad + rama residual); ResNeXt añade **grupos**|ResNet facilita optimizar redes muy profundas sin “pagar” en parámetros por el atajo; ResNeXt explota **cardinalidad** vía convoluciones agrupadas para ganar capacidad con coste controlado|ResNeXt se formula como agregación homogénea (vía grouped conv) sobre el bloque residual|
-> |DenseNet (8.7)|Conectividad **densa por concatenación**: cada capa ve todas las previas|Reutiliza _features_ → eficiencia en parámetros; pero puede ser muy exigente en **memoria GPU** por concatenaciones|Se subraya explícitamente el coste de memoria como trade-off importante|
-> 
-> **Cierre: Ideas de Diseño (8.8)**
-> 
+### X. Tabla Comparativa de Arquitecturas y Cierre con Ideas de Diseño
+#### 1. Tabla Comparativa
+
+|Arquitectura|Idea Estructural|Cómo Reduce Coste/Parámetros|Nota del Material|
+|---|---|---|---|
+|AlexNet (8.1)|5 conv + 2 FC ocultas grandes + ReLU + dropout|Coste alto en FC (matrices enormes); regulariza con dropout|Se reescala a 224×224 en Fashion-MNIST “por fidelidad”, aunque es ineficiente|
+|VGG (8.2)|Diseño por **bloques**: varias 3×3 antes de _pooling_|Bloques repetibles; familias con _trade-off_; pero computacionalmente exigente|VGG-11 como ejemplo de familia parametrizada por `arch`|
+|NiN (8.3)|**MLP por parche** con 1×1 conv + **global average pooling**|Elimina FC gigantes → muchos menos parámetros|_Global average pooling_ como sustitución directa de FC final|
+|GoogLeNet (8.4)|**Multi-rama** (Inception), patrón stem–body–head|Control de coste vía diseño de ramas y reducciones intermedias|Se destaca como diseño deliberado para precisión con menor coste|
+|ResNet / ResNeXt (8.6)|**Bloques residuales** (atajo identidad + rama residual); ResNeXt añade **grupos**|ResNet facilita optimizar redes muy profundas sin “pagar” en parámetros por el atajo; ResNeXt explota **cardinalidad** vía convoluciones agrupadas para ganar capacidad con coste controlado|ResNeXt se formula como agregación homogénea (vía _grouped conv_) sobre el bloque residual|
+|DenseNet (8.7)|Conectividad **densa por concatenación**: cada capa ve todas las previas|Reutiliza _features_ → eficiencia en parámetros; pero puede ser muy exigente en **memoria GPU** por concatenaciones|Se subraya explícitamente el coste de memoria como _trade-off_ importante|
+#### 2. Cierre: Ideas de Diseño (8.8)
 > - Plantilla **stem–body–head** y descomposición del _body_ en **stages** (bajando resolución progresivamente).
->     
-> - Definir un **espacio de diseño** con hiperparámetros claros por stage: (c_i) (canales), (d_i) (bloques), (g_i) (grupos), (k_i) (bottleneck).
->     
+> - Definir un **espacio de diseño** con hiperparámetros claros por stage: $c_i$ (canales), $d_i$ (bloques), $g_i$ (grupos), $k_i$ (bottleneck).
 > - Evitar búsqueda exhaustiva: evaluar **distribuciones de redes** (no una sola red) y comparar mediante CDF/empirical CDF.
->     
-> - Reducir el espacio sin perder rendimiento: **atar** (k_i) y (g_i) entre stages; imponer **monotonía** de ancho/profundidad entre stages (mejora según comparación de CDFs).
->     
-> - RegNet: anchos que crecen aproximadamente lineal con el índice de bloque ((c_j\approx c_0+c_a j)), aproximados por tramos por stage; recomendación empírica de (k=1) (sin bottleneck); extensión a RegNetY con SE.
->     
+> - Reducir el espacio sin perder rendimiento: **atar** $k_i$ y $g_i$ entre stages; imponer **monotonía** de ancho/profundidad entre stages (mejora según comparación de CDFs).
+> - RegNet: anchos que crecen aproximadamente lineal con el índice de bloque $(c_j\approx c_0+c_a j)$, aproximados por tramos por stage; recomendación empírica de $k=1$ (sin bottleneck); extensión a RegNetY con SE.
 > - Cierre global: se contrasta la utilidad de sesgos inductivos de CNNs con la escalabilidad y rendimiento actual de Transformers en visión a gran escala.
 
-##### ALTERNATIVA
+##### ALTERNATIVA SIN TABLA
 #### Resumen Comparativo de Arquitecturas y Cierre con Ideas de Diseño
 > **Arquitecturas (8.1–8.4, 8.6, 8.7): Qué Aporta Cada Una**
-> 
 > - **AlexNet (8.1)**  
 >   - Plantilla: 5 conv + 2 fully-connected ocultas grandes + ReLU + dropout.  
 >   - Punto crítico del material: las fully-connected finales son el “talón de Aquiles” por eficiencia (matrices enormes; coste notable en memoria y MFLOPs).  
 >   - Observación del texto: pese a muchísimos parámetros frente al tamaño del dataset del ejemplo, hay **poco overfitting** por regularización (dropout).
-> 
 > - **VGG (8.2)**  
->   - Idea estructural: diseñar con **bloques repetibles** (varias 3×3 + ReLU antes de max-pooling).  
+>   - Idea estructural: diseñar con **bloques repetibles** (varias $3×3$ + ReLU antes de max-pooling).  
 >   - Aporte: preferencia por redes **profundas y estrechas**; y VGG se presenta como **familia** parametrizable con trade-off velocidad–precisión.
-> 
 > - **NiN (8.3)**  
->   - Idea: 1×1 para no linealidad local por canal + **global average pooling** al final.  
+>   - Idea: $1×1$ para no linealidad local por canal + **global average pooling** al final.  
 >   - Efecto: elimina fully-connected gigantes; el texto destaca que así tiene **dramáticamente menos parámetros** (aunque puede aumentar tiempo de entrenamiento).
-> 
 > - **GoogLeNet / Inception (8.4)**  
 >   - Idea: concatenar **múltiples ramas** con kernels distintos para evitar elegir uno solo.  
 >   - Discusión del material: es **más barato de computar** que predecesores y mejora precisión; marca el inicio de diseño deliberado y experimentación a nivel de **bloque**.
-> 
-> - **ResNet / ResNeXt (8.6)**  
->   - ResNet: bloque residual aprende g(x)=f(x)−x y suma con x, facilitando aprender identidad y entrenar redes profundas.  
->   - ResNeXt: grouped convolutions con **reducción g×** en coste y parámetros, más 1×1 para mezclar entre grupos (bottleneck “sandwich”).
-> 
+> - **ResNet / ResNeXₜ (8.6)**  
+>   - ResNet: bloque residual aprende $g(x)=f(x)−x$ y suma con $x$, facilitando aprender identidad y entrenar redes profundas.  
+>   - ResNeXt: grouped convolutions con **reducción g×** en coste y parámetros, más $1×1$ para mezclar entre grupos (bottleneck “sandwich”).
 > - **DenseNet (8.7)**  
 >   - Idea: conexiones densas por **concatenación** (cada capa ve todas las previas).  
 >   - Trade-off explícito del material: reutiliza features y es computacionalmente eficiente, pero induce **alto consumo de memoria GPU** por concatenaciones (y puede requerir implementaciones más eficientes en memoria).
-> 
 > **Cierre de Diseño (8.8): De Arquitecturas a Espacios**
-> 
 > - Plantilla base: **stem–body–head**, con el body organizado por **stages** que reducen resolución progresivamente.  
-> - Definir un **espacio de diseño** con hiperparámetros por stage (anchos cᵢ, profundidades dᵢ, grupos gᵢ, bottleneck ratios kᵢ) y reconocer que el espacio es enorme.  
+> - Definir un **espacio de diseño** con hiperparámetros por stage (anchos $c_i$, profundidades $d_i$, grupos $g_i$, bottleneck ratios $k_i$) y reconocer que el espacio es enorme.  
 > - Idea metodológica: evitar buscar “una aguja” y comparar elecciones mediante **distribuciones de error** (CDF / empirical CDF), para poder simplificar el espacio sin perder rendimiento.  
-> - Resultado: principios tipo RegNet (atar ciertos hiperparámetros, imponer monotonicidad de anchos/profundidades, y ejemplo concreto RegNetX32 con k=1, g=16, stem_channels=32, etc.).
+> - Resultado: principios tipo RegNet (atar ciertos hiperparámetros, imponer monotonicidad de anchos/profundidades, y ejemplo RegNetX32 con $k=1,$ $g=16,$ $stem\_channels=32,$ $etc.$). 
+
