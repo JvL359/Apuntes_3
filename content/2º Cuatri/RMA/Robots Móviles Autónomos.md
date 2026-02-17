@@ -1,4 +1,6 @@
 - [[Tema 1 - Introducción a la Robótica]]
 - [[Tema 2 - ROS]]
 - [[Tema 3 - Percepción]]
+- [[Tema 4 - Cinemática]]
+- [[Tema 5 - Localización]]
 - [[Guía Docente - RMA]]

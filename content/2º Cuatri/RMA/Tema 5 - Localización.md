@@ -1,0 +1,1 @@
+pg ~30, si nos falta algo, se hace con maxima verosimilitud y se coge lo que la minimice
