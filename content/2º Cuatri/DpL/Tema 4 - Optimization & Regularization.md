@@ -54,3 +54,5 @@
 ###### 3.2. Opción B
 > Normalización -> Convolución -> ReLU
 > Aquí se evita el problema de que directamente la mitad de la información se vuelva nula
+
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
