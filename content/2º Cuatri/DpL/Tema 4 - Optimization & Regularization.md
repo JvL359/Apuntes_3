@@ -23,3 +23,21 @@
 > Este tiene dos versiones ADAM y ADAMW, el W es por que incluye un término de los pesos en la función de pérdida imitando regularización L2.
 ##### PRACTICA 3
 > No tocar estos parámetros de optimización hasta tener el modelo bien avanzado porque se supone que ya están bien conseguidos.
+
+### II. Overfitting y Underfitting
+#### 1. Balance
+> En general lo que pasa con los modelos es que los modelos simples sean underfitting, y cuando empleamos modelos más complejos se tiende al overfitting, que esto hace que la capacidad de generalización baje. Por lo que hay que encontrar un término medio.
+> Vamos a tener dos errores:
+> - bias -> tenemos un sesgo en el modelo y fallan en las predicciones consistentemente (under)
+> - variance -> aprende cada dato sin conseguir generalización (overe)
+> Al conseguir disminuir uno, aumentamos el otro, esto se conoce como bias variance trade of.
+> Para estabilizarlos hay que conseguir que el modelo no se aprenda los datos "de memoria".
+#### 2. Normalización
+> Para la prevención de los vanishing y exploding gradients, podemos hacer normalización para conseguir que aunque tengamos datos con valores muy bajos o muy distintos (?)
+> Para la detección de estos, podemos ver que la función de perdida se va hacia arriba (con un exploding), y con los vanishing la función de pérdida se queda estática. 
+###### 2.1. Batch-Norm
+> Vamos a normalizar en el entrenamiento (y no en validacion o test) por canal sobre cada batch. Cuando lleguen en validación nuevas imágenes, se tienen guardados unos valores de media y desviación que se han ido actualizando con running average. 
+> Aquí cuanto mayor sea el batch size mejor porque así generaliza mejor en términos de elegir valores representativos de los parámetros.
+> Beneficios: escalar bien los inputs (outliers, ...), escalar activaciones según vamos pasando capas para intentar prevenir problemas de gradiente, y a regularizar la red (prevenir overfitting).
+> Malo: mezcla la información del gradiente de varios samples, problemas por propagación de NaNs o valores no representativos, se propaga todo, gradiente malo, activación, valores, ...
+> 
