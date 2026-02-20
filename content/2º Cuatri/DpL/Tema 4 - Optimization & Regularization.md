@@ -51,3 +51,6 @@
 ###### 3.1. Opción A
 > Convolución -> Normalización -> ReLU
 > Esto tiene le problema de que si muchos valores son negativos, después de la ReLU esos valores se vuelven 0 y se pierde la ~mitad de la información.
+###### 3.2. Opción B
+> Normalización -> Convolución -> ReLU
+> Aquí se evita el problema de que directamente la mitad de la información se vuelva nula
