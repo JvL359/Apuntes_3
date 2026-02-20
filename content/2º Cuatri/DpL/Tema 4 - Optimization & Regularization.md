@@ -54,5 +54,57 @@
 ###### 3.2. Opción B
 > Normalización -> Convolución -> ReLU
 > Aquí se evita el problema de que directamente la mitad de la información se vuelva nula
+###### 3.3. Decisión
+> Entre estas dos A es más popular y B es más fácil. Pero todo esto es experimental.
 
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+**Regularización**
+
+### III. Data Augmentation
+#### 1. Señales de Overfitting
+> Al repetir una imagen pero con una transformación simple, y que esta sea mal clasificada significa que el modelo se está aprendiendo las imágenes pixel a pixel y no las características.
+#### 2. Solución
+> Añadir aleatoriamente al dataset imágenes transformadas para mejorar la capacidad de generalización. Lo que queremos es que el modelo aprenda bien las características de las imágenes bien. Para esto una buena práctica es semi entrenar el modelo con el dataset extendido, y terminar de entrenarlo con un dataset reducido para el coste de ejecución.
+> Esta solución, generalmente solo se aplica a imágenes, en otros dominios se añade ruido a los datos para conseguir que el accuracy suba y que le sea más dificil al modelo hacer overfitting. El modelo solo recibe la transformada (si toca).
+### IV. Early Stopping
+#### 1. Cuando parar
+> Aunque el error de entrenamiento al seguir iterando vaya bajando, es posible que llegue un punto (overfitting) en el que el de validación en vez de seguir bajando también, empezará a subir. Es importante tener en cuenta el parámetro de paciencia, que son las épocas que hay que esperar para ver si sigue mejorando. Otra cosa parecida (como curiosidad) es guardar checkpoints del estado del modelo durante el entrenamiento, que se pueden reutilizar.
+> En este caso, parar demasiado pronto, puede quedarse en un mínimo local y no global en validación.
+#### 2. DropOut
+> En las capas de cualquier red tenemos muchas neuronas interconectadas, que esto hace que pueda haber mucha información redundante y que esto le lleve a memorizar y no a aprender. El dropout consiste en apagar/desactivar (pesos a 0) neuronas aleatoriamente entre iteraciones para forzar al modelo a aprender varios caminos posibles. Aquí hay dos comportamientos:
+> - train -> se desactivan aleatoriamente según una probabilidad en cada iteración
+> - val -> si se desactivan el modelo no sería determinista, por lo que no se hace. Al hacerlo, se convierte la red en una red bayesiana.
+> Esto hace que el modelo sea más robusto en validación.
+> Un problema aquí es que como en validación le llegan las activaciones de todas las neuronas, la activación media en validación sea mayor que la de training, y esto hay que corregirlo, ya que es fácil que luego clasifique mucho peor. Para esto lo que hay que hacer es un escalado en training, que es 1/1-P(desactivar), con el que se consigue que de media, sea mejor. Por ejemplo si en el train hay solo 60 activaciones de 100, se escala como 60 * 1 / 1 - 0.4.
+> Esta técnica se elige por capa, no en toda la red, y normalmente solo en las activaciones y no en las lineales.
+
+### V. Residual Connections
+#### 1. Profundidad
+> Para resolver el problema de la profundidad (hay un punto donde entrena peor o ni entrena al aumentar el número de capas), con normalización el máximo de profundidad pasa de 12-16 a 20-30, que sigue siendo pequeño. Esta técnica lo que hace es sumar la entrada a la salida, por lo que es más dificil que los gradientes se vuelvan 0. Se suma tal cual, no hay ponderación, y con esto el tamaño del input y el output tienen la misma dimensión. También se puede hacer en vez de entre capas, se puede hacer entre bloques. Con esto pasamos a 1000 capas. Para aplicarlas se puede poner en varias capas, se puede poner el batch-norm primero, hay varias combinaciones.
+
+### VI. Learning Rate Schedulers
+#### 1. Optimizers
+> A lo mejor la variablidad del learning rate aquí no es suficiente como para que sea notable. Entonces se pueden hacer schedulers que cambian el learning rate sin modificar el estado del optimizer.
+#### 2. Step-LR
+> A partir de tantas épocas se baja un orden de magnitud (de manera fija) el learning rate para que el modelo no se estanque y se agilice el proceso de entrenamiento. 
+#### 3. Multi-Step
+> Igual que el anterior pero de diferentes longitudes
+#### 4. Exponencial
+> Igual pero caida exponencial del lr
+#### 5. Reduce-on-Plateau
+> Cuando se estanca reduce
+#### 6. WarmUp
+> Con modelos complejos y muchos parámetros, con un lr inicial alto es fácil que el gradiente se vaya a la mierda, con esta técnica se empieza con un valor más pequeño del "inicial" y luego ya si se sube.
+### VII. Regularización
+#### 1. L(w)
+> Con esto lo que hacemos es modificar la función de pérdida añadiendo el término de regularización de los pesos. Así se consigue que la función objetivo tenga también que minimizar los pesos a un valor relativamente pequeño, y esto ayuda a que el modelo generalice mejor y que no se memorice el modelo.
+> El weight decay no es lo mismo que la regularizacion. El primero se refiere a cuando voy a actualizar el peso se añade un término al gradiente, que cuando el gradiente tiene una velocidad o término de momento, no es lo mismo que añadir regularización al modelo. 
+
+### VIII. Ensambles
+#### 1. Introducción
+> Se entrenan múltiples modelos con distintas inicializaciones y se hace la media de los resultados. Aunque no se usan muy usados, dan un 1-3% de accuracy extra, y es más dificil que el modelo final tenga overfitting.
+
+### IX. Transfer Learning
+#### 1. Como entrenar modelos grandes con datasets pequeños
+> Primero se entrena un modelo con los mismos datos de entrada aunque la tarea sea diferente, y luego hacemos fine tuning cambiando la última capa para clasificar o solo entrenar la ultima capa o entrenar con un lr muy bajo (para evitar catastrophy forgetting). 
+> "Transferir el conocimiento de un modelo grande a la tarea de un modelo pequeño".
