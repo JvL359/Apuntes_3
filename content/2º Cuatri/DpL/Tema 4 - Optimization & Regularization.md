@@ -40,4 +40,14 @@
 > Aquí cuanto mayor sea el batch size mejor porque así generaliza mejor en términos de elegir valores representativos de los parámetros.
 > Beneficios: escalar bien los inputs (outliers, ...), escalar activaciones según vamos pasando capas para intentar prevenir problemas de gradiente, y a regularizar la red (prevenir overfitting).
 > Malo: mezcla la información del gradiente de varios samples, problemas por propagación de NaNs o valores no representativos, se propaga todo, gradiente malo, activación, valores, ...
-> 
+###### 2.2. Layer-Norm
+> Vamos a normalizar todos los canales de un solo batch. Esto tiene sentido para que no tengamos el problema de los NaNs, no se traspasa a otras imágenes. Funciona bien para secuencias.
+###### 2.3. Instance-Norm
+> Esta se utiliza para otras aplicaciones de cv, y solo se normaliza un canal. Esto quita activaciones outlier en cada canal para poder "mezclar" imágenes. Esto en clasificación no se usa.
+###### 2.4. Group-Norm
+> Este se utiliza cuando el batch-norm no sirve porque el tamaño del batch es muy pequeño (layer e instance son un caso particular de group: 1 solo grupo y 1 grupo por canal), esto sirve para coger x canales del grupo.
+> Este es más estable que instance-norm (como todos).
+#### 3. Donde añadir
+###### 3.1. Opción A
+> Convolución -> Normalización -> ReLU
+> Esto tiene le problema de que si muchos valores son negativos, después de la ReLU esos valores se vuelven 0 y se pierde la ~mitad de la información.
