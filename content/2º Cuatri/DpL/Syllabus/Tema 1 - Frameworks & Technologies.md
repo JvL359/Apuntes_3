@@ -13,9 +13,8 @@
 > El capítulo se plantea como una **introducción rápida** a los fundamentos necesarios para seguir la mayoría del contenido técnico posterior del libro.
 
 ### II. Manipulación de Datos
-
 #### 1. Tensores Como Estructura Central
-> Para trabajar con datos en el ordenador se necesitan dos cosas: **i) adquirir datos** y **ii) procesarlos**una vez dentro del sistema.  
+> Para trabajar con datos en el ordenador se necesitan dos cosas: **i) adquirir datos** y **ii) procesarlos** una vez dentro del sistema.  
 > El fragmento introduce los **arreglos n-dimensionales**, también llamados **tensores**.
 > - **Vector**: tensor 1D (un eje).
 > - **Matriz**: tensor 2D (dos ejes).
@@ -26,7 +25,6 @@
 > - Uso de **GPU** para acelerar cómputo numérico (mientras NumPy corre solo en CPU).
 
 ### III. Creación y Forma de Tensores en PyTorch
-
 #### 1. Importación de la Librería
 > El fragmento usa PyTorch y recuerda que el nombre del paquete es `torch`.
 ```python
@@ -91,9 +89,9 @@ torch.tensor([[2, 1, 4, 3],
 #### 1. Operaciones Elemento a Elemento
 > Tras construir tensores y acceder a sus elementos, el fragmento introduce operaciones matemáticas.  
 > **Operaciones elemento a elemento**: aplican una operación escalar a cada elemento.
-> - Operadores escalares unarios: firma (f: \mathbb{R} \rightarrow \mathbb{R}).
-> - Operadores escalares binarios: firma (f: \mathbb{R}, \mathbb{R} \rightarrow \mathbb{R}).  
->     Levantar (lift) un operador escalar binario a vectores del mismo tamaño: para (c = F(u, v)), cada componente cumple (c_i \leftarrow f(u_i, v_i)).  
+> - Operadores escalares unarios: firma $f: \mathbb{R} \rightarrow \mathbb{R}$.
+> - Operadores escalares binarios: firma $f: \mathbb{R}, \mathbb{R} \rightarrow \mathbb{R}$.  
+>     Levantar (lift) un operador escalar binario a vectores del mismo tamaño: para $c = F(u, v)$, cada componente cumple $c_i \leftarrow f(u_i, v_i)$.  
 >     Operadores aritméticos estándar `+`, `-`, `*`, `/`, `**` están disponibles como operaciones elemento a elemento para tensores de igual forma.
 ```python
 x = torch.tensor([1.0, 2, 4, 8])
@@ -114,7 +112,7 @@ torch.cat((X, Y), dim=0), torch.cat((X, Y), dim=1)
 ```
 > El texto explica el efecto sobre longitudes: al concatenar por filas, se suman longitudes del eje 0; por columnas, se suman longitudes del eje 1.
 #### 4. Tensores Lógicos y Reducciones
-> Ejemplo de tensor binario (booleano) con una comparación: `X == Y` evalúa igualdad por posición ((i, j)), dando `True` si son iguales y `False` si no.  
+> Ejemplo de tensor binario (booleano) con una comparación: `X == Y` evalúa igualdad por posición $(i, j)$, dando `True` si son iguales y `False` si no.  
 > Sumar todos los elementos: `X.sum()` devuelve un tensor con un único elemento.
 
 ### VI. Broadcasting
@@ -182,7 +180,6 @@ a, a.item(), float(a), int(a)
 > - Describir el procedimiento de broadcasting en dos pasos y reconocer el patrón                               ($3\times1 + 1\times2 \rightarrow 3\times2$).
 > - Justificar por qué `+=` y `Y[:] = ...` ahorran memoria frente a `Y = Y + X` (según lo explicado con `id()`).
 > - Convertir entre PyTorch y NumPy y saber que comparten memoria (implicación: cuidado con in-place).
-
 
 ---
 
