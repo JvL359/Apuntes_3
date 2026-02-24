@@ -1,3 +1,6 @@
 - [[Tema 1 - Language Models I]]
 - [[Tema 2 - Text Classification]]
+- [[Tema 3 - Word Embeddings]]
+- [[Tema 4 - Neural Language Models]]
+- [[Tema 5 - Recurrent Neural Networks]]
 - [[Guía Docente - NLP]]
