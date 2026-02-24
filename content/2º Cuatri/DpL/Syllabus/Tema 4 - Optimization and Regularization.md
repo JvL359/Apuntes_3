@@ -393,3 +393,433 @@ class DropoutMLP(d2l.Classifier):
 >     
 > - Inventar otra técnica de ruido por capa y evaluar si supera a dropout en Fashion-MNIST (arquitectura fija).
 
+## D2DpL 12. Optimization Algorithms
+
+### I. Optimización y Dificultades en Deep Learning
+
+#### 1. Qué Se Optimiza y Qué Problemas Aparecen
+
+> En deep learning, **minimizar el error de entrenamiento** no garantiza obtener el mejor conjunto de parámetros para **generalizar**. Además, la optimización puede ser difícil porque:
+> 
+> - puede haber **muchos mínimos locales**;
+>     
+> - suele haber aún más **puntos silla** (porque en alta dimensión es probable que el Hessiano tenga autovalores negativos y positivos);
+>     
+> - pueden aparecer **gradientes evanescentes**, p. ej. en (f(x)=\tanh(x)), donde (f'(x)=1-\tanh^2(x)) puede ser muy pequeño (ej. (f'(4)=0.0013)), haciendo que el aprendizaje se estanque.
+>     
+> 
+> El material enfatiza que, en la práctica, **no siempre hace falta el “mejor” mínimo**: soluciones locales o aproximadas pueden ser útiles, pero necesitamos **algoritmos robustos** y **buenas decisiones** (p. ej. activaciones tipo ReLU frente a saturación).
+
+#### 2. Criterio de Mínimo Local, Máximo Local y Punto Silla (Hessiano)
+
+> En un punto con **gradiente cero**:
+> 
+> - si los autovalores del Hessiano son **todos positivos** → **mínimo local**;
+>     
+> - si son **todos negativos** → **máximo local**;
+>     
+> - si hay **positivos y negativos** → **punto silla**.
+>     
+> 
+> El material subraya que, en alta dimensión, los **puntos silla** son especialmente probables.
+
+---
+
+### II. Convexidad Como Herramienta de Análisis
+
+#### 1. Por Qué Convexidad Importa Aquí
+
+> Aunque la mayoría de problemas reales en deep learning **no son convexos**, el material usa convexidad para **motivar** y **entender** algoritmos de optimización con más detalle (y para justificar resultados teóricos en escenarios controlados).
+
+#### 2. Propiedades Clave y Consecuencias
+
+> Resumen de hechos que usa el capítulo:
+> 
+> - **Intersección** de conjuntos convexos es convexa; **unión** en general no.
+>     
+> - **Jensen**: la **esperanza** de una función convexa es (\ge) que la función convexa de la esperanza.
+>     
+> - Si (f) es dos veces derivable: (f) es convexa **ssi** su **Hessiano** es **semidefinido positivo**.
+>     
+> - Restricciones convexas pueden incorporarse vía **Lagrangiano**; en la práctica, a menudo se añaden como **penalización** al objetivo.
+>     
+> - **Proyecciones**: llevan un punto al **más cercano** dentro de un conjunto convexo (útil, p. ej., para imponer esparsidad proyectando sobre una **bola (\ell_1)**).
+>     
+
+---
+
+### III. Descenso por Gradiente
+
+#### 1. Idea General y Limitación Práctica
+
+> El capítulo sitúa el **descenso por gradiente** como el extremo “determinista”: calcular gradiente usando **todo el dataset** y actualizar parámetros en cada paso.
+> 
+> Limitación práctica destacada al compararlo con métodos estocásticos: cuando los datos son **redundantes o muy similares**, usar todo el conjunto puede ser **poco eficiente** (en coste por iteración).
+
+---
+
+### IV. Descenso por Gradiente Estocástico (SGD)
+
+#### 1. Actualización Estocástica y Efecto del Ruido
+
+> En SGD, el gradiente se calcula con **una observación** (o una muestra) por paso. En el ejemplo del capítulo, esto genera trayectorias **más ruidosas** que en descenso por gradiente (incluso cerca del mínimo), debido a la incertidumbre del gradiente instantáneo.
+> 
+> Consecuencia práctica que enfatiza el material: con **tasa de aprendizaje constante**, el ruido puede impedir “refinar” la solución; la alternativa es **ajustar (\eta)** durante el entrenamiento.
+
+#### 2. Tasa de Aprendizaje Dinámica (Schedules) En SGD
+
+> El capítulo introduce estrategias básicas para (\eta(t)):
+> 
+> - **por tramos (piecewise constant)**:  
+>     [  
+>     \eta(t)=\eta_i \quad \text{si } t_i \le t \le t_{i+1}  
+>     ]
+>     
+> - **decaimiento exponencial**:  
+>     [  
+>     \eta(t)=\eta_0 e^{-\lambda t}  
+>     ]
+>     
+> - **decaimiento polinómico**:  
+>     [  
+>     \eta(t)=\eta_0 (\beta t + 1)^{-\alpha}  
+>     ]  
+>     El material comenta que el exponencial puede **decaer demasiado rápido** (parando “prematuramente”), y destaca que el polinómico con (\alpha=0.5) es una elección popular en convexos por propiedades teóricas.
+>     
+
+#### 3. Muestreo con y sin Reemplazo (Eficiencia de Datos)
+
+> Aunque en una formulación “ideal” se podría muestrear de una distribución discreta sobre el dataset, el material aclara que en la práctica suele iterarse **sin reemplazo** (una permutación por época).
+> 
+> Razón: muestrear **con reemplazo** reduce eficiencia de datos. El capítulo muestra que, si eliges (n) veces con reemplazo:
+> 
+> - probabilidad de seleccionar un ejemplo (i) **al menos una vez**:  
+>     [  
+>     P(\text{elegir } i)=1-(1-1/n)^n \approx 1-e^{-1}\approx 0.63  
+>     ]
+>     
+> - probabilidad de seleccionar un ejemplo **exactamente una vez**:  
+>     [  
+>     \binom{n}{1}\frac{1}{n}\left(1-\frac{1}{n}\right)^{n-1} \approx e^{-1}\approx 0.37  
+>     ]  
+>     Conclusión del material: se prefiere **sin reemplazo** (y es el **default** del libro), recorriendo el dataset en orden aleatorio distinto en cada época.
+>     
+
+#### 4. Resumen de Resultados y Limitaciones Teóricas
+
+> Resumen del capítulo para SGD:
+> 
+> - En **convexo**, con una familia amplia de tasas de aprendizaje, SGD **converge** al óptimo.
+>     
+> - En deep learning (no convexo), el análisis convexo sirve como **intuición**: hay que **reducir** (\eta) progresivamente, **pero no demasiado rápido**.
+>     
+> - Problemas típicos: (\eta) **muy pequeña** (progreso lento/subóptimo) o **muy grande** (divergencia); se suele encontrar una buena (\eta) tras **múltiples experimentos**.
+>     
+> - Con datasets grandes, cada iteración de gradiente completo es cara: se prefiere SGD.
+>     
+> - En no convexo no hay garantías generales (p. ej., número de mínimos locales podría crecer exponencialmente).
+>     
+
+---
+
+### V. SGD con Minibatches
+
+#### 1. Motivación: “Entre Dos Extremos”
+
+> El material presenta minibatches como un punto intermedio:
+> 
+> - Gradiente completo: **computacionalmente caro** por paso.
+>     
+> - SGD puro: menos eficiente en hardware porque CPU/GPU no explotan bien **vectorización**.
+>     
+> 
+> Minibatch SGD busca **eficiencia estadística** (ruido útil) y **eficiencia computacional** (vectorización).
+
+#### 2. Vectorización, Cachés y Localidad
+
+> La decisión de usar minibatches se justifica por eficiencia de cómputo, especialmente al paralelizar (múltiples GPUs/servidores). El resumen enfatiza:
+> 
+> - la **vectorización** reduce overhead del framework;
+>     
+> - mejora **localidad de memoria y cachés** (CPU/GPU).
+>     
+
+#### 3. Resumen Operativo de Minibatch SGD
+
+> Resumen del capítulo:
+> 
+> - existe un trade-off entre **eficiencia estadística** (más estocástico) y **eficiencia computacional** (batches grandes).
+>     
+> - en minibatch SGD se procesan batches obtenidos por **permutación aleatoria** del training set: cada observación se procesa **una vez por época**, en orden aleatorio.
+>     
+> - es aconsejable **decaer** la tasa de aprendizaje durante entrenamiento.
+>     
+> - medido en **tiempo de reloj**, minibatch SGD puede ser más rápido que SGD puro y que gradiente completo para alcanzar riesgos pequeños.
+>     
+
+---
+
+### VI. Momentum
+
+#### 1. Intuición y Ecuaciones
+
+> Momentum agrega un **promedio móvil exponencial (leaky average)** de gradientes para acelerar convergencia (especialmente en direcciones “consistentes”) y suavizar oscilaciones.
+> 
+> El material lo escribe como:  
+> [  
+> v_t \leftarrow \beta v_{t-1} + (1-\beta) g_t,\qquad  
+> x_t \leftarrow x_{t-1} - \eta v_t  
+> ]  
+> donde (g_t) es el gradiente del paso y (\beta) controla cuánto “histórico” se acumula.
+
+#### 2. Lectura Como Promedio Ponderado y “Memoria Efectiva”
+
+> El capítulo interpreta el leaky average como pesos geométricos sobre el pasado; la “cantidad efectiva” de historial está relacionada con (\frac{1}{1-\beta}) (cuanto más cerca de 1, más memoria).
+
+---
+
+### VII. AdaGrad
+
+#### 1. Idea Central: Escalado por Coordenada
+
+> AdaGrad adapta la tasa de aprendizaje **por coordenada** acumulando el cuadrado del gradiente en un estado (s). En la implementación “from scratch” del capítulo:  
+> [  
+> s \leftarrow s + g^2,\qquad  
+> x \leftarrow x - \eta \frac{g}{\sqrt{s+\varepsilon}}  
+> ]  
+> con (\varepsilon) pequeño (p. ej. (10^{-6})) por estabilidad numérica.
+
+#### 2. Cuándo Ayuda y Cuándo Puede Fallar
+
+> Resumen del material:
+> 
+> - reduce (\eta) de forma dinámica y **por coordenada**;
+>     
+> - compensa coordenadas con gradientes grandes mediante un escalado que reduce el paso;
+>     
+> - útil como proxy de precondicionamiento cuando el problema es “desigual” por coordenadas;
+>     
+> - especialmente efectivo en **features dispersas**, donde ciertas coordenadas aparecen raramente;
+>     
+> - en deep learning puede ser **demasiado agresivo** reduciendo (\eta) (se enlaza con mejoras posteriores).
+>     
+
+---
+
+### VIII. RMSProp
+
+#### 1. Motivación Frente a AdaGrad
+
+> El problema clave que marca el capítulo: en AdaGrad, (s_t) crece sin cota al acumular (g_t^2), y la tasa efectiva decrece aproximadamente como (O(t^{-1/2})), apropiado en convexos pero a veces no ideal en no convexos.
+> 
+> RMSProp introduce un promedio móvil exponencial en (s_t) para “olvidar” pasado:  
+> [  
+> s_t \leftarrow \gamma s_{t-1} + (1-\gamma) g_t^2,\qquad  
+> x_t \leftarrow x_{t-1} - \eta \frac{g_t}{\sqrt{s_t+\varepsilon}}  
+> ]  
+> con (\varepsilon) típico (10^{-6}).
+
+#### 2. Resumen del Material
+
+> RMSProp:
+> 
+> - es similar a AdaGrad (usa (g^2) para escalar coordenadas),
+>     
+> - comparte con momentum el **leaky averaging**, pero aplicado al **precondicionador**,
+>     
+> - requiere que el experimentador **programe** la tasa de aprendizaje,
+>     
+> - (\gamma) determina “cuánta historia” se conserva al ajustar la escala por coordenada.
+>     
+
+---
+
+### IX. Adadelta
+
+#### 1. Idea: Calibrar el Paso con el Historial de Cambios
+
+> Adadelta se presenta como variante de AdaGrad que reduce cuán “agresiva” es la adaptatividad por coordenada y, “tradicionalmente”, se describe como no teniendo tasa de aprendizaje explícita.
+> 
+> El capítulo define dos estados:
+> 
+> - (s_t): leaky average del segundo momento del gradiente,
+>     
+> - (\Delta x_t): leaky average del segundo momento del **cambio** en parámetros.
+>     
+> 
+> Ecuaciones:  
+> [  
+> s_t = \rho s_{t-1} + (1-\rho) g_t^2  
+> ]  
+> [  
+> x_t = x_{t-1} - g'_t  
+> ]  
+> [  
+> g'_t = \frac{\sqrt{\Delta x_{t-1}+\varepsilon}}{\sqrt{s_t+\varepsilon}}, g_t  
+> ]  
+> [  
+> \Delta x_t = \rho \Delta x_{t-1} + (1-\rho) (g'_t)^2  
+> ]  
+> con (\varepsilon) (p. ej. (10^{-5})) para estabilidad.
+
+#### 2. Resumen del Material
+
+> - Adadelta “no tiene” (\eta) explícita: usa el propio **ritmo de cambio** como calibración.
+>     
+> - requiere **dos** variables de estado (segundos momentos del gradiente y del cambio).
+>     
+> - usa leaky averages para estimar estadísticas relevantes de forma continua.
+>     
+
+---
+
+### X. Adam y Yogi
+
+#### 1. Adam: Unificación de Ideas Previas
+
+> El material lo presenta como combinación de:
+> 
+> - minibatches (eficiencia por vectorización),
+>     
+> - momentum (historial de gradientes),
+>     
+> - escalado por coordenada tipo AdaGrad,
+>     
+> - desacople entre escalado y (\eta) tipo RMSProp.
+>     
+> 
+> Define estados (EWMA):  
+> [  
+> v_t \leftarrow \beta_1 v_{t-1} + (1-\beta_1) g_t,\qquad  
+> s_t \leftarrow \beta_2 s_{t-1} + (1-\beta_2) g_t^2  
+> ]  
+> con valores típicos (\beta_1=0.9), (\beta_2=0.999).
+> 
+> Como (v_0=s_0=0) sesga al inicio, introduce **bias correction**:  
+> [  
+> \hat v_t=\frac{v_t}{1-\beta_1^t},\qquad \hat s_t=\frac{s_t}{1-\beta_2^t}  
+> ]
+> 
+> Rescalado y update:  
+> [  
+> g'_t = \frac{\eta \hat v_t}{\sqrt{\hat s_t}+\varepsilon},\qquad  
+> x_t \leftarrow x_{t-1} - g'_t  
+> ]  
+> (con (\varepsilon) típico (10^{-6})).
+
+#### 2. Yogi: Ajuste del Segundo Momento Para Evitar Explosión
+
+> El material indica que Adam puede fallar incluso en convexos si la estimación del segundo momento (s_t) “se dispara”. Propone Yogi reescribiendo la actualización de Adam:  
+> [  
+> s_t \leftarrow s_{t-1} + (1-\beta_2)\bigl(g_t^2 - s_{t-1}\bigr)  
+> ]  
+> y sustituyendo el término por uno con signo:  
+> [  
+> s_t \leftarrow s_{t-1} + (1-\beta_2), g_t^2 \odot \operatorname{sgn}(g_t^2 - s_{t-1})  
+> ]  
+> (según el material, esto evita que la magnitud del update dependa del tamaño de la desviación).
+
+#### 3. Resumen del Material (Adam)
+
+> - Adam es una regla de actualización “robusta” que combina varias ideas previas.
+>     
+> - usa EWMA para momentum y segundo momento; aplica **bias correction**.
+>     
+> - con gradientes de alta varianza puede haber problemas de convergencia; el material menciona mitigaciones como **minibatches más grandes** o usar alternativas como **Yogi** para (s_t).
+>     
+
+---
+
+### XI. Programación de la Tasa de Aprendizaje
+
+#### 1. Por Qué Es Tan Importante Como el Algoritmo
+
+> El capítulo remarca que ajustar (\eta) puede ser tan importante como el optimizador:
+> 
+> - (\eta) grande → **divergencia**; (\eta) pequeña → entrenamiento lento o subóptimo.
+>     
+> - influye el **condition number** del problema (mencionado en relación con momentum).
+>     
+> - también importa la **tasa de decaimiento**: si (\eta) no baja, podemos “rebotar” cerca del mínimo.
+>     
+> - aparece la idea de **warmup**: no empezar con pasos grandes cuando los parámetros son aleatorios.
+>     
+> 
+> El capítulo se centra en schedulers “manejables” y muestra cómo gestionarlos con herramientas del framework.
+
+#### 2. Políticas Básicas: Por Tramos, Exponencial y Polinómica
+
+> El material lista (entre otras) estas formas típicas:
+> 
+> - piecewise constant, exponencial y polinómica (ver fórmulas en la sección de SGD).
+>     
+> 
+> Además comenta que hay muchas variantes (p. ej. alternar rates), pero el capítulo prioriza las que admiten análisis más claro (especialmente en convexos).
+
+#### 3. Schedulers Concretos del Capítulo
+
+> El capítulo introduce schedulers y da ejemplos con entrenamiento (p. ej. en Fashion-MNIST). Incluye:
+> 
+> - scheduler tipo (\eta = \eta_0 (t+1)^{-1/2}) (square-root decay) como ejemplo de scheduler “callable”.
+>     
+> - **Factor scheduler** (multiplicativo):  
+>     [  
+>     \eta_{t+1} \leftarrow \eta_t \cdot \alpha,\quad \alpha\in(0,1),\qquad  
+>     \eta_{t+1}\leftarrow \max(\eta_{\min}, \eta_t \cdot \alpha)  
+>     ]
+>     
+> - **Multi-step** (piecewise): reducir (\eta) en hitos (t\in s) con un factor (\alpha).
+>     
+
+#### 4. Cosine Scheduler y Warmup
+
+> El capítulo presenta el **cosine schedule** (Loshchilov y Hutter, 2016) para (t\in[0,T]):  
+> [  
+> \eta_t = \eta_T + \frac{\eta_0-\eta_T}{2}\bigl(1+\cos(\pi t/T)\bigr)  
+> ]  
+> y para (t>T) fija (\eta_t=\eta_T).
+> 
+> También describe **warmup**: un periodo inicial donde la tasa **aumenta** (típicamente lineal) hasta un máximo antes de “enfriarse”, para evitar divergencia inicial en arquitecturas inestables. El material señala que warmup puede combinarse con cualquier scheduler (no solo coseno).
+
+#### 5. Resumen del Material (Scheduling)
+
+> - bajar (\eta) durante entrenamiento puede mejorar precisión y, “perplejamente”, reducir overfitting.
+>     
+> - bajar (\eta) por tramos cuando el progreso se estanca funciona bien: primero converges rápido, luego reduces varianza bajando (\eta).
+>     
+> - cosine es popular en visión (sin garantía universal).
+>     
+> - warmup ayuda a evitar divergencia.
+>     
+> - la optimización afecta no solo al error de entrenamiento sino también a generalización/overfitting para el mismo error de entrenamiento.
+>     
+
+---
+
+### XII. Checklist de Repaso del Capítulo
+
+#### 1. Dominio Mínimo Operativo
+
+> Antes de dar por “controlado” el capítulo, deberías poder:
+> 
+> - Explicar por qué en deep learning aparecen **mínimos locales**, **puntos silla** y **gradientes evanescentes**, y por qué esto complica optimización.
+>     
+> - Relacionar convexidad con: Hessiano PSD, Jensen, Lagrangiano y proyecciones (y qué aporta al análisis).
+>     
+> - Distinguir **gradiente completo**, **SGD** y **minibatch SGD** (trade-off estadística vs cómputo; permutación sin reemplazo).
+>     
+> - Escribir (y justificar cuándo conviene) las reglas de actualización de:
+>     
+>     - Momentum, AdaGrad, RMSProp, Adadelta, Adam, y la modificación de Yogi para (s_t).
+>         
+> - Enumerar y comparar estrategias de **learning rate scheduling** (piecewise, exponencial, polinómico, coseno, warmup) y explicar el “por qué” práctico de bajar (\eta).
+>     
+
+#### 2. Siguiente Paso
+
+> Si quieres, en el siguiente turno puedo:
+> 
+> - convertir este resumen en un “apunte de examen” (muy compacto, solo fórmulas + cuándo usar cada método), o
+>     
+> - preparar **preguntas tipo examen** basadas en los ejercicios y resúmenes del capítulo (sin salir del material).
+>
