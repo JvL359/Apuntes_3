@@ -127,3 +127,5 @@
 > - La hipótesis distribucional conecta **contextos compartidos** con **significado compartido**.
 > - SGNS aprende embeddings resolviendo una tarea binaria y usando **negativos** para evitar soluciones triviales.
 > - Tras entrenar, se conservan los **center embeddings** como representación final; una limitación de skip-gram es que los embeddings son **estáticos** (polisemia).
+
+Los apuntes continúan en [[Tema 4 - Neural Language Models]]
