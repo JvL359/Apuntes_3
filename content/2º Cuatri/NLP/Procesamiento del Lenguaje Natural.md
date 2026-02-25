@@ -1,4 +1,4 @@
-- [[Tema 1 - Modelos de Lenguaje I (N-gramas)]]
+- [[Tema 1 - Modelos de Lenguaje I]]
 - [[Tema 2 - Text Classification I]]
 - [[Tema 3 - Word Embeddings]]
 - [[Tema 4 - Neural Language Models]]
