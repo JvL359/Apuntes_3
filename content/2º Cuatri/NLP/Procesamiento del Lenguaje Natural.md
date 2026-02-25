@@ -1,5 +1,5 @@
-- [[Tema 1 - Language Models I]]
-- [[Tema 2 - Text Classification]]
+- [[Tema 1 - Modelos de Lenguaje I (N-gramas)]]
+- [[Tema 2 - Text Classification I]]
 - [[Tema 3 - Word Embeddings]]
 - [[Tema 4 - Neural Language Models]]
 - [[Tema 5 - Recurrent Neural Networks]]
