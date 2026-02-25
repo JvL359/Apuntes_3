@@ -22,7 +22,7 @@ if __name__ == "__main__":
 > Esto ayuda a detectar errores antes de ejecutar el programa, y también fuerza a la buena práctica de no cambiar el tipo de las variables ya definidas, creando variables nuevas del nuevo tipo deseado. Aunque haya veces que no sea necesario es recomendable ponerlo en la mayor cantidad de variables posibles. 
 > Para comprobar los tipos usaremos *`my[py]`* con el comando `mypy --cache-dir=/dev/null`.
 #### 5. Pep-8 Coding
-> Usando `Black` se formateo el código para dejarlo "bonito" y bien formateado, vamos a tener un archivo `pyproject.toml` para que Black siga unas reglas fijas de formateo (esta es otra razón por la que abrir Lab1 y no Labs)
+> Usando `Black` se formatea el código para dejarlo "bonito" y bien formateado, vamos a tener un archivo `pyproject.toml` para que Black siga unas reglas fijas de formateo (esta es otra razón por la que abrir Lab1 y no Labs)
 
 > [!warning] Warning
 >  Cuidado con los entornos de anaconda, mejor usar los de python con 
@@ -30,10 +30,10 @@ if __name__ == "__main__":
 #### 6. Tipos de Métodos de Clases
 ###### 6.1. Instance Methods
 > Métodos normales que tienen la referencia `self`. Se ejecutan con `class_instance.method()`.
-###### 6.2. Static Methods
-> Métodos que no requieren de una instancia para ser llamados. Se ejecutan con `Class.method()`
-###### 6.3. Class Method
-> Métodos que RELLENAR
+###### 6.2. Class Method
+> Métodos que operan a nivel de clase y no necesitan de una instancia.
+###### 6.3. Static Methods
+> Métodos que no requieren ni de una instancia ni de atributos de clase.
 #### 7. Callable Objects
 > Requieren de la implementación de un `__call__` para poder ser llamados desde fuera.
 #### 8. Excepciones
@@ -43,15 +43,11 @@ if __name__ == "__main__":
 > - Else: Si no se ha ejecutado B, se ejecuta C
 > - Finally: Siempre se ejecuta D
 #### 9. Iteradores
-> a
+> Se usan para recorrer una secuencia. Implementan métodos \_\_iter\_\_ y \_\_next\_\_
 #### 10. Generadores
-> a
+> Es un iterador que implementa `yield`, que es como un return pero en vez de salir, para y sigue.
 #### 11. Decoradores
-> a
-
-### II. Git
-#### 1.
-
+> Funciones que añaden funcionalidad extra a otras funciones.
 
 ### III. Arrays
 #### 1. Definición
@@ -102,7 +98,7 @@ a += b # actualiza el objeto ya existente (más eficiente)
 > Si queremos sacar algo del grafo computacional se usa el `detach` que crea un tensor separado del grafo actual, creando un nuevo nodo hoja de un nuevo grafo computacional. Por ejemplo, para pasar un tensor a numpy hace falta hacer detach.
 > Los hijos de un nodo hoja que tiene el `requires_grad` en `True` también lo tienen activado.
 > **POSIBLE PREGUTNA: QUE HACE REQUIRES_GRAD : EVITAR QUE SE CALCULE O EVITAR QUE SE GUARDE -> EVITAR QUE SE GUARDE PORQUE SI QUE SE CALCULA PERO NO LO DEVUELVE.**
-> También está `retains_grad` que si está en `True` hace que no se borren los gradientes intermedios  y los guarda, se lo pones al final (de la derecha) y se auto pone en el resto.
+> También está `retains_grad` que si está en `True` hace que no se borren los gradientes intermedios y los guarda, se lo pones al final (de la derecha) y se auto pone en el resto.
 > No se permiten in-place operations con grafos porque podemos modificar un aspecto que cambia la derivada (en el += no afecta? pero en el \*= si). -- Mirar ejemplos en las diapos de cuando si o cuando no --. 
 > Ejemplo de autograd diapo 95
 
