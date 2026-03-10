@@ -64,7 +64,7 @@ if __name__ == "__main__":
 > Seguir la guía de las diapos para que no pete.
 #### 2. Tensores
 > Son unos arrays "aumentados". Para una inicialización vacía mejor usar `empty`. También tienen métodos de indexado y slicing como los arrays.
-#### 3. Almacenamiento
+#### 3. Almacenamiento y Memoria
 > Mejor usar view siempre para saber qué estamos haciendo con el tensor. Pueden almacenarse de manera contigua o no. Los contiguos almacenan la última dimensión toda seguida. Esto se modela con un `stride`, que marca los saltos a la siguiente dimensión, por ejemplo en una matriz `3x3` su stride es `(3, 1)` porque para cambiar de fila es un salto de 3 elementos y para cambiar de columna es un salto de 1 elemento.
 #### 4. View vs Clone
 > View solo se puede cuando el tensor es contiguo (stride terminado en 1: `(..., 1)`).
