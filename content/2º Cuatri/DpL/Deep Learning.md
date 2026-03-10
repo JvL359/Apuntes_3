@@ -3,7 +3,7 @@
 - [[Tema 2 - Neural Networks]]
 - [[Tema 3 - Convolutional Neural Networks]]
 - [[Tema 4 - Optimization & Regularization]]
-- [[Tema 5 - RNNs]]
+- [[2º Cuatri/DpL/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
 ### II. Resúmenes
 - [[Resumen Temas 1-4]]
 ### III. Syllabus

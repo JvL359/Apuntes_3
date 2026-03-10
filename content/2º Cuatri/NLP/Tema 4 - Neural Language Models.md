@@ -88,4 +88,4 @@
 > - Ventaja de generalización: embeddings permiten suavidad en la entrada y generalizar a contextos “parecidos”.
 > - Limitaciones: contexto acotado por ventana (no arbitrariamente largo) y generalización muy sensible al orden.
 
-Los apuntes continúan en [[Tema 5 - Recurrent Neural Networks]]
+Los apuntes continúan en [[2º Cuatri/NLP/Tema 5 - Recurrent Neural Networks]]
