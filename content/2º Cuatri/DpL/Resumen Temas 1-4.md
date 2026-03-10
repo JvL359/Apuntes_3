@@ -76,7 +76,11 @@ x[1:7:2]
 ##### 1.3. Shapes y View vs Clone
 > La **shape** indica las dimensiones del tensor, mientras que el **storage** es la memoria donde se guardan realmente sus datos. Una **view** es un tensor con distinta forma o dimensionalidad que **comparte el mismo storage** que el original, por lo que no copia datos ni reserva memoria nueva. Así, `view()` crea una nueva vista sobre los mismos datos, de modo que los cambios afectan a ambos tensores. En cambio, `clone()` crea una **copia independiente** en memoria, por lo que modificar uno no afecta al otro.
 ##### 1.4. Reshape
-> Rellenar
+> `reshape()` permite cambiar la **shape** de un tensor sin cambiar sus datos. Su funcionamiento es parecido a `view()`, pero es más flexible, ya que puede devolver **una view o una copia** dependiendo de cómo estén organizados los datos en memoria.
+> Si el tensor es **contiguo** y la nueva forma puede obtenerse ajustando únicamente los **strides**, entonces `reshape()` devuelve una **view**, sin copiar datos. En cambio, si el tensor es **no contiguo** y la nueva forma requiere reordenar los datos en memoria, `reshape()` crea una **copia** en un nuevo bloque de memoria contiguo.
+> Por esta razón, `reshape()` puede resultar ambiguo: a veces comparte almacenamiento con el tensor original y otras veces no. Si se quiere controlar este comportamiento de forma explícita, puede usarse `clone().view()` en su lugar.
+> En general, operaciones como `transpose()` pueden hacer que un tensor deje de ser contiguo, y en ese caso un `reshape()` posterior puede necesitar copiar los datos.
+> (Material: _Deep Learning Frameworks_, diapositivas “Reshape”, “Reshape Details (View vs. Copy)”, “Example: Reshape Gives a View” y “Example: Reshape Gives a Copy”)
 ##### 1.5. Indexing y Slicing
 > Rellenar
 ##### 1.6. BroadCasting
