@@ -3,6 +3,7 @@
 - [[Tema 2 - Neural Networks]]
 - [[Tema 3 - Convolutional Neural Networks]]
 - [[Tema 4 - Optimization & Regularization]]
+- [[Tema 5 - RNNs]]
 ### II. Resúmenes
 - [[Resumen Temas 1-4]]
 ### III. Syllabus
