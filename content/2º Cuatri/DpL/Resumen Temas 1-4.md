@@ -72,7 +72,7 @@ x[1:7:2]
 > Para recorrer ese almacenamiento se utilizan los **strides**, que indican cuántas posiciones en memoria hay que saltar para avanzar en cada dimensión del tensor.  
 > Por ejemplo, en una matriz de tamaño `(3,3)` el _stride_ es `(3,1)`: avanzar una fila implica saltar **3 posiciones** en memoria, mientras que avanzar una columna implica saltar **1 posición**.
 > Además, un tensor puede empezar en una posición concreta del almacenamiento mediante un **offset**, que indica el índice inicial dentro del _storage_.
-> Un tensor es **contiguo** cuando sus elementos están almacenados consecutivamente en memoria siguiendo el orden de sus dimensiones (cuando el stride acaba en 1). En caso contrario, puede compartir almacenamiento con otros tensores y no estar organizado de forma contigua.
+> Un tensor es **contiguo** cuando sus elementos están almacenados consecutivamente en memoria siguiendo el orden de sus dimensiones (cuando el stride acaba en 1). En caso contrario, puede compartir almacenamiento con otros tensores y no estar organizado de forma contigua. ![[Pasted image 20260315165645.png]]
 ##### 1.3. Shapes y View vs Clone
 > La **shape** indica las dimensiones del tensor, mientras que el **storage** es la memoria donde se guardan realmente sus datos. Una **view** es un tensor con distinta forma o dimensionalidad que **comparte el mismo storage** que el original, por lo que no copia datos ni reserva memoria nueva. Así, `view()` crea una nueva vista sobre los mismos datos, de modo que los cambios afectan a ambos tensores. En cambio, `clone()` crea una **copia independiente** en memoria, por lo que modificar uno no afecta al otro.
 ##### 1.4. Reshape
@@ -82,47 +82,142 @@ x[1:7:2]
 > En general, operaciones como `transpose()` pueden hacer que un tensor deje de ser contiguo, y en ese caso un `reshape()` posterior puede necesitar copiar los datos.
 > (Material: _Deep Learning Frameworks_, diapositivas “Reshape”, “Reshape Details (View vs. Copy)”, “Example: Reshape Gives a View” y “Example: Reshape Gives a Copy”)
 ##### 1.5. Indexing y Slicing
-> Rellenar
+> En PyTorch, el indexado y el slicing siguen prácticamente la misma sintaxis que en NumPy. El **indexado** permite acceder o modificar elementos concretos mediante corchetes `[]`, separando por comas los índices de cada dimensión. También se pueden usar **índices negativos** para acceder a elementos desde el final.
+> El **slicing** funciona como `[i:j:k, l:m:n, ...]`: cada set de índices corresponde a una dimensión del tensor. En cada uno, el primer valor indica el índice inicial inclusivo, el segundo el índice final no inclusivo y el tercero el salto entre elementos. Si en un tensor de varias dimensiones solo se especifica un índice o un slice, este se aplica sobre la **dimensión 0**.
+> Como particularidad importante en PyTorch, muchas operaciones de indexado y slicing devuelven una **view** del tensor original, es decir, un tensor que puede compartir el mismo almacenamiento en memoria.
 ##### 1.6. BroadCasting
-> Rellenar
-##### 1.7. Operaciones In-place 
-> Rellenar
+> Esta técnica de pytorch permite realizar operaciones `element wise` entre tensores aunque no tengan las mismas dimensiones, haciendo que los tensores más pequeños se reescalan automáticamente para ello.
+> Sigue una serie de reglas:
+> - Empieza comparando las dimensiones finales.
+> - Las dimensiones deben ser iguales o una de ellas debe ser 1.
+> - Las dimensiones que faltan se consideran de tamaño 1. 
+> 
+> ![[Pasted image 20260315165748.png]]
+##### 1.7. Operaciones In-Place 
+> Este tipo de operaciones modifican los datos del tensor original. Se suelen identificar con un `_` al final, como con `add_()` o `sub_()`. Estas evitan crear un nuevo tensor nuevo para ahorrar memoria y reducir el coste computacional. 
+> Los puntos a tener en cuenta son:
+> - Pueden sobrescribir datos de forma inesperada.
+> - Deben usarse con cuidado si el tensor original se necesita en otra parte.
+> - Las operaciones no in-place son más seguras a la hora de depurar y reutilizar datos.
+```python
+# 1. Not In-Place
+prev_id = id(Y)
+Y = Y + X
+assert(id(Y), prev_id)
+>>> False
+
+# 2. In-Place
+prev_id = id(X)
+X += Y
+assert(id(X), prev_id)
+>>> True
+```
 ##### 1.8. From Numpy Array to Torch Tensor
-> Rellenar
+> Tenemos 3 formas diferentes de hacerlo:
+> - **`from_numpy()`:** Crea un tensor, directamente a partir de un array de numpy, que comparte memoria con el array (no se copian los datos), por lo que cambios en el array se reflejan en el tensor, y viceversa.
+> - **`tensor()`:** Crea un tensor a partir de distintos tipos de datos (listas o arrays de numpy). Siempre copia los datos, creando un tensor nuevo, por lo que los cambios en los datos originales no afectan al tensor ni viceversa.
+> - **`as_tensor()`:** Convierte distintos tipos de datos (listas o arrays de numpy), en un tensor que comparte memoria solo si el origen es un array de NumPy y el tipo de dato coincide y en caso contrario, hace una copia de los datos.
 #### 2. Optimización de Redes Neuronales
-> Rellenar
+> Para obtener un buen ajuste, el error de entrenamiento debe minimizarse y ser similar al error de test; es decir, hay que minimizar el error de test teniendo en cuenta lo siguiente:
+> - Si el error de test >> error de entrenamiento → error de alta varianza.
+> - Si el error de entrenamiento ≈ error de test >> 0 → error de alto sesgo.
+> 
+> Un buen ajuste proviene de una buena elección de los hiperparámetros del modelo. Queremos elegir aquellos hiperparámetros que minimicen el error de test.
+> Sin embargo, no podemos conocer el error de test durante el proceso de entrenamiento, por lo que se estima mediante **validación cruzada** para optimizar los hiperparámetros. Para cada partición, se entrena un modelo con una combinación dada de hiperparámetros. En general, las redes neuronales se entrenan usando alguna variante del **descenso por gradiente (GD)**. ![[Pasted image 20260315171418.png]]
+> ![[Pasted image 20260315172039.png]]
+> ![[Pasted image 20260315171731.png]]
 #### 3. Funcionalidades y Mecánicas de PyTorch
 ##### 3.1. Autodiff-Autograd
-> Rellenar
+> La **diferenciación automática** es una técnica utilizada para calcular gradientes (derivadas parciales) de tensores de forma eficiente.
+> En PyTorch, `torch.autograd` sigue las operaciones realizadas sobre tensores que tienen `requires_grad=True`.
+> Los gradientes se calculan mediante **retro-propagación** a través de las operaciones registradas, en lugar de derivar y programar manualmente las derivadas. ![[Pasted image 20260315173237.png]]
 ##### 3.2. Grafo Computacional
-> Rellenar
+> Es un **grafo acíclico dirigido (DAG)** en el que cada nodo corresponde a una operación o a un tensor. Cuando realizas operaciones sobre tensores con `requires_grad=True`, PyTorch construye este grafo de forma interna. Tiene `leaf nodes` que son el inicio (no tienen nada antes, tanto inputs como pesos). Internamente se guarda la derivada de cada bloque en esta estructura, y con la regla de la cadena se calcula de forma backward el resultado del gradiente.
+> ![[Pasted image 20260315174115.png]]
 ##### 3.3. Forward y Backward
-> Rellenar
+> - **Forward Pass:** es el proceso de pasar los datos de entrada a través de la red (serie de operaciones) para obtener la salida o predicción. Durante este proceso, pytorch almacena resultados intermedios para utilizarlos posteriormente en el backward pass.
+> - **Backward Pass:** es el proceso mediante el cual, a partir del error o función de pérdida, se calculan los gradientes de esa salida respecto a los parámetros del modelo. Durante este proceso, pytorch recorre en sentido inverso el grafo computacional construido en el forward pass y aplica la regla de la cadena para obtener las derivadas parciales de cada operación. Los resultados intermedios almacenados durante el forward pass se utilizan ahora para poder calcular esos gradientes de forma eficiente. 
+>   Por último, el backward solo se puede llamar desde un escalar, por un tema de dimensiones, ya que habría varias derivadas parciales en vez de una única en cada iteración. Si el resultado final son varios elementos, se unifican haciendo una suma ponderada o similar para reducirlo.  ![[Pasted image 20260315174721.png]]![[Pasted image 20260315174746.png]]
 ##### 3.4. Gradiente de un Tensor
-> Rellenar
+> En pytorch, un tensor puede almacenar su **gradiente** en el atributo `.grad` (que no se reinicia después de cada iteración), siempre que tenga activado `requires_grad=True`. Al crear este tipo de tensores, el gradiente es inicialmente `None`, y solo se calcula cuando se ejecuta la retro-propagación con `.backward()`.
+> Si un tensor se obtiene a partir de operaciones sobre otros tensores, pytorch guarda en `grad_fn` la **función** que lo generó dentro del grafo computacional. En cambio, si el tensor ha sido creado directamente por el usuario, entonces `grad_fn` es `None`. Por defecto, `.backward()` espera una **salida escalar**. Si la salida no es escalar, es necesario proporcionar un tensor de gradientes que indique cómo contribuye cada componente al gradiente final; en este caso, pasar `gradient=torch.ones(len(y))` es equivalente a aplicar `y.sum().backward()`.
+> Además, pytorch **no reinicia automáticamente** los gradientes: cuando se calcula un nuevo gradiente, este se acumula sobre el valor anterior. Por eso, si se quiere volver a calcular desde cero, hay que resetearlos explícitamente con `.grad.zero_()`.
+> Generalmente no se permiten in-place operations con grafos porque podemos modificar un aspecto que cambia la derivada.
+> Por último, `detach()` crea un nuevo tensor que **deja de estar conectado al grafo computacional**, por lo que ya no será seguido por `autograd` ni participará en el cálculo de gradientes. Aun así, el tensor desacoplado comparte el mismo _storage_ que el original, por lo que cambios _in-place_ en uno pueden verse reflejados en el otro.
 ##### 3.5. Acceso y Flujo de los Gradientes
-> Rellenar
+> En pytorch, por defecto los gradientes se almacenan solo en los **leaf tensors**, es decir, en los tensores hoja del grafo computacional. Los tensores intermedios o **non-leaf tensors**, que son el resultado de operaciones sobre otros tensores, no guardan su gradiente en `.grad` salvo que se indique explícitamente con `.retain_grad()`.
+> Además, las operaciones **in-place** no están permitidas durante el cálculo de `.backward()` cuando interfieren con la construcción correcta del grafo, ya que al no crear nueva memoria pueden provocar errores o inconsistencias en el cálculo de gradientes.
+> Si se quiere **detener el flujo de gradiente** en un tensor intermedio, no se debe usar `.requires_grad_(False)` sobre un **non-leaf tensor**. En su lugar, hay que usar `.detach()`, que separa ese tensor del grafo computacional y evita que los gradientes sigan propagándose a través de él.
+> Por último, pytorch permite **personalizar el flujo de gradientes** mediante `torch.autograd.Function`, definiendo manualmente las funciones `forward()` y `backward()`. Esto permite controlar de forma explícita cómo se calcula la salida y cómo se propagan los gradientes en operaciones personalizadas.
 ##### 3.6. Maneras de Trabajar con/sin Gradientes
-> Rellenar
+> En pytorch, el modo por defecto es trabajar **con gradientes**, de manera que las operaciones sobre tensores con `requires_grad=True` se registran en el grafo computacional para poder usar después `.backward()`.
+> Para trabajar **sin gradientes**, puede usarse `torch.no_grad()`, que desactiva temporalmente el cálculo de gradientes dentro de su ámbito. Esto evita registrar operaciones en el grafo, acelera la **inferencia** y reduce el uso de memoria. Puede usarse como **context manager** (`with torch.no_grad():`) y como **decorador** (`@torch.no_grad()`).
+> Una opción todavía más eficiente es `torch.inference_mode()`, que también desactiva el cálculo de gradientes, pero además evita el seguimiento de la historia computacional y el **version   tracking**, reduciendo aún más la sobrecarga. Por eso está especialmente pensado para **inferencia**, evaluación del modelo y procesamiento de datos. También puede usarse como **context manager** o decorador.
+> Si en algún punto se necesita volver a activar explícitamente el cálculo de gradientes, puede usarse `torch.enable_grad()`, que re-habilita el autograd dentro de su ámbito. Suele emplearse junto con `no_grad` o con otros mecanismos de control del autograd.
+> En resumen, el modo **default** se usa normalmente en el _forward pass_ de entrenamiento; `no_grad` resulta útil cuando no se quiere registrar operaciones pero los tensores creados todavía pueden usarse más adelante en modo gradiente; e `inference_mode` es la opción más eficiente para evaluación e inferencia, aunque más restrictiva. ![[Pasted image 20260315181348.png]]
 #### 4. Implementaciones Prácticas
 ##### 4.1. Modules
-> Rellenar
+> En pytorch, **`nn.Module`** es la **clase base** para todos los módulos de redes neuronales. Proporciona una estructura conveniente para **definir y organizar capas**, **registrar automáticamente parámetros** para su optimización y mover el modelo entre **CPU y GPU** mediante `.to(device)`.
+> El patrón habitual consiste en definir la arquitectura en `__init__()`, llamando primero a `super().__init__()`, y declarando ahí los **submódulos** de la red, como capas `Linear`, `Conv2d` u otras. Después, en `forward()`, se especifica cómo fluye la entrada a través de esos submódulos para producir la salida.
+> Un modelo puede implementarse creando una clase que herede de `nn.Module`. Por ejemplo, en un MLP se definen sus capas en `__init__()` y en `forward()` se encadenan las operaciones necesarias para obtener la salida.
+> Cuando las capas se aplican simplemente **una detrás de otra**, puede utilizarse un modelo secuencial mediante `torch.nn.Sequential`, que organiza una secuencia de módulos ejecutados en orden.
+> Además, pytorch permite **personalizar completamente el método `forward()`**, incluyendo reutilización de capas, uso de parámetros constantes y estructuras de control como condicionales o bucles. Esto da flexibilidad para construir arquitecturas más complejas que una simple secuencia lineal de capas.
 ##### 4.2. Parameters
-> Rellenar
+> En pytorch, un **`Parameter`** es una subclase de `Tensor` diseñada para usarse dentro de `nn.Module`. Cuando se asigna como atributo de un módulo, queda **registrado automáticamente como parámetro** del modelo, por lo que aparecerá en `model.parameters()` y podrá ser optimizado, por ejemplo, mediante un optimizador. En cambio, un tensor normal asignado como atributo no se registra de esta forma.
+> Los `Parameter` se utilizan para representar los **parámetros aprendibles** del modelo, como los **pesos** y **bias** de capas `Linear`, `Conv2d`, etc. Cada parámetro tiene asociados sus valores numéricos y también su gradiente, accesible mediante el atributo `.grad`.
+> Para inspeccionar los parámetros de un modelo, puede utilizarse `state_dict()`, que devuelve un diccionario de python que asocia cada parámetro (y también los _buffers_ del modelo) con su tensor correspondiente. Este mecanismo también existe en los optimizadores, donde `optimizer.state_dict()` almacena tanto hiperparámetros como estados internos del optimizador. Por ello, `state_dict()` es fundamental para **guardar y cargar modelos**.
+> En modelos definidos con `Sequential`, se puede acceder a una capa por índice y consultar sus parámetros con `.state_dict()`. Además, para acceder a todos los parámetros de un módulo de una vez puede usarse `.named_parameters()`, que devuelve pares **(nombre, parámetro)**.
+> En resumen, los `Parameter` son los tensores que contienen los valores entrenables del modelo y que pytorch registra automáticamente para su seguimiento, inspección y optimización.
 ##### 4.3. Inicializaciones
-> Rellenar
+> En pytorch, la **lazy initialization** aplaza la forma y la inicialización de los parámetros hasta que haya suficiente información disponible. En capas como `nn.LazyLinear`, los pesos y bias quedan inicialmente como **no inicializados**.
+> Esto es útil cuando la dimensión de entrada **no se conoce al crear el modelo**. En el primer `forward()`, pytorch **infiere automáticamente** esa dimensión e inicializa los parámetros. Antes de eso aparecen como `UninitializedParameter`; después, ya tienen su forma definitiva.
 ##### 4.4. Guardar Tensores
-> Rellenar
-> Hasta Compile
+> En pytorch, `torch.save()` permite **serializar y guardar** objetos como tensores, diccionarios o modelos completos. El guardado puede hacerse en una **ruta de archivo** o en un **buffer en memoria**, y posteriormente recuperarse con `torch.load()`. Este mecanismo es útil para hacer **checkpointing** y para almacenar pesos o tensores intermedios.
+> Para guardar un modelo, puede usarse su `state_dict()`, que es la opción recomendada en las diapositivas: se guarda con `torch.save(model.state_dict(), PATH)` y después se carga con `model.load_state_dict(torch.load(PATH, weights_only=True))`.
+> También puede guardarse el **modelo completo** con `torch.save(model, PATH)` y recuperarse con `torch.load(PATH, weights_only=False)`, aunque en ese caso debe existir la definición de la clase del modelo al cargarlo.
+> Para salir del prototipado y pasar a despliegue, pytorch distingue entre **Eager Mode** y **Script Mode**. `TorchScript` permite convertir el modelo a un formato más estático y portable, mediante `torch.jit.script(model)` o `torch.jit.trace(model, example_inputs)`, y después guardarlo directamente con `.save()` y cargarlo con `torch.jit.load()`.
+> Además, en PyTorch 2.x aparece `torch.compile`, orientado a **mejorar el rendimiento** en entrenamiento e inferencia manteniendo la semántica de Eager Mode. Según las diapositivas, `torch.compile` está enfocado en velocidad dentro de python, mientras que **TorchScript** está más orientado a **despliegue y portabilidad** en entornos sin python.
 ##### 4.5. Device
-> Rellenar
+> En pytorch, un tensor se almacena en un **device**, normalmente **CPU** o **GPU**, y puede moverse entre dispositivos con el método `.to(device)`. La GPU suele utilizarse para acelerar operaciones matriciales, mientras que la CPU es más adecuada para tareas secuenciales o con menor paralelismo. La localización de un tensor puede consultarse mediante su atributo `.device`.
+> Cuando se trabaja con varios dispositivos, cada uno tiene su **propio espacio de memoria**. Por eso, para operar con varios tensores a la vez, **todos deben estar en el mismo device**. Si un tensor está en otra GPU, hay que copiarlo explícitamente antes de operar con él. En consecuencia, los dispositivos **no comparten memoria automáticamente**, y los datos deben moverse al lugar donde se realiza el cálculo.
 ##### 4.6. Data
-> Rellenar
+> En pytorch, la gestión de datos se organiza principalmente mediante las clases **`Dataset`** y **`DataLoader`**. Primero, se define una clase `Dataset`, que indica cómo se almacenan y recuperan las muestras; después, a partir de ella, se crean los conjuntos de entrenamiento, validación y test, y finalmente se instancian los `DataLoader` correspondientes.
+> En un `Dataset` suelen definirse tres métodos principales: `__init__()`, para guardar los datos o las rutas a los ficheros; `__len__()`, para indicar el número de muestras; y `__getitem__()`, para especificar cómo recuperar la entrada y la salida asociadas a un índice concreto.
+> El **`DataLoader`** se encarga de extraer los datos del `Dataset` y suministrarlos al modelo en forma de **batches** durante el entrenamiento o la validación. Cada vez que se itera sobre él, devuelve un lote de datos.
+> Entre sus argumentos más importantes están `batch_size`, que fija el tamaño del lote; `shuffle`, que indica si se mezclan las muestras en cada época; `num_workers`, que controla cuántos subprocesos se usan para cargar los datos; y `drop_last`, que decide si se descarta el último batch cuando queda incompleto. Si `drop_last=False`, el último lote puede ser más pequeño.
 ##### 4.7. Loops
-> Rellenar
+> En pytorch, el entrenamiento de un modelo se organiza mediante un **training loop** y, normalmente, un **validation loop**. En el bucle de entrenamiento, primero se pone el modelo en modo entrenamiento con `model.train()`, se pasan los datos al **device** correcto, se obtienen las salidas del modelo, se calcula la pérdida, se reinician los gradientes con `optimizer.zero_grad()`, se ejecuta la retro-propagación con `loss.backward()` y finalmente se actualizan los parámetros con `optimizer.step()`.
+> En el **validation loop**, el modelo se pone en modo evaluación con `model.eval()` y se usa `torch.no_grad()` para desactivar el cálculo de gradientes. En este bucle solo se pasan las entradas por el modelo y se calcula la pérdida o las métricas, pero **no se optimiza el modelo ni se calculan gradientes**.
+> En resumen, el bucle de entrenamiento sirve para **actualizar los parámetros** del modelo, mientras que el de validación sirve para **evaluar su rendimiento** sin modificarlo.
 ##### 4.8. Modos
-> Rellenar
+> En pytorch, `model.train()` pone el modelo en **modo entrenamiento**, activando comportamientos específicos de esta fase. Por ejemplo, **Dropout** desactiva aleatoriamente neuronas como regularización y **BatchNorm** actualiza sus estadísticas usando el batch actual.
+> En cambio, `model.eval()` pone el modelo en **modo evaluación**, desactivando esos comportamientos de entrenamiento. En este modo, **Dropout** deja de introducir aleatoriedad y **BatchNorm** usa las estadísticas acumuladas, produciendo salidas más estables y consistentes para inferencia.
+> Además, durante evaluación suele usarse `torch.no_grad()`, que evita calcular gradientes, reduce el uso de memoria y acelera el cómputo. Por tanto, `model.eval()` y `torch.no_grad()` **no son lo mismo**: `eval()` cambia el comportamiento de ciertas capas, mientras que `no_grad()` desactiva el cálculo de gradientes.
 ##### 4.9. TensorBoard
-> Rellenar
+> **TensorBoard** es una herramienta de visualización, originalmente asociada a TensorFlow, pero que también puede utilizarse en PyTorch. Permite mostrar **paneles interactivos** con métricas del entrenamiento, como la **loss**, la **accuracy** y otras magnitudes relevantes, facilitando el seguimiento y análisis del comportamiento del modelo.
+
+---
+
+## Tema 2 - Neural Networks
+### I. Introduction
+
+
+
+### II. FeedForward Layer
+
+
+
+### III. Regression & Classification
+
+
+
+
+### IV. Loss Functions & Non Linearities
+
+
+
+
+### V. Initialization & Optimization
+
 
 
