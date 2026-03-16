@@ -80,7 +80,6 @@ x[1:7:2]
 > Si el tensor es **contiguo** y la nueva forma puede obtenerse ajustando únicamente los **strides**, entonces `reshape()` devuelve una **view**, sin copiar datos. En cambio, si el tensor es **no contiguo** y la nueva forma requiere reordenar los datos en memoria, `reshape()` crea una **copia** en un nuevo bloque de memoria contiguo.
 > Por esta razón, `reshape()` puede resultar ambiguo: a veces comparte almacenamiento con el tensor original y otras veces no. Si se quiere controlar este comportamiento de forma explícita, puede usarse `clone().view()` en su lugar.
 > En general, operaciones como `transpose()` pueden hacer que un tensor deje de ser contiguo, y en ese caso un `reshape()` posterior puede necesitar copiar los datos.
-> (Material: _Deep Learning Frameworks_, diapositivas “Reshape”, “Reshape Details (View vs. Copy)”, “Example: Reshape Gives a View” y “Example: Reshape Gives a Copy”)
 ##### 1.5. Indexing y Slicing
 > En PyTorch, el indexado y el slicing siguen prácticamente la misma sintaxis que en NumPy. El **indexado** permite acceder o modificar elementos concretos mediante corchetes `[]`, separando por comas los índices de cada dimensión. También se pueden usar **índices negativos** para acceder a elementos desde el final.
 > El **slicing** funciona como `[i:j:k, l:m:n, ...]`: cada set de índices corresponde a una dimensión del tensor. En cada uno, el primer valor indica el índice inicial inclusivo, el segundo el índice final no inclusivo y el tercero el salto entre elementos. Si en un tensor de varias dimensiones solo se especifica un índice o un slice, este se aplica sobre la **dimensión 0**.
@@ -198,13 +197,18 @@ assert(id(X), prev_id)
 
 ---
 
-## Tema 2 - Neural Networks
+## Tema 2 - Foundations of Neural Networks
 ### I. Introduction
-
-
+#### 1. Idea y Contexto
+> Las **redes neuronales artificiales** surgen como una inspiración simplificada del funcionamiento de las neuronas biológicas. La idea básica es combinar varias **entradas** con unos **pesos**, aplicar una suma y después una **función de activación** para obtener una salida.
+> Un único perceptrón o neurona artificial puede modelar relaciones sencillas, pero resulta limitado cuando el problema es más complejo. Por ello, se combinan varias neuronas en una **red neuronal artificial**, capaz de representar comportamientos más ricos y aproximar funciones más complejas.
+> En este tema se parte de la neurona artificial como bloque básico para entender cómo se construyen redes neuronales y por qué estas permiten resolver problemas que un único modelo lineal no puede capturar.
 
 ### II. FeedForward Layer
-
+#### 1. Multi Layer Perceptron (MLP)
+> Rellenar
+#### 2. Capa y Detalles
+> Rellenar
 
 
 ### III. Regression & Classification
