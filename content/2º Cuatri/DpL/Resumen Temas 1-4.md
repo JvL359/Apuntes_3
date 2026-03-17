@@ -206,14 +206,19 @@ assert(id(X), prev_id)
 
 ### II. FeedForward Layer
 #### 1. Multi Layer Perceptron (MLP)
-> Rellenar
+> Un **Multi Layer Perceptron (MLP)** es una red neuronal formada por una **capa de entrada**, una o varias **capas ocultas** y una **capa de salida**. Cada capa aplica una transformación lineal a sus entradas y, después, una **función de activación** para introducir no linealidad.
+> La idea principal es que una sola neurona o una sola transformación lineal tienen capacidad limitada, mientras que al **combinar varias neuronas en capas** se pueden modelar relaciones más complejas entre las variables de entrada y la salida. En general, las capas ocultas suelen usar activaciones no lineales, mientras que la capa de salida utiliza una activación acorde al problema.
 #### 2. Capa y Detalles
-> Rellenar
-
+> Una **feedforward layer** o capa densa recibe un vector —o un batch de vectores— y aplica una **transformación lineal** de la forma `Z = XW^T + b`, donde `X` representa la entrada, `W` los pesos y `b` el sesgo. Después, a ese resultado se le aplica una **función de activación** elemento a elemento: `A = φ(Z)`.
+> El número de parámetros de la capa viene dado por los **pesos** y los **biases**, es decir, `d_in × d_out + d_out`, donde `d_in` es la dimensión de entrada y `d_out` el número de neuronas de salida. Entre las activaciones más habituales aparecen **sigmoid**, **ReLU**, **tanh** y **softmax**. Además, la inicialización de los pesos y el proceso de entrenamiento son importantes para que la red aprenda correctamente.
 
 ### III. Regression & Classification
+#### 1. Regression
 
-
+> La **regresión** es un problema fundamental de **aprendizaje supervisado** en el que se busca **predecir valores continuos** a partir de unas variables de entrada. Dado un vector de características $x \in \mathbb{R}^d$, el objetivo es aprender una función $f:\mathbb{R}^d \to \mathbb{R}$. En su versión más simple, la **regresión lineal** modela esta relación como una combinación lineal de las entradas: $\hat{y} = \mathbf{w}^\top \mathbf{x} + b$.  
+> En esta formulación, los parámetros a aprender son los **pesos** $\mathbf{w}$ y el **sesgo** $b$. Para ajustar el modelo se define una función de pérdida, en estas diapositivas el **error cuadrático medio (MSE)**: $$L(w,b)=\frac{1}{2n}\sum_{i=1}^{n}(\hat{y}^{(i)}-y^{(i)})^2$$y el objetivo de optimización consiste en encontrar los valores $w^*, b^*$ que minimizan dicha pérdida. 
+> La regresión lineal puede resolverse de dos formas principales. Por un lado, existe una **solución analítica cerrada** basada en ecuaciones matriciales, $\mathbf{w} = (X^\top X)^{-1}X^\top y$, aunque su coste puede hacerla poco práctica cuando la dimensión es grande. Por otro lado, puede resolverse de forma **iterativa** mediante **descenso por gradiente**, actualizando los parámetros con las reglas $w←w−η∂L∂ww \leftarrow w - \eta \frac{\partial L}{\partial w}w←w−η∂w∂L​ y b←b−η∂L∂bb \leftarrow b - \eta \frac{\partial L}{\partial b}b←b−η∂b∂L$​. Esta segunda opción es la más relevante en Deep Learning, ya que constituye la base del entrenamiento de redes neuronales.
+> Conceptualmente, la regresión lineal puede verse como una **red neuronal de una sola capa**. A partir de ahí, al introducir **múltiples salidas** y, sobre todo, al **apilar capas con no linealidades**, se obtienen redes neuronales capaces de modelar relaciones mucho más complejas. Las diapositivas conectan esta idea con el **teorema de aproximación universal**, según el cual una red con suficientes unidades ocultas y una no linealidad adecuada puede aproximar cualquier función continua.
 
 
 ### IV. Loss Functions & Non Linearities
