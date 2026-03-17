@@ -83,6 +83,108 @@
 > - **MaxOut:** es una activación más general que toma el **máximo de varias transformaciones lineales**. Esta puede aproximar cualquier función convexa, aumentar la capacidad del modelo y puede aproximar distintas formas de activación, pero a cambio requiere **más parámetros**, más coste computacional y puede aumentar el riesgo de _overfitting_. ![[Pasted image 20260317115505.png]]
 > 
 > En conjunto, **ReLU y sus variantes** suelen ser las opciones más prácticas en muchas redes profundas, mientras que activaciones como **Sigmoid** y **Tanh** siguen siendo útiles en contextos concretos, y **MaxOut** ofrece más flexibilidad a costa de mayor complejidad.
-
+#### 5. Preguntas
+> 1. ¿Qué funciones de activación necesitan más entrenamiento?
+> 	Las que **tienen parámetros aprendibles** o **aumentan mucho la capacidad del modelo**:
+> 	- **PReLU**: necesita más entrenamiento que ReLU o Leaky ReLU porque la pendiente en la parte negativa **se aprende**.
+> 	- **MaxOut**: es la que más claramente necesita más entrenamiento, porque cada unidad trabaja con **varias transformaciones lineales** y, por tanto, introduce **muchos más parámetros**.
+> 	En cambio:
+> 	- **Sigmoid, Tanh, ReLU, Leaky ReLU, ELU y SELU** no tienen parámetros propios que aprender como activación.
+> 
+> 2. ¿Qué funciones de activación dan más expresividad?
+> 	La más expresiva es **MaxOut**, puede aproximar cualquier función convexa, generaliza ReLU y otras activaciones, y aumenta la capacidad del modelo aprendiendo varias regiones lineales.
+> 	Después, en flexibilidad:
+> 	- **PReLU** es más flexible que **Leaky ReLU** y **ReLU**, porque la pendiente negativa no es fija, sino aprendible.
+> 	- **Leaky ReLU** y **ELU/SELU** son más flexibles que **ReLU** en la parte negativa.
+> 	- **Sigmoid** y **Tanh** introducen no linealidad, pero no aparecen en estas diapositivas como las más expresivas para redes profundas.
+> 
+> 3. Ventajas y desventajas de cada una:
+> - Sigmoid:
+> 	- **Expresividad**: introduce no linealidad y produce salidas entre 0 y 1.
+> 	- **Computación**: requiere exponenciales.
+> 	- **Forward/backward**: puede saturarse en los extremos, lo que dificulta el flujo del gradiente.
+> - Tanh:
+> 	- **Expresividad**: similar a sigmoide, pero con salida entre -1 y 1.
+> 	- **Computación**: también requiere exponenciales.
+> 	- **Forward/backward**: mejora frente a sigmoide en que está **centrada en cero**, pero también puede saturarse.
+> - ReLU:
+> 	- **Expresividad**: simple pero muy efectiva; base de muchas redes profundas.
+> 	- **Computación**: muy barata.
+> 	- **Forward/backward**: buen flujo de gradiente para entradas positivas, pero puede aparecer el problema de las **dead ReLU**, donde una neurona deja de activarse y deja de aprender.
+> - Leaky ReLU:
+> 	- **Expresividad**: algo mayor que ReLU, porque mantiene respuesta en la zona negativa.
+> 	- **Computación**: casi tan barata como ReLU.
+> 	- **Forward/backward**: reduce el problema de las dead ReLU al dejar una pequeña pendiente negativa.
+> - PReLU:
+> 	- **Expresividad**: mayor que Leaky ReLU, porque la pendiente negativa se aprende.
+> 	- **Computación**: un poco más costosa por tener parámetros extra.
+> 	- **Forward/backward**: evita mejor neuronas muertas, pero necesita aprender más y guardar estado.
+> - ELU:
+> 	- **Expresividad**: similar a ReLU-like, pero con transición más suave en la parte negativa.
+> 	- **Computación**: más cara que ReLU porque usa exponencial.
+> 	- **Forward/backward**: busca mejorar la suavidad alrededor de 0 y evitar la parte totalmente muerta negativa.
+> - SELU:
+> 	- **Expresividad**: similar a ELU.
+> 	- **Computación**: también más cara que ReLU.
+> 	- **Forward/backward**: está diseñada para redes **self-normalizing**, manteniendo activaciones cerca de media 0 y varianza 1 durante el forward.
+> - Absolute Value:
+> 	- **Expresividad**: introduce una no linealidad simple.
+> 	- **Computación**: muy barata.
+> 	- **Forward/backward**: en las diapositivas aparece como alternativa, pero no se desarrolla tanto como las demás.
+> - MaxOut:
+> 	- **Expresividad**: la más alta de las mostradas.
+> 	- **Computación**: la más costosa, porque requiere más parámetros y más memoria.
+> 	- **Forward/backward**: aumenta mucho la capacidad, pero hace el entrenamiento más lento, más difícil de optimizar y con mayor riesgo de **overfitting**.
+> 
+> Conclusión rápida:
+> - **Más entrenamiento**: **PReLU** y sobre todo **MaxOut**.
+> - **Más expresividad**: **MaxOut**.
+> - **Más práctica y eficiente**: **ReLU** y sus variantes.
+> - **Para evitar dead ReLU**: **Leaky ReLU** o **PReLU**.
+> - **Si quieres suavidad / self-normalization**: **ELU** o **SELU**.
 
 ### V. Initialization & Optimization
+#### 1. Initialization
+##### 1.1. Idea
+> La **inicialización** de los pesos es crucial porque condiciona cómo se propagan las activaciones y los gradientes a través de la red. Si los pesos iniciales son demasiado pequeños, la señal puede debilitarse y aparecer problemas de **vanishing**; si son demasiado grandes, las activaciones y los gradientes pueden crecer en exceso y provocar **exploding**.
+> El objetivo de una buena inicialización es facilitar una propagación estable tanto en el **forward** como en el **backward**, lo que se traduce en un entrenamiento más eficiente y, en general, en una convergencia más rápida.
+##### 1.2. Zero / Constant
+> La inicialización **zero/constant** consiste en fijar todos los pesos a $0$ o a una misma constante $k$. Su principal ventaja es que es muy simple de implementar, pero presenta un problema fundamental de **simetría**: todas las neuronas de una misma capa empiezan igual y, por tanto, aprenden exactamente lo mismo.
+> Además, esta estrategia lleva a gradientes poco útiles o nulos y dificulta seriamente el aprendizaje. En redes profundas, las distribuciones de gradientes tienden a concentrarse cerca de cero y las activaciones pierden variabilidad, lo que empeora la propagación de la señal entre capas.
+> Por ello, la conclusión práctica es clara: **no debe usarse para inicializar pesos**; como mucho puede aceptarse en algunos casos para los **bias**.
+##### 1.3. Random / Normal (Naive)
+> La inicialización **random/normal naive** rompe la simetría asignando a los pesos pequeños valores aleatorios, por ejemplo tomados de una distribución normal como $\mathcal{N}(0, 0.01)$. Esto mejora respecto a la inicialización constante y puede funcionar en redes poco profundas.
+> Sin embargo, sigue siendo una estrategia limitada para redes profundas, porque depende mucho de la **desviación estándar** elegida. Si esta es demasiado pequeña, las activaciones se van reduciendo capa a capa y pueden desaparecer; si es demasiado grande, las activaciones crecen demasiado y se vuelven inestables.
+> En consecuencia, aunque esta inicialización rompe la simetría, puede seguir produciendo problemas de **vanishing/exploding activations o gradients**, por lo que resulta **subóptima en redes profundas**.
+##### 1.4. Constant Activation Variance
+> La idea de **constant activation variance** es elegir la escala de los pesos para que la **varianza de las activaciones se mantenga aproximadamente constante** al atravesar las capas. Si para una neurona  $y_i=\sum_j w_{ij}x_j$  y se asume independencia entre entradas y pesos, entonces la varianza de la salida crece como  $\sigma_{y_i}^2=\sigma_x^2 \cdot d_x \cdot \sigma_w^2$  donde $d_x$ es el número de entradas. Para evitar que las activaciones se apaguen o exploten al profundizar en la red, se escala la varianza de los pesos como  $\sigma_w^2=\frac{1}{d_x}$  
+> Con ello se busca una propagación más estable de la señal entre capas.
+##### 1.5. Xavier / Glorot
+> La inicialización **Xavier/Glorot** está diseñada para mantener la varianza de las activaciones dentro de unos límites razonables a lo largo de la red. Tiene en cuenta tanto el número de **entradas** $d_x$ como el de **salidas** $d_y$ de la capa.
+> Dos formas habituales son:  $$W \sim U\left(-\sqrt{\frac{6}{d_x+d_y}},\sqrt{\frac{6}{d_x+d_y}}\right)$$ $$W \sim \mathcal{N}\left(0,\frac{2}{d_x+d_y}\right)$$Sus principales ventajas son que mantiene estable la varianza de activaciones y funciona bien con activaciones como **sigmoide** y **tanh**. Como inconveniente, no es la mejor opción para **ReLU**. En pytorch aparece, por ejemplo, como `torch.nn.init.xavier_uniform_()`.
+##### 1.6. He / Kaiming
+> La inicialización **He/Kaiming** está pensada para activaciones del tipo **ReLU**. Como ReLU anula aproximadamente la mitad de las activaciones negativas, la varianza efectiva se reduce, y por eso se corrige escalando los pesos con $$\mathrm{Var}(w_{ij})=\frac{2}{d_x}$$o, de forma equivalente, usando una normal del tipo $$\mathcal{N}\left(0,\sqrt{\frac{2}{d_x}}\right)$$Esta inicialización estabiliza mejor tanto el **forward pass** como el **backward pass**, evitando problemas de activaciones o gradientes que desaparecen o explotan. Es la opción más adecuada para redes profundas con **ReLU**, mientras que resulta menos apropiada para **sigmoide** o **tanh**. En PyTorch puede usarse con `torch.nn.init.kaiming_normal_()`, y para variantes como **Leaky ReLU** se ajusta el factor mediante `torch.nn.init.calculate_gain`.
+#### 2. Optimization
+##### 2.1. Idea General
+> La **optimización** en un modelo de _feedforward_ consiste en ajustar sus parámetros $\theta$ para **minimizar una función de pérdida diferenciable** $\ell(o,y)$, que mide la diferencia entre la salida del modelo $o$ y el valor real $y$. El modelo recibe una entrada $x$, la procesa mediante capas lineales y no lineales, produce una predicción $o=f(x,\theta)$, y a partir de ella se calcula la pérdida.
+> 
+> En tareas de **regresión**, la pérdida suele medirse mediante una **norma de distancia**, como **MSE** o **MAE**; en **clasificación**, se emplea típicamente la **cross-entropy**. Sobre un dataset, el objetivo es minimizar la pérdida esperada:  $$L(\theta)=\mathbb{E}_{x,y\sim D}[\ell(f(x,\theta),y)]$$El proceso de optimización es **iterativo**: primero se calculan las predicciones, después la pérdida, luego los gradientes respecto a los parámetros, y finalmente se actualizan esos parámetros mediante algoritmos de optimización. Intuitivamente, esto equivale a moverse por el **loss landscape** buscando un mínimo local o global de la función de pérdida. Este paisaje depende de la arquitectura del modelo, de sus parámetros y de los datos de entrada y salida.
+##### 2.2. Gradient Descend
+> El **gradient descent** es un algoritmo de optimización que actualiza iterativamente los parámetros del modelo en la dirección opuesta al gradiente de la función de pérdida:  $$\theta \leftarrow \theta - \eta ,\nabla_{\theta}L(\theta)$$donde (\eta) es la **learning rate**, que controla el tamaño del paso, y $\nabla_{\theta}L(\theta)$ es el gradiente de la pérdida respecto a los parámetros. La idea es repetir estas actualizaciones hasta acercarse a un mínimo de la función de pérdida.
+>
+> Existen tres variantes principales:
+> - **Batch Gradient Descent:** calcula el gradiente usando **todo el dataset** en cada actualización:  $$\nabla_{\theta}L(\theta)=\frac{1}{N}\sum_{i=1}^{N}\nabla_{\theta}\ell(f(x_i,\theta),y_i)$$Produce una dirección de descenso estable, pero es costoso en tiempo y memoria para datasets grandes.
+> 
+> - **Stochastic Gradient Descent (SGD):** actualiza los parámetros con **una sola muestra** cada vez:  $$\nabla_{\theta}L(\theta)\approx \nabla_{\theta}\ell(f(x_i,\theta),y_i)$$Es más eficiente para datasets grandes, pero introduce mucho ruido en las actualizaciones y puede oscilar alrededor del mínimo.
+> 
+> - **Mini-Batch Gradient Descent:** usa un **pequeño batch** de tamaño $B$:  $$\nabla_{\theta}L(\theta)=\frac{1}{B}\sum_{i=1}^{B}\nabla_{\theta}\ell(f(x_i,\theta),y_i)$$Es la opción más usada en Deep Learning porque equilibra eficiencia computacional y estabilidad, además de aprovechar bien las operaciones matriciales en GPU.
+> 
+> ![[Pasted image 20260317125838.png]]
+> 
+> Un aspecto clave es la **learning rate**:
+> - si es **demasiado pequeña**, la convergencia es muy lenta;
+> - si es **adecuada**, el entrenamiento converge de forma suave y estable;
+> - si es **demasiado grande**, puede producir oscilaciones, _overshooting_ o incluso divergencia.
+> ![[Pasted image 20260317125902.png]]
+> 
+> En resumen, gradient descent busca minimizar la pérdida actualizando los parámetros paso a paso, y en la práctica suele usarse en su versión **mini-batch**, con especial cuidado en la elección de la **learning rate**.
