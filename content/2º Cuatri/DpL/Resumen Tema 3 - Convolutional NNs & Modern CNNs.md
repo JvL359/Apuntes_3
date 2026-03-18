@@ -312,7 +312,7 @@ $$
 > - En la parte expansiva se usan **up-convolutions 2×2** para aumentar la resolución.
 > - Después de cada subida de resolución, se combinan características de baja y alta resolución mediante conexiones laterales.
 > - Finalmente, una convolución 1×1 produce el mapa de segmentación de salida.
-> ![[Pasted image 20260318123604.png]]
+> ![[Pasted image 20260318123346.png]]
 > Esto hace que U-Net sea especialmente útil cuando no basta con clasificar una imagen completa, sino que hay que **predecir una etiqueta por píxel**.
 #### 2. Temporal Convolutions
 > Las **convoluciones temporales 1D** aplican filtros sobre secuencias ordenadas, como texto, audio o series temporales.
