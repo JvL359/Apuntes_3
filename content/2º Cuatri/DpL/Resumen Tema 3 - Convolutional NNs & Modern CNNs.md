@@ -19,6 +19,7 @@
 > El tensor $V$ recibe el nombre de **kernel**, **filtro** o pesos de la capa convolucional. En conjunto, compartir pesos y limitar la interacción a regiones locales reduce drásticamente el número de parámetros y da lugar a la idea central de las **convolution layers**.
 #### 2. Convolución: intuición, formulación y capa convolucional
 > Una **convolución** aplica un conjunto de pesos locales sobre pequeñas regiones de la entrada para producir una nueva representación. Visualmente, cada unidad de salida solo “ve” una región pequeña de la entrada, llamada **receptive field**, y calcula una combinación lineal local más un sesgo: $$y = w * x + b$$Matemáticamente, la convolución entre dos funciones $f$ y $g$ se define como: $$(f*g)(x)=\int f(z)\,g(x-z)\,dz$$Para entradas discretas: $$(f*g)(i)=\sum_a f(a)\,g(i-a)$$y en dos dimensiones: $$(f*g)(i,j)=\sum_a\sum_b f(a,b)\,g(i-a,j-b)$$En CNNs, estrictamente la operación implementada es **cross-correlation** y no convolución pura, porque no se invierte el kernel. Aun así, por convención se sigue llamando **convolución**.
+> ![[Pasted image 20260318112944.png]]
 >
 > Si no se usa _padding_, el tamaño espacial de la salida disminuye según: $$o_h \times o_w = (n_h-k_h+1)\times(n_w-k_w+1)$$donde $n_h\times n_w$​ es el tamaño de la entrada y $k_h\times k_w$ el tamaño del kernel.
 > 
@@ -28,6 +29,7 @@
 > Normalmente, los kernels se inicializan de forma aleatoria.
 #### 3. Canales, Feature Maps y Receptive Field
 > En imágenes reales, la entrada no suele ser solo bidimensional, sino un **tensor** con dimensiones de **alto, ancho y canales**. Por ejemplo, en una imagen RGB cada píxel puede representarse como: $$X_{i,j,k}$$donde $k$ indexa el canal.
+> ![[Pasted image 20260318112754.png]]
 > Para trabajar con esta estructura, la salida de una capa convolucional también se representa como un tensor de orden tres: $$H_{i,j,d}$$donde $d$ indexa los distintos **feature maps**. Cada **feature map** se especializa en detectar un tipo de patrón, como bordes, texturas o colores.
 > 
 > Al aplicar **múltiples kernels**, se obtienen **múltiples feature maps**, es decir, múltiples canales de salida. Por eso, tanto la entrada como la salida de una convolución deben entenderse como tensores apilados por canales.
@@ -74,11 +76,13 @@ $$
 > 
 > - **Padding** consiste en añadir filas y columnas al tensor de entrada, normalmente con ceros, para compensar la pérdida de píxeles en los bordes. En la notación de estas diapositivas, si añadimos $p_h$ filas y $p_w$ columnas, el tamaño de salida pasa a ser:  $$o_h \times o_w = (n_h-k_h+p_h+1)\times(n_w-k_w+p_w+1)$$Un caso importante es usar padding para mantener la forma espacial de la entrada. Para ello: $$p_h = k_h-1,\quad p_w = k_w-1$$Si $k_h$ o $k_w$ son pares, el padding necesario es asimétrico; por eso es habitual usar kernels impares.
 > 
-> - **Striding** indica cuánto se desplaza la ventana de convolución en cada paso. Por defecto, el stride es 1 en ambas dimensiones, lo que significa avanzar píxel a píxel. Si aumentamos el stride, reducimos el coste computacional y hacemos una especie de _downsampling_, ya que se omiten posiciones intermedias. Con stride vertical $s_h$ y horizontal $s_w$, el tamaño de salida es:  $$o_h \times o_w = \left[\frac{n_h-k_h+p_h+s_h}{s_h}\right] \times \left[\frac{n_w-k_w+p_w+s_w}{s_w}\right]$$
+> - **Striding** indica cuánto se desplaza la ventana de convolución en cada paso. Por defecto, el stride es 1 en ambas dimensiones, lo que significa avanzar píxel a píxel. Si aumentamos el stride, reducimos el coste computacional y hacemos una especie de _downsampling_, ya que se omiten posiciones intermedias. Con stride vertical $s_h$ y horizontal $s_w$, el tamaño de salida es:  $$o_h \times o_w = \left[\frac{n_h-k_h+p_h+s_h}{s_h}\right] \times \left[\frac{n_w-k_w+p_w+s_w}{s_w}\right]$$![[Pasted image 20260318113056.png]]
 > 
 > - **Dilation** (o _atrous convolution_) separa los elementos del kernel, aumentando su campo receptivo sin incrementar el número de parámetros. Su objetivo es capturar contexto más amplio, aunque puede perder detalle local fino. Para un factor de dilatación $d$, la convolución se escribe como: $$H_{i,j}=\sum_{a=-\Delta}^{\Delta}\sum_{b=-\Delta}^{\Delta}V_{a,b},X_{i+da,;j+db}$$Aquí, $d$ separa las posiciones del kernel y hace que este “vea” una región mayor de la entrada.
 > 
-> En la fórmula general, combinando **padding**, **stride** y **dilation**, el tamaño de salida queda: $$o_h=\left[ \frac{n_h+2p_h-d,(k_h-1)-1}{s_h}\right]+1, \quad o_w=\left[ \frac{n_w+2p_w-d,(k_w-1)-1}{s_w}\right]+1$$En resumen:
+> En la fórmula general, combinando **padding**, **stride** y **dilation**, el tamaño de salida queda: $$o_h=\left[ \frac{n_h+2p_h-d,(k_h-1)-1}{s_h}\right]+1, \quad o_w=\left[ \frac{n_w+2p_w-d,(k_w-1)-1}{s_w}\right]+1$$![[Pasted image 20260318113229.png]]
+> 
+> En resumen:
 > - **Padding** controla la pérdida de borde y puede mantener el tamaño espacial.
 > - **Stride** controla cuánto avanza el kernel y reduce resolución/coste.
 > - **Dilation** amplía el campo receptivo sin añadir parámetros.
@@ -86,13 +90,53 @@ $$
 #### 2. Múltiples Canales
 > Cuando la entrada tiene varios canales $(c_i>1)$, el **kernel** debe tener también ese mismo número de canales. Si la ventana espacial del kernel es $k_h\times k_w$, entonces su forma pasa a ser: $$c_i \times k_h \times k_w$$La convolución se realiza **canal a canal** sobre tensores bidimensionales, y después se **suman** los resultados de todos los canales de entrada para obtener una única salida bidimensional.
 > 
-> Si además queremos varios **canales de salida**, no basta con un solo kernel, sino con un conjunto de kernels. Si $n_c$ es el número de canales de entrada y $o_c$ el número de canales de salida, entonces el tensor de pesos tiene forma:  $$o_c \times n_c \times k_h \times k_w$$Cada canal de salida se obtiene aplicando su kernel correspondiente sobre **todos** los canales de entrada. El resultado final es un tensor de forma:  $$o_c \times o_h \times o_w$$Es decir, cada filtro produce un **feature map**, y varios filtros producen varios mapas de características.
+> Si además queremos varios **canales de salida**, no basta con un solo kernel, sino con un conjunto de kernels. Si $n_c$ es el número de canales de entrada y $o_c$ el número de canales de salida, entonces el tensor de pesos tiene forma:  $$o_c \times n_c \times k_h \times k_w$$Cada canal de salida se obtiene aplicando su kernel correspondiente sobre **todos** los canales de entrada. El resultado final es un tensor de forma:  $$o_c \times o_h \times o_w$$Es decir, cada filtro produce un **feature map**, y varios filtros producen varios mapas de características. ![[Pasted image 20260318113428.png]]
 > 
 > Un caso particular importante es la **convolución (1×1)**, donde: $k_h = k_w = 1$ 
 > En este caso no se mezclan vecinos espaciales, sino solo la información en la **dimensión de los canales**. Puede verse como una capa totalmente conectada aplicada **independientemente en cada posición espacial**. Su función principal es transformar $n_c$ canales de entrada en $o_c$ canales de salida, pudiendo **reducir o aumentar** la profundidad del tensor sin alterar la estructura espacial.
+> ![[Pasted image 20260318113459.png]]
+#### 3. Groups
+> En una **convolución estándar**, cada canal de entrada está conectado con **todos** los canales de salida. Esto da máxima flexibilidad, pero también implica un coste computacional alto y un gran número de parámetros.
+> 
+> Las **grouped convolutions** dividen los canales de entrada en $G$ grupos, conectando cada grupo de entrada solo con un grupo correspondiente de canales de salida. Así, la convolución deja de ser totalmente densa en la dimensión de canales y pasa a estar parcialmente separada.
+> 
+> Si una convolución estándar tiene:  $$C_{out}\times C_{in}\times k_h\times k_w$$parámetros, entonces una convolución con grupos tiene: $$G\left(\frac{C_{out}}{G}\times \frac{C_{in}}{G}\times k_h\times k_w\right)$$lo que reduce de forma importante el número de parámetros cuando $G>1$.
+> 
+> La principal ventaja de esta idea es que disminuye el coste computacional y la memoria aproximadamente en un factor $G$, haciendo el modelo más eficiente, especialmente en arquitecturas diseñadas para dispositivos con recursos limitados.
+> 
+> Por ejemplo, si la entrada es un tensor (imagen) $X$ de tamaño:  $8\times 32\times 32$  y usamos un kernel de tamaño:  $8\times 8\times 3\times 3$ (8 output channels, 8 input channels, y 3x3 kernel) con:  $G=4$, entonces los 8 canales de entrada se dividen en 4 grupos de 2 canales cada uno. Cada grupo utiliza sus propios filtros y opera solo sobre sus canales correspondientes. Finalmente, las salidas de todos los grupos se concatenan para formar el tensor final:  $8\times 30\times 30$  
+> 
+> En resumen, las **grouped convolutions** sacrifican parte de la conectividad total entre canales a cambio de una arquitectura mucho más eficiente en parámetros y computación.![[Pasted image 20260318113912.png]]
+#### 4. Pipeline Completo de la CNN
+> El pipeline típico de una **CNN** comienza con una **imagen de entrada**, sobre la que se aplican sucesivamente varias capas de **convolución + activación** (normalmente ReLU). Estas capas se encargan de extraer características locales de la imagen, como bordes, texturas y patrones cada vez más complejos.
+> 
+> Entre bloques convolucionales se suelen introducir capas de **pooling**, que reducen la dimensión espacial de los mapas de características. Esto permite disminuir el coste computacional, conservar la información más relevante y hacer que la representación sea más compacta.
+> 
+> Tras varios bloques de **convolución + activación + pooling**, la red obtiene una representación de alto nivel de la imagen. Esa representación se transforma en un vector mediante la operación de **flatten**, que prepara la salida convolucional para las capas finales de clasificación.
+> 
+> Finalmente, el vector resultante pasa por una o varias capas **fully connected**, que combinan las características extraídas para producir una salida final. En problemas de clasificación, la última capa suele terminar en una **softmax**, que convierte las salidas en puntuaciones interpretables como probabilidades de clase.
+> 
+> En resumen, una CNN sigue este flujo: $$\text{Input} \rightarrow (\text{Conv}+\text{ReLU}\rightarrow \text{Pooling})^n \rightarrow \text{Flatten} \rightarrow \text{Fully Connected} \rightarrow \text{Softmax}$$donde la primera parte realiza el **feature learning** y la última lleva a cabo la **clasificación**.![[Pasted image 20260318114036.png]]
 
 ### IV. Pooling
-
+#### 1. Idea
+> El **pooling** es una operación de **submuestreo** que reduce el tamaño espacial de los **feature maps** sin cambiar la naturaleza del objeto representado. La idea es que una imagen o un patrón relevante puede seguir reconociéndose aunque se represente con menos resolución.
+> 
+> Sus dos funciones principales son:
+> - **Reducir el tamaño** de los mapas de características, disminuyendo el coste computacional.
+> - **Agregar información local**, ayudando a construir características más globales.
+> 
+> Un operador de pooling consiste en una **ventana de tamaño fijo** que recorre el mapa de entrada y produce un único valor por cada región visitada. A diferencia de una convolución, **no tiene parámetros aprendibles**: no hay kernel ni pesos que entrenar. Es una operación determinista que aplica una regla simple sobre cada ventana.
+> 
+> Los casos más habituales son:
+> - **Max pooling**: toma el valor máximo de la ventana.
+> - **Average pooling**: toma la media de los valores de la ventana.
+> 
+> En resumen, el pooling sirve para hacer la representación más compacta y para resumir la información local más importante antes de pasar a capas posteriores.
+#### 2. Max Pooling & Avg Pooling
+> Rellenar
+#### 3. Rellenar
+> Rellenar
 
 
 ### V. Design Principles
