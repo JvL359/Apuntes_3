@@ -28,7 +28,7 @@
 > - el **bias**.
 > Normalmente, los kernels se inicializan de forma aleatoria.
 #### 3. Canales, Feature Maps y Receptive Field
-> En imágenes reales, la entrada no suele ser solo bidimensional, sino un **tensor** con dimensiones de **alto, ancho y canales**. Por ejemplo, en una imagen RGB cada píxel puede representarse como: $$X_{i,j,k}$$donde $k$ indexa el canal.
+> En imágenes reales, la entrada no suele ser solo bidimensional, sino un **tensor** con dimensiones de **alto, ancho y canales**. Por ejemplo, en una imagen RGB cada píxel puede representarse como $X_{i,j,k}$donde $k$ indexa el canal.
 > ![[Pasted image 20260318112754.png]]
 > Para trabajar con esta estructura, la salida de una capa convolucional también se representa como un tensor de orden tres: $$H_{i,j,d}$$donde $d$ indexa los distintos **feature maps**. Cada **feature map** se especializa en detectar un tipo de patrón, como bordes, texturas o colores.
 > 
@@ -267,39 +267,23 @@ $$
 > Sin embargo, **más profundidad no garantiza automáticamente menor error**. A partir de cierto punto puede aparecer degradación del rendimiento: añadir capas deja de ayudar e incluso puede empeorar los resultados si la arquitectura o el entrenamiento no están bien diseñados.
 > 
 > Los principales problemas de redes profundas son:
-> 
 > - **Vanishing / exploding gradients**: los gradientes pueden hacerse muy pequeños o muy grandes al propagarse por muchas capas.
->     
 > - **Overfitting**: al aumentar el número de parámetros, la red puede ajustarse demasiado a los datos de entrenamiento.
->     
 > - **Mayor coste computacional**: más capas implican más tiempo de entrenamiento y más memoria.
->     
 > - **Rendimientos decrecientes**: apilar capas sin más no siempre produce mejoras proporcionales.
->     
 > 
 > Para mitigar estos problemas suelen emplearse:
-> 
-> - **skip / residual connections**,
->     
-> - **inicialización cuidadosa**,
->     
-> - **Batch Normalization**,
->     
-> - **regularización**,
->     
-> - **data augmentation**.
->     
+> - **skip / residual connections**
+> - **inicialización cuidadosa**
+> - **Batch Normalization**
+> - **regularización**
+> - **data augmentation**
 > 
 > Además, una CNN es robusta por diseño sobre todo frente a **traslaciones**, pero no necesariamente frente a otras transformaciones como:
-> 
 > - rotaciones,
->     
 > - cambios de escala,
->     
 > - deformaciones,
->     
 > - shearing o warping.
->     
 > 
 > Por eso, para que una red profunda generalice mejor, es habitual usar **data augmentation**, generando versiones transformadas de las imágenes durante el entrenamiento. Así, la red aprende a ser más robusta frente a variaciones que no vienen incorporadas directamente en la convolución.
 > 
@@ -308,15 +292,71 @@ $$
 
 
 
-### VI. Other Types of Convolutions & Implementation
+### VI. Other Types of Convolutions & Implementations
 #### 1. Up-Convolution
-> Rellenar
+> La **up-convolution** (también llamada **transposed convolution** o **deconvolution**) se utiliza para transformar un mapa de características pequeño en una salida de **mayor resolución espacial**.
+> 
+> A diferencia de la convolución estándar, que normalmente reduce o mantiene la resolución, la     up-convolution **aprende a hacer upsampling** preservando la estructura aprendida. Por eso aparece con frecuencia en la parte **decodificadora** de arquitecturas que necesitan reconstruir detalle espacial. ![[Pasted image 20260318123202.png]]
+> 
+> Sus usos más habituales son **autoencoders**, **generadores de imágenes** como GANs, y **redes de segmentación** como **U-Net**.
+> 
+> Una forma intuitiva de entenderla es la siguiente:
+> Se parte de una entrada pequeña, en algunas implementaciones se **insertan ceros entre los elementos** de la entrada para “expandir” la rejilla, después se aplica un filtro aprendible, el filtro “rellena” las posiciones intermedias y produce una salida más grande. ![[Pasted image 20260318123243.png]]
+> 
+> En otras palabras, la up-convolution realiza un **upsampling aprendido**, no una simple interpolación fija.
+> 
+> **Idea clave:** mientras la convolución estándar extrae y comprime características, la up-convolution permite **reconstruir resolución espacial** a partir de representaciones compactas.
+> 
+> **Ejemplo importante: U-Net**
+> - U-Net combina una rama de **contracción** (encoder) con una rama de **expansión** (decoder).
+> - En la parte expansiva se usan **up-convolutions 2×2** para aumentar la resolución.
+> - Después de cada subida de resolución, se combinan características de baja y alta resolución mediante conexiones laterales.
+> - Finalmente, una convolución 1×1 produce el mapa de segmentación de salida.
+> ![[Pasted image 20260318123604.png]]
+> Esto hace que U-Net sea especialmente útil cuando no basta con clasificar una imagen completa, sino que hay que **predecir una etiqueta por píxel**.
 #### 2. Temporal Convolutions
-> Rellenar
+> Las **convoluciones temporales 1D** aplican filtros sobre secuencias ordenadas, como texto, audio o series temporales.
+>
+> En lugar de recorrer una imagen en dos dimensiones, el filtro se desplaza a lo largo del eje temporal y aprende patrones locales entre elementos consecutivos. Así, una convolución 1D puede capturar dependencias de corto alcance entre tokens, muestras de audio o pasos de tiempo.
+> 
+> Ideas clave:
+> - El filtro “desliza” sobre la secuencia y detecta patrones locales.
+> - Apilar varias capas aumenta el **contexto temporal efectivo**.
+> - Puede usarse como alternativa a modelos recurrentes en algunos problemas secuenciales.
+> - Una capa **lineal final** puede agregar las características aprendidas para producir una salida de clasificación o regresión.
+> ![[Pasted image 20260318123549.png]]
+> En resumen, las convoluciones temporales permiten modelar secuencias de forma eficiente, capturando estructura local y construyendo contexto más amplio al profundizar la red.
 #### 3. Casual Convolutions
-> Rellenar
+> **Convoluciones causales** son un tipo de convolución temporal diseñado para respetar el orden temporal de la secuencia.
+> La idea es que la salida en una posición $t$ solo puede depender de la entrada actual, y las entradas pasadas, pero **no** de valores futuros.
+> 
+> Esto es especialmente importante en tareas autorregresivas, donde el modelo genera o predice el siguiente elemento de una secuencia sin “mirar al futuro”.
+> 
+> Su utilidad principal es:
+> - mantener la coherencia temporal
+> - evitar fuga de información futura
+> - permitir predicción paso a paso en audio, texto o series temporales
+> ![[Pasted image 20260318123720.png]]
+> Por tanto, una convolución causal es una restricción sobre la convolución temporal para que el modelo use solo información disponible hasta el instante actual.
 #### 4. Wave-Net
-> Rellenar
+> **WaveNet** es un ejemplo de arquitectura basada en convoluciones 1D para modelar secuencias, especialmente audio.
+> 
+> Su idea principal es combinar **convoluciones causales**, para no usar información futura, y **dilatación** (creciente), para ampliar rápidamente el campo receptivo.
+> Esto permite que la red capture dependencias a distintas escalas temporales sin necesidad de usar kernels enormes ni una profundidad descontrolada.
+> 
+> La ventaja clave de WaveNet es que modela contexto temporal largo, mantiene causalidad, y lo hace de manera eficiente gracias a las convoluciones dilatadas. ![[Pasted image 20260318123739.png]]
+> En resumen, WaveNet muestra cómo combinar **convolución temporal + causalidad + dilatación** para construir modelos secuenciales potentes.
 #### 5. 3D-Convolutions
+> Las **convoluciones 3D** extienden las convoluciones 2D añadiendo una dimensión extra, normalmente el **tiempo** o la **profundidad volumétrica**.
+> Son adecuadas para datos como vídeo, imágenes médicas 3D, y datos volumétricos.
+> 
+> En este caso, el filtro ya no cubre solo **alto × ancho**, sino también una tercera dimensión. Por ejemplo, un filtro **(3×3×3)** captura estructura espacial, y también contexto entre frames o cortes consecutivos.
+> 
+> Ideas clave:
+> - Permiten aprender **características espaciotemporales**.
+> - Son útiles cuando importa tanto la forma en cada imagen como su evolución temporal.
+> - Al apilar varias capas, la red puede aprender patrones de movimiento o estructuras volumétricas cada vez más complejas.
+> ![[Pasted image 20260318124111.png]]
+> En resumen, las convoluciones 3D son la extensión natural de las CNN cuando los datos no son solo imágenes estáticas, sino secuencias o volúmenes.
+#### 6. Implementation of CNNs
 > Rellenar
-#### 6. Implementation
