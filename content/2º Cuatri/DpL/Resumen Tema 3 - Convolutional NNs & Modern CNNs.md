@@ -359,4 +359,39 @@ $$
 > ![[Pasted image 20260318124111.png]]
 > En resumen, las convoluciones 3D son la extensión natural de las CNN cuando los datos no son solo imágenes estáticas, sino secuencias o volúmenes.
 #### 6. Implementation of CNNs
-> Rellenar
+> En la implementación práctica de convoluciones en CNNs, una idea central es transformar la operación de convolución en una secuencia de pasos matriciales sobre bloques extraídos de la imagen. Para ello se usan las operaciones **unfold** y **fold**.
+> 
+> **Unfold** (también conocido como **im2col**) extrae bloques o parches solapados de una imagen o de un lote de imágenes.  
+> Si la entrada tiene forma: $$b \times n_c \times n_h \times n_w$$entonces la salida de `unfold` tiene forma: $$b \times (n_c \cdot k_h \cdot k_w) \times (h' \cdot w')$$donde:
+> - $k_h, \ k_w$ son el alto y ancho del kernel
+> - $h', \ w'$ son el número de bloques extraídos en vertical y horizontal
+> 
+> El cálculo de $h'$ y $w'$ sigue exactamente la misma lógica que en una convolución: $$h' = \left[ \frac{n_h + 2p_h - d,(k_h-1) - 1}{s_h} \right] + 1, \quad w' = \left[ \frac{n_w + 2p_w - d,(k_w-1) - 1}{s_w} \right] + 1$$donde:
+> - $n_h, \ n_w$ es el tamaño espacial de la entrada
+> - $p_h, \ p_w$ es el padding
+> - $s_h, \ s_w$ es el stride
+> - $d$ es la dilatación
+> 
+> La operación inversa es **fold** (o **col2im**), que reconstruye una imagen a partir de los bloques extraídos.  
+> Recibe una entrada de forma: $$b \times (n_c \cdot k_h \cdot k_w) \times (h' \cdot w')$$y devuelve una imagen reconstruida de forma: $$b \times n_c \times n_h \times n_w$$Durante esta reconstrucción, los bloques solapados se **suman** en las posiciones compartidas.
+> 
+> El flujo práctico es:
+> 1. Aplicar `unfold` para extraer parches.
+> 2. Operar sobre esos parches, por ejemplo con transformaciones lineales o implementaciones manuales de convolución.
+> 3. Aplicar `fold` para reconstruir la salida espacial.
+> 
+> Esto permite entender la convolución como una operación matricial explícita, aunque tiene varios inconvenientes prácticos:
+> - **Solapamiento de bloques**: algunos píxeles aparecen varias veces.
+> - **Mayor uso de memoria**: extraer todos los bloques puede ser costoso.
+> - **Consistencia de parámetros**: stride, padding y dilatación deben coincidir entre `unfold` y `fold`.
+> 
+> Los parámetros principales de **unfold** son:
+> - `kernel_size`: tamaño de la ventana,
+> - `dilation`: separación interna entre elementos del bloque,
+> - `padding`: ceros añadidos al borde,
+> - `stride`: desplazamiento entre bloques.
+> 
+> Los parámetros principales de **fold** son los mismos, añadiendo además:
+> - `output_size`: tamaño espacial objetivo de la reconstrucción.
+> 
+> En resumen, `unfold` y `fold` son herramientas útiles para implementar convoluciones de forma explícita, manipular parches de imagen y entender cómo una CNN procesa localmente la información espacial.
