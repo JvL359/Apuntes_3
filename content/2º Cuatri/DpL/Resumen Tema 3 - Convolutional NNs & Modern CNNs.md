@@ -221,7 +221,7 @@ $$
 > - pooling para reducir resolución
 > - capas fully connected al final para clasificar
 > 
-> Es un modelo relativamente pequeño y sirve muy bien para entender el pipeline básico de una CNN clásica.
+> Es un modelo relativamente pequeño y sirve muy bien para entender el pipeline básico de una CNN clásica. ![[Pasted image 20260318121350.png]]
 > 
 > **2. `AlexNet`**  
 > Supone un salto importante respecto a LeNet-5: la red se hace bastante más profunda y ancha. Combina varias capas convolucionales con ReLU, pooling y varias capas fully connected finales, terminando en una salida `Softmax`.
@@ -237,10 +237,7 @@ $$
 > - capas fully connected grandes al final
 > - salida final de clasificación
 > 
-> En comparación con LeNet-5, AlexNet:
-> - es más profunda
-> - usa más canales
-> - tiene mucha mayor capacidad de representación
+> En comparación con LeNet-5, AlexNet es más profunda, usa más canales y tiene mucha mayor capacidad de representación. ![[Pasted image 20260318121418.png]]
 > 
 > **3. `VGGNet`**  
 > VGG lleva la idea de profundidad todavía más lejos, pero con una filosofía muy regular: repetir muchas veces bloques simples, normalmente convoluciones pequeñas seguidas de no linealidades y reducciones progresivas de resolución.
@@ -256,11 +253,7 @@ $$
 > - repetición de patrones simples
 > - reducción progresiva de tamaño espacial
 > 
-> VGG es importante porque consolida varios principios de diseño de CNN modernas:
-> - preferir kernels pequeños
-> - aumentar canales al profundizar
-> - repetir bloques
-> - separar claramente la parte de extracción de características de la parte final de clasificación
+> VGG es importante porque consolida varios principios de diseño de CNN modernas: preferir kernels pequeños, aumentar canales al profundizar, repetir bloques y separar claramente la parte de extracción de características de la parte final de clasificación. ![[Pasted image 20260318121603.png]]
 > 
 > **Resumen rápido**
 > - **LeNet-5**: CNN clásica y simple; muy útil para entender la estructura base.
@@ -269,7 +262,49 @@ $$
 > 
 > En conjunto, estos modelos muestran la evolución típica de las CNN: más profundidad, más canales, bloques más estructurados y mejores representaciones jerárquicas.
 #### 3. Profundidad
-> Rellenar
+> Aumentar la profundidad de una CNN suele mejorar su capacidad de representación, porque permite construir características jerárquicas cada vez más abstractas. En general, más capas permiten pasar de patrones simples a estructuras más complejas.
+> 
+> Sin embargo, **más profundidad no garantiza automáticamente menor error**. A partir de cierto punto puede aparecer degradación del rendimiento: añadir capas deja de ayudar e incluso puede empeorar los resultados si la arquitectura o el entrenamiento no están bien diseñados.
+> 
+> Los principales problemas de redes profundas son:
+> 
+> - **Vanishing / exploding gradients**: los gradientes pueden hacerse muy pequeños o muy grandes al propagarse por muchas capas.
+>     
+> - **Overfitting**: al aumentar el número de parámetros, la red puede ajustarse demasiado a los datos de entrenamiento.
+>     
+> - **Mayor coste computacional**: más capas implican más tiempo de entrenamiento y más memoria.
+>     
+> - **Rendimientos decrecientes**: apilar capas sin más no siempre produce mejoras proporcionales.
+>     
+> 
+> Para mitigar estos problemas suelen emplearse:
+> 
+> - **skip / residual connections**,
+>     
+> - **inicialización cuidadosa**,
+>     
+> - **Batch Normalization**,
+>     
+> - **regularización**,
+>     
+> - **data augmentation**.
+>     
+> 
+> Además, una CNN es robusta por diseño sobre todo frente a **traslaciones**, pero no necesariamente frente a otras transformaciones como:
+> 
+> - rotaciones,
+>     
+> - cambios de escala,
+>     
+> - deformaciones,
+>     
+> - shearing o warping.
+>     
+> 
+> Por eso, para que una red profunda generalice mejor, es habitual usar **data augmentation**, generando versiones transformadas de las imágenes durante el entrenamiento. Así, la red aprende a ser más robusta frente a variaciones que no vienen incorporadas directamente en la convolución.
+> 
+> **Idea clave:**  
+> La profundidad es útil y necesaria para aprender representaciones complejas, pero debe ir acompañada de buenas técnicas de entrenamiento y de estrategias que mejoren la robustez del modelo.
 
 
 
