@@ -104,7 +104,7 @@ $$
 > 
 > La principal ventaja de esta idea es que disminuye el coste computacional y la memoria aproximadamente en un factor $G$, haciendo el modelo más eficiente, especialmente en arquitecturas diseñadas para dispositivos con recursos limitados.
 > 
-> Por ejemplo, si la entrada es un tensor (imagen) $X$ de tamaño:  $8\times 32\times 32$  y usamos un kernel de tamaño:  $8\times 8\times 3\times 3$ (8 output channels, 8 input channels, y 3x3 kernel) con:  $G=4$, entonces los 8 canales de entrada se dividen en 4 grupos de 2 canales cada uno. Cada grupo utiliza sus propios filtros y opera solo sobre sus canales correspondientes. Finalmente, las salidas de todos los grupos se concatenan para formar el tensor final:  $8\times 30\times 30$  
+> Por ejemplo, si la entrada es un tensor (imagen) $X$ de tamaño:  $8\times 32\times 32$  y usamos un kernel de tamaño:  $8\times 8\times 3\times 3$ (8 output channels, 8 input channels, y 3×3 kernel) con:  $G=4$, entonces los 8 canales de entrada se dividen en 4 grupos de 2 canales cada uno. Cada grupo utiliza sus propios filtros y opera solo sobre sus canales correspondientes. Finalmente, las salidas de todos los grupos se concatenan para formar el tensor final:  $8\times 30\times 30$  
 > 
 > En resumen, las **grouped convolutions** sacrifican parte de la conectividad total entre canales a cambio de una arquitectura mucho más eficiente en parámetros y computación.![[Pasted image 20260318113912.png]]
 #### 4. Pipeline Completo de la CNN
@@ -134,29 +134,154 @@ $$
 > 
 > En resumen, el pooling sirve para hacer la representación más compacta y para resumir la información local más importante antes de pasar a capas posteriores.
 #### 2. Max Pooling & Avg Pooling
-> Rellenar
-#### 3. Rellenar
-> Rellenar
+> Los dos tipos de pooling más habituales son **max pooling** y **average pooling**. Ambos aplican una ventana local sobre el mapa de características y devuelven un único valor por región, pero lo hacen con criterios distintos.
+> 
+> **Max pooling** devuelve el **valor máximo** dentro de la ventana de pooling. Por tanto, se centra en la característica más fuerte o más prominente de esa región. Esto lo hace especialmente útil cuando queremos conservar respuestas intensas, como bordes o activaciones muy marcadas.
+> 
+> Sus principales ventajas son:
+> - conserva características destacadas,
+> - reduce el efecto de valores pequeños o ruido débil,
+> - es robusto ante pequeños desplazamientos o distorsiones,
+> - resulta útil para detectar patrones nítidos.
+> 
+> Sus desventajas son:
+> - puede descartar otra información potencialmente útil,
+> - es sensible a picos de ruido altos si estos dominan la ventana.
+> 
+> **Average pooling** devuelve la **media** de todos los valores de la ventana. En vez de quedarse con la activación más fuerte, genera una versión más suavizada del mapa de características.
+> 
+> Sus ventajas son:
+> - suaviza los feature maps y conserva el patrón general,
+> - es menos sensible a picos aislados de ruido,
+> - captura mejor el contexto global de la región.
+> 
+> Sus desventajas son:
+> - diluye las características más prominentes,
+> - difumina bordes o transiciones bruscas,
+> - suele ser menos eficaz para detección precisa de rasgos.
+> 
+> En resumen:
+> - **Max pooling** prioriza las activaciones más importantes.
+> - **Average pooling** prioriza un resumen más suave y global.
+> ![[Pasted image 20260318115654.png]]
+> La elección entre ambos depende del objetivo: si interesa resaltar rasgos fuertes, suele preferirse **max pooling**; si interesa una agregación más estable y suavizada, puede usarse **average pooling**.
+#### 3. Output Shape, Global Average Pooling y Papel del Pooling
+> Las capas de pooling también admiten **padding** y **stride** para controlar el tamaño de la salida. Además, como el pooling agrega información dentro de una ventana, en muchos frameworks el **stride por defecto coincide con el tamaño de la ventana**. Por ejemplo, una ventana $3\times3$ suele usar stride $3\times3$.
+> 
+> Cuando la entrada tiene varios canales, el pooling se aplica **por separado en cada canal**; no mezcla ni suma canales como sí hace una convolución. Por eso, en pooling normalmente se cumple: $n_c=o_c$  
+> 
+> En general, para una entrada de tamaño $n_h\times n_w$, padding $p_h,p_w$, ventana $k_h\times k_w$ y stride $s_h,s_w$, el tamaño de salida es: $$o_h=\left[ \frac{n_h+2p_h-k_h}{s_h}\right] +1, \quad o_w=\left[ \frac{n_w+2p_w-k_w}{s_w}\right] +1$$
+> Un caso especial importante es el **Global Average Pooling (GAP)**, que puede verse como una versión extrema del average pooling. En lugar de promediar pequeñas ventanas, promedia **todo el feature map** de cada canal y lo reduce a un único valor. Así, cada mapa espacial pasa de tamaño $H'\times W'$ a un solo escalar, quedando únicamente la dimensión de canales.
+> Esto reduce fuertemente la dimensión espacial y deja una representación compacta, útil justo antes de una capa lineal o de clasificación.
+> ![[Pasted image 20260318120049.png]]
+> 
+> También, el **max pooling** puede interpretarse como una pequeña fuente de **no linealidad**, porque selecciona la activación más fuerte de cada región en lugar de hacer una combinación lineal. Así complementa a las capas convolucionales: reduce dimensión espacial y conserva las respuestas más relevantes.
+>  ![[Pasted image 20260318120055.png]]
+> 
+> En resumen:
+> - el pooling controla también el tamaño de salida mediante ventana, stride y padding
+> - se aplica canal a canal
+> - el **GAP** reduce cada canal a un único valor
+> - el **max pooling** no solo resume información, sino que también introduce un efecto no lineal
 
-
-### V. Design Principles
-#### 1. Principios
-
+### V. Design Principles of CNN Models
+#### 1. Principios de Diseño
+> En CNNs modernas, es habitual **reducir progresivamente la resolución espacial** de los feature maps mediante **striding** o **pooling**, mientras que **aumenta el número de canales**. La idea es intercambiar detalle espacial por representaciones más abstractas y ricas, manteniendo controlados el coste computacional y la memoria.
+> 
+> Otro principio importante es **usar kernels pequeños**, normalmente 3×3, en lugar de kernels grandes como 7×7. Varias convoluciones pequeñas apiladas suelen ser preferibles porque:
+> - reducen el número de parámetros
+> - introducen más no linealidades
+> - en la práctica suelen rendir mejor que una sola convolución grande
+> 
+> También es común **repetir bloques de capas** con una estructura regular, por ejemplo combinaciones de:
+> - **conv 1×1** para reducir o expandir canales (_bottleneck_),
+> - **conv 3×3** para capturar patrones espaciales locales,
+> - **ReLU** u otras no linealidades entre medias.
+> 
+> Estos patrones repetidos facilitan construir redes más profundas con un diseño más limpio, estable y fácil de ajustar.
+> 
+> Finalmente, muchas arquitecturas modernas tienden a ser **“all convolutional”**, evitando grandes bloques `Flatten + Linear`. En su lugar, suelen usar **global pooling** (por ejemplo, _global average pooling_) antes de la clasificación final. Esto aporta:
+> - menos parámetros
+> - mayor flexibilidad respecto al tamaño de entrada
+> - una arquitectura más coherente al mantener el procesamiento convolucional hasta casi el final
+> 
+> En resumen, los principios de diseño más importantes son:
+> - bajar resolución espacial de forma gradual
+> - aumentar canales al profundizar
+> - preferir kernels pequeños
+> - reutilizar bloques simples y repetidos
+> - reducir el uso de capas fully connected grandes al final
 #### 2. Modelos
-
-#### 3. Profundidad·
+> **1. `LeNet-5`**  
+> Es una de las primeras arquitecturas CNN clásicas. Sigue una estructura simple y muy representativa:  
+> `Input → Convolution → Nonlinearity → Pooling → Convolution → Nonlinearity → Pooling → Fully Connected → Nonlinearity → Fully Connected → Nonlinearity`
+> 
+> Idea principal:
+> - primeras capas convolucionales para extraer patrones locales
+> - pooling para reducir resolución
+> - capas fully connected al final para clasificar
+> 
+> Es un modelo relativamente pequeño y sirve muy bien para entender el pipeline básico de una CNN clásica.
+> 
+> **2. `AlexNet`**  
+> Supone un salto importante respecto a LeNet-5: la red se hace bastante más profunda y ancha. Combina varias capas convolucionales con ReLU, pooling y varias capas fully connected finales, terminando en una salida `Softmax`.
+> 
+> Idea principal:
+> - extraer características cada vez más complejas con varias convoluciones
+> - reducir resolución de forma progresiva
+> - usar una cabeza densa grande para clasificación
+> 
+> Rasgos que se aprecian en el esquema:
+> - varias capas `Conv + ReLU`
+> - pooling intermedio
+> - capas fully connected grandes al final
+> - salida final de clasificación
+> 
+> En comparación con LeNet-5, AlexNet:
+> - es más profunda
+> - usa más canales
+> - tiene mucha mayor capacidad de representación
+> 
+> **3. `VGGNet`**  
+> VGG lleva la idea de profundidad todavía más lejos, pero con una filosofía muy regular: repetir muchas veces bloques simples, normalmente convoluciones pequeñas seguidas de no linealidades y reducciones progresivas de resolución.
+> 
+> Idea principal:
+> - usar una arquitectura muy uniforme
+> - apilar muchas convoluciones pequeñas
+> - y construir profundidad a partir de bloques repetidos
+> 
+> Rasgos clave:
+> - diseño muy regular y modular
+> - gran profundidad
+> - repetición de patrones simples
+> - reducción progresiva de tamaño espacial
+> 
+> VGG es importante porque consolida varios principios de diseño de CNN modernas:
+> - preferir kernels pequeños
+> - aumentar canales al profundizar
+> - repetir bloques
+> - separar claramente la parte de extracción de características de la parte final de clasificación
+> 
+> **Resumen rápido**
+> - **LeNet-5**: CNN clásica y simple; muy útil para entender la estructura base.
+> - **AlexNet**: CNN más profunda y potente; marca un gran avance en visión por computador.
+> - **VGGNet**: arquitectura muy profunda y regular, basada en bloques repetidos y convoluciones pequeñas.
+> 
+> En conjunto, estos modelos muestran la evolución típica de las CNN: más profundidad, más canales, bloques más estructurados y mejores representaciones jerárquicas.
+#### 3. Profundidad
+> Rellenar
 
 
 
 ### VI. Other Types of Convolutions & Implementation
 #### 1. Up-Convolution
-
+> Rellenar
 #### 2. Temporal Convolutions
-
+> Rellenar
 #### 3. Casual Convolutions
-
+> Rellenar
 #### 4. Wave-Net
-
+> Rellenar
 #### 5. 3D-Convolutions
-
+> Rellenar
 #### 6. Implementation
