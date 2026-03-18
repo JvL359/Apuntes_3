@@ -1,0 +1,118 @@
+### I. Introduction
+#### 1. Idea y Contexto
+> Las **CNNs** surgen porque las redes **fully connected** no son la mejor opción para trabajar con imágenes. En una imagen, los patrones visuales suelen ser **locales** y pueden aparecer en distintas posiciones, mientras que una MLP trata todas las entradas como independientes y no aprovecha esa estructura espacial. Por eso, las fully connected no son naturalmente **invariantes o equivariantes** a cambios de posición, y además requieren muchos parámetros.
+> 
+> La idea central es que en imágenes no hace falta aprender un detector distinto para cada posición: el **mismo patrón** puede reaparecer en muchos lugares, así que conviene **compartir parámetros** y buscar patrones locales con un número mucho menor de pesos. Esto permite detectar características pequeñas (bordes, texturas o partes de objetos) y reutilizarlas en toda la imagen.
+> 
+> A partir de ahí, las CNNs construyen una representación **de local a global**: las primeras capas detectan patrones simples en regiones pequeñas, y las capas más profundas combinan esas características para formar patrones cada vez más abstractos hasta llegar a objetos completos. Esta organización explota dos principios clave: **localidad** en las capas iniciales y **agregación jerárquica** en las capas profundas.
+> 
+> En este sentido, para datos tabulares una MLP puede ser adecuada, pero para imágenes una arquitectura mejor debe responder de forma similar ante parches similares, centrarse primero en regiones locales y después combinar esa información. Esa necesidad es lo que lleva al diseño de las **Convolutional Neural Networks**. Además, su importancia práctica queda reflejada en la evolución de la visión por computador moderna y en el papel de **ImageNet** como benchmark clave en el desarrollo de estos modelos.
+
+### II. Convolutional Layers
+#### 1. De MLP a Convolución: Invariancia y Localidad
+> Una capa convolucional puede entenderse como una versión **restringida** de una MLP aplicada a imágenes. Si la entrada es una imagen bidimensional $X$ y la representación oculta tiene la misma forma $H$, una unidad oculta en $(i,j)$ en una red totalmente conectada se escribiría como: $$H_{i,j}=U_{i,j}+\sum_k\sum_l W_{i,j,k,l} \cdot X_{k,l}$$o, reindexando por desplazamientos espaciales, $$H_{i,j}=U_{i,j}+\sum_a\sum_b V_{i,j,a,b} \cdot X_{i+a,j+b}$$Esta formulación muestra que cada posición tiene sus propios pesos, lo que hace que el número de parámetros crezca enormemente para imágenes grandes.
+> 
+> Para hacer el modelo adecuado a imágenes, se introduce primero el principio de **invariancia/equivariancia a traslaciones**, imponiendo que los pesos no dependan de la posición $(i,j)$. Así se comparten pesos entre posiciones: $$H_{i,j}=u+\sum_a\sum_b V_{a,b} \cdot X_{i+a,j+b}$$donde $u$ es un sesgo constante y $V_{a,b}$ representa un conjunto de pesos compartidos en toda la imagen.
+> 
+> Después se aplica el principio de **localidad**, restringiendo el cálculo de $H_{i,j}$ a una pequeña vecindad alrededor de $(i,j)$. En ese caso:  $$H_{i,j}=u+\sum_{a=-\Delta}^{\Delta}\sum_{b=-\Delta}^{\Delta}V_{a,b} \cdot X_{i+a,j+b}$$donde $\Delta$ fija el tamaño del vecindario local.
+> 
+> El tensor $V$ recibe el nombre de **kernel**, **filtro** o pesos de la capa convolucional. En conjunto, compartir pesos y limitar la interacción a regiones locales reduce drásticamente el número de parámetros y da lugar a la idea central de las **convolution layers**.
+#### 2. Convolución: intuición, formulación y capa convolucional
+> Una **convolución** aplica un conjunto de pesos locales sobre pequeñas regiones de la entrada para producir una nueva representación. Visualmente, cada unidad de salida solo “ve” una región pequeña de la entrada, llamada **receptive field**, y calcula una combinación lineal local más un sesgo: $$y = w * x + b$$Matemáticamente, la convolución entre dos funciones $f$ y $g$ se define como: $$(f*g)(x)=\int f(z)\,g(x-z)\,dz$$Para entradas discretas: $$(f*g)(i)=\sum_a f(a)\,g(i-a)$$y en dos dimensiones: $$(f*g)(i,j)=\sum_a\sum_b f(a,b)\,g(i-a,j-b)$$En CNNs, estrictamente la operación implementada es **cross-correlation** y no convolución pura, porque no se invierte el kernel. Aun así, por convención se sigue llamando **convolución**.
+>
+> Si no se usa _padding_, el tamaño espacial de la salida disminuye según: $$o_h \times o_w = (n_h-k_h+1)\times(n_w-k_w+1)$$donde $n_h\times n_w$​ es el tamaño de la entrada y $k_h\times k_w$ el tamaño del kernel.
+> 
+> Una **capa convolucional** realiza esta operación entre la entrada y el kernel y añade un **bias** escalar para generar la salida. Sus dos parámetros principales son:
+> - el **kernel** o conjunto de pesos,
+> - el **bias**.
+> Normalmente, los kernels se inicializan de forma aleatoria.
+#### 3. Canales, Feature Maps y Receptive Field
+> En imágenes reales, la entrada no suele ser solo bidimensional, sino un **tensor** con dimensiones de **alto, ancho y canales**. Por ejemplo, en una imagen RGB cada píxel puede representarse como: $$X_{i,j,k}$$donde $k$ indexa el canal.
+> Para trabajar con esta estructura, la salida de una capa convolucional también se representa como un tensor de orden tres: $$H_{i,j,d}$$donde $d$ indexa los distintos **feature maps**. Cada **feature map** se especializa en detectar un tipo de patrón, como bordes, texturas o colores.
+> 
+> Al aplicar **múltiples kernels**, se obtienen **múltiples feature maps**, es decir, múltiples canales de salida. Por eso, tanto la entrada como la salida de una convolución deben entenderse como tensores apilados por canales.
+> 
+> El **receptive field** de una unidad es la región local de la entrada que influye en esa activación concreta. Así, una neurona de la salida no depende de toda la imagen, sino solo de una ventana local.
+> 
+> Para soportar múltiples canales en la entrada y en la salida, la formulación se amplía añadiendo más índices al kernel: $$H_{i,j,d}=u+\sum_{a=-\Delta}^{\Delta}\sum_{b=-\Delta}^{\Delta} V_{a,b,c,d}\,X_{i+a,j+b,c}$$donde:
+> - $c$ recorre los **canales de entrada**,
+> - $d$ identifica el **feature map de salida**,
+> - $V$ contiene los pesos del kernel,
+> - $U$ es el sesgo.
+> 
+> En resumen, una convolución en imágenes reales toma un tensor de entrada con varios canales, aplica kernels locales compartidos y produce un nuevo tensor de salida formado por **feature maps**, que servirán como entrada para la siguiente capa.
+#### 4. Convolución como Multiplicación Matricial
+> Aunque la convolución se suele entender como un **kernel que se desliza** sobre la entrada, también puede verse como una **multiplicación matricial estructurada**. La diferencia con la multiplicación matricial usual es que esta combina filas y columnas completas, mientras que la convolución trabaja sobre **ventanas locales** y realiza productos elemento a elemento dentro de cada región.
+> 
+> En una dimensión, la convolución puede escribirse como una multiplicación entre el vector de entrada y una **matriz de Toeplitz**, es decir, una matriz cuyas diagonales son constantes. Si $h$ es el kernel y $x$ la entrada, entonces:  $$y = h * x$$puede representarse matricialmente usando una matriz construida a partir de copias desplazadas del kernel. De forma equivalente, también puede escribirse como: $$
+y^{T} = [h_1\ h_2\ \cdots\ h_m]
+\begin{bmatrix}
+x_1 & x_2 & x_3 & \cdots & x_n & 0 & \cdots & 0 \\
+0 & x_1 & x_2 & \cdots & x_{n-1} & x_n & \cdots & 0 \\
+\vdots & \ddots & \ddots & \ddots & \ddots & \ddots & \ddots & \vdots \\
+0 & \cdots & 0 & x_1 & x_2 & \cdots & x_{n-1} & x_n
+\end{bmatrix}
+$$  
+> lo que muestra que la convolución puede interpretarse como una operación lineal.
+> 
+> En dos dimensiones, la misma idea se mantiene. Si $A$ es la imagen de entrada y $K$ el kernel, la convolución $A*K$ puede representarse como:  $Mv^T = v'$ donde:
+> - $v$ es la imagen $A$ vectorizada fila a fila
+> - $M$ es una matriz por bloques construida a partir del kernel $K$
+> - $v'$ es el resultado vectorizado de la convolución
+> 
+> Si la entrada es de tamaño $n\times n$ y el kernel de tamaño $k\times k$, entonces el tamaño espacial de la salida es:  $t = n-k+1$ y la matriz $M$ tiene tamaño $t^2 \times n^2$.
+> 
+> La construcción de $M$ se hace generando submatrices $K_i$ que representan el deslizamiento horizontal de cada fila del kernel, concatenándolas horizontalmente y después desplazándolas verticalmente mediante bloques nulos. Finalmente, tras multiplicar por el vector de entrada, el vector resultante $v'$ se reorganiza para recuperar la salida bidimensional.
+> 
+> En resumen, la convolución no deja de ser una **transformación lineal**, pero con una estructura muy particular: la matriz asociada es extremadamente estructurada y refleja el **deslizamiento local y compartido** del kernel sobre la entrada.
+
+### III. Padding, Striding, Dilatation, Groups, & Pooling
+#### 1. Padding, Striding & Dilatation
+> En una convolución, cada vez que aplicamos un kernel se pierde información en el borde de la imagen, por lo que el tamaño espacial de la salida se reduce si no hacemos nada para evitarlo.
+> 
+> - **Sin padding ni stride**, para una entrada de tamaño $n_h \times n_w$ y un kernel de tamaño $k_h \times k_w$, la salida tiene tamaño: $$o_h \times o_w = (n_h-k_h+1)\times(n_w-k_w+1)$$Para controlar mejor ese tamaño aparecen tres ideas clave: **padding**, **stride** y **dilation**.
+> 
+> - **Padding** consiste en añadir filas y columnas al tensor de entrada, normalmente con ceros, para compensar la pérdida de píxeles en los bordes. En la notación de estas diapositivas, si añadimos $p_h$ filas y $p_w$ columnas, el tamaño de salida pasa a ser:  $$o_h \times o_w = (n_h-k_h+p_h+1)\times(n_w-k_w+p_w+1)$$Un caso importante es usar padding para mantener la forma espacial de la entrada. Para ello: $$p_h = k_h-1,\quad p_w = k_w-1$$Si $k_h$ o $k_w$ son pares, el padding necesario es asimétrico; por eso es habitual usar kernels impares.
+> 
+> - **Striding** indica cuánto se desplaza la ventana de convolución en cada paso. Por defecto, el stride es 1 en ambas dimensiones, lo que significa avanzar píxel a píxel. Si aumentamos el stride, reducimos el coste computacional y hacemos una especie de _downsampling_, ya que se omiten posiciones intermedias. Con stride vertical $s_h$ y horizontal $s_w$, el tamaño de salida es:  $$o_h \times o_w = \left[\frac{n_h-k_h+p_h+s_h}{s_h}\right] \times \left[\frac{n_w-k_w+p_w+s_w}{s_w}\right]$$
+> 
+> - **Dilation** (o _atrous convolution_) separa los elementos del kernel, aumentando su campo receptivo sin incrementar el número de parámetros. Su objetivo es capturar contexto más amplio, aunque puede perder detalle local fino. Para un factor de dilatación $d$, la convolución se escribe como: $$H_{i,j}=\sum_{a=-\Delta}^{\Delta}\sum_{b=-\Delta}^{\Delta}V_{a,b},X_{i+da,;j+db}$$Aquí, $d$ separa las posiciones del kernel y hace que este “vea” una región mayor de la entrada.
+> 
+> En la fórmula general, combinando **padding**, **stride** y **dilation**, el tamaño de salida queda: $$o_h=\left[ \frac{n_h+2p_h-d,(k_h-1)-1}{s_h}\right]+1, \quad o_w=\left[ \frac{n_w+2p_w-d,(k_w-1)-1}{s_w}\right]+1$$En resumen:
+> - **Padding** controla la pérdida de borde y puede mantener el tamaño espacial.
+> - **Stride** controla cuánto avanza el kernel y reduce resolución/coste.
+> - **Dilation** amplía el campo receptivo sin añadir parámetros.
+> Los tres son hiperparámetros fundamentales de una capa convolucional porque determinan cuánto contexto observa la red y cuál será el tamaño de las representaciones intermedias.
+#### 2. Múltiples Canales
+> Cuando la entrada tiene varios canales $(c_i>1)$, el **kernel** debe tener también ese mismo número de canales. Si la ventana espacial del kernel es $k_h\times k_w$, entonces su forma pasa a ser: $$c_i \times k_h \times k_w$$La convolución se realiza **canal a canal** sobre tensores bidimensionales, y después se **suman** los resultados de todos los canales de entrada para obtener una única salida bidimensional.
+> 
+> Si además queremos varios **canales de salida**, no basta con un solo kernel, sino con un conjunto de kernels. Si $n_c$ es el número de canales de entrada y $o_c$ el número de canales de salida, entonces el tensor de pesos tiene forma:  $$o_c \times n_c \times k_h \times k_w$$Cada canal de salida se obtiene aplicando su kernel correspondiente sobre **todos** los canales de entrada. El resultado final es un tensor de forma:  $$o_c \times o_h \times o_w$$Es decir, cada filtro produce un **feature map**, y varios filtros producen varios mapas de características.
+> 
+> Un caso particular importante es la **convolución (1×1)**, donde: $k_h = k_w = 1$ 
+> En este caso no se mezclan vecinos espaciales, sino solo la información en la **dimensión de los canales**. Puede verse como una capa totalmente conectada aplicada **independientemente en cada posición espacial**. Su función principal es transformar $n_c$ canales de entrada en $o_c$ canales de salida, pudiendo **reducir o aumentar** la profundidad del tensor sin alterar la estructura espacial.
+
+### IV. Pooling
+
+
+
+### V. Design Principles
+#### 1. Principios
+
+#### 2. Modelos
+
+#### 3. Profundidad·
+
+
+
+### VI. Other Types of Convolutions & Implementation
+#### 1. Up-Convolution
+
+#### 2. Temporal Convolutions
+
+#### 3. Casual Convolutions
+
+#### 4. Wave-Net
+
+#### 5. 3D-Convolutions
+
+#### 6. Implementation
