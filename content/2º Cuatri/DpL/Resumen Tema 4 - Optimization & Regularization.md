@@ -17,7 +17,7 @@
 > - Si es **demasiado grande**, el algoritmo puede oscilar o divergir.
 > - Si está bien ajustada, el descenso es estable y eficiente.
 > 
-> Otro problema importante es que en funciones **no convexas** puede haber muchos mínimos locales. En ese caso, el punto al que llega el algoritmo depende de la inicialización y de la learning rate. En deep learning esto es habitual, porque las funciones objetivo suelen ser altamente no convexas.
+> Otro problema importante es que en funciones **no convexas** puede haber muchos mínimos locales. En ese caso, el punto al que llega el algoritmo depende de la inicialización y de el learning rate. En deep learning esto es habitual, porque las funciones objetivo suelen ser altamente no convexas.
 > 
 > Para mejorar el descenso básico aparecen los **métodos adaptativos** y de **segundo orden**. La motivación es que una learning rate fija no siempre funciona bien en todas las direcciones del espacio de parámetros.
 > 
@@ -36,7 +36,7 @@
 > - **Stochastic Gradient Descent (SGD)**  
 > SGD reduce el coste aproximando el gradiente completo con el gradiente de una sola muestra. Su regla de actualización es: $$\mathbf{x}\leftarrow \mathbf{x}-\eta \nabla f(\mathbf{x}_i)$$donde:
 > - $i \in {1,\dots,n}$ se elige uniformemente al azar.
-> - $\eta$ es la learning rate.
+> - $\eta$ es el learning rate.
 > 
 > Su coste computacional pasa a ser $O(1)$. Además, el gradiente estocástico es un estimador insesgado del gradiente completo: $$\mathbb{E}_i \nabla f(\mathbf{x}_i)=\frac{1}{n}\sum_{i=1}^{n}\nabla f(\mathbf{x}_i)=\nabla f(\mathbf{x})$$
 > - **Mini-Batch Gradient Descent (MBGD)**  
@@ -47,7 +47,7 @@
 > - **SGD:** usa una sola muestra, trayectoria más ruidosa.
 > - **MBGD:** usa un lote pequeño, combinando eficiencia y mayor estabilidad que SGD.
 #### 3. Momentum
-> En SGD y MBGD los gradientes pueden ser ruidosos. Si la learning rate disminuye demasiado rápido, la convergencia se frena; si disminuye demasiado poco, el ruido puede alejar la optimización del óptimo. La idea de _momentum_ es usar el historial de gradientes para suavizar la trayectoria y hacer el proceso más estable.
+> En SGD y MBGD los gradientes pueden ser ruidosos. Si el learning rate disminuye demasiado rápido, la convergencia se frena; si disminuye demasiado poco, el ruido puede alejar la optimización del óptimo. La idea de _momentum_ es usar el historial de gradientes para suavizar la trayectoria y hacer el proceso más estable.
 > 
 > **Promedio con memoria (leaky average)**  
 > En minibatch SGD, el gradiente en la iteración $t$ se estima como: $$g_{t,t-1}=\frac{1}{|\mathcal{B}_t|}\sum_{i\in \mathcal{B}_t}\partial_w f(x_i,w_{t-1}) = \frac{1}{|\mathcal{B}_t|}\sum_{i\in \mathcal{B}_t} h_{i,t-1}$$donde $\mathcal{B}_t$ es el minibatch en la iteración $t$, y $g_{t,t-1}$ es el gradiente promedio sobre ese batch.
@@ -129,12 +129,12 @@
 > **RMSProp** es un método de optimización adaptativo diseñado para corregir una limitación importante de Adagrad: en Adagrad, el estado acumulado crece sin límite y eso hace que la tasa de aprendizaje efectiva se vuelva demasiado pequeña con el paso de las iteraciones.
 > 
 > Su _idea principal_ es no acumular todos los gradientes cuadrados desde el inicio, sino usar una *media móvil exponencial* o _leaky average_. De este modo, el algoritmo da más peso a los gradientes recientes y evita que la acumulación crezca indefinidamente.
-> En Adagrad, el estado $s_t$ crece sin control, que provoca una reducción excesiva de la learning rate efectiva. Entonces RMSProp separa la adaptatividad por coordenada del problema de una decadencia irreversible del step.
+> En Adagrad, el estado $s_t$ crece sin control, que provoca una reducción excesiva de el learning rate efectivo. Entonces RMSProp separa la adaptatividad por coordenada del problema de una decadencia irreversible del step.
 > 
 > La _acumulación del estado_ en RMSProp es: $$s_t \leftarrow \beta s_{t-1} + (1-\beta)g_t^2$$donde $s_t$ representa la acumulación de gradientes cuadrados en forma de media móvil, y $\beta \in [0,1]$ controla cuánto peso se da al pasado.
 > 
 > La _regla de actualización_ es: $$x_t \leftarrow x_{t-1} - \frac{\eta}{\sqrt{s_t}+\epsilon}\cdot g_t$$donde:
-> - $\eta$ es la learning rate global
+> - $\eta$ es el learning rate global
 > - $\epsilon > 0$ es una constante pequeña para evitar divisiones por cero
 > - $g_t$ es el gradiente en la iteración $t$
 > 
@@ -149,7 +149,7 @@
 #### 7. Adam
 > **Adam** combina varias ideas de los métodos vistos anteriormente en un único optimizador. Toma de **Momentum** la media móvil de los gradientes para estabilizar y acelerar la dirección de descenso, y de **RMSProp** la media móvil de los gradientes cuadrados para reescalar cada coordenada de forma adaptativa.
 > 
-> La motivación que aparece en las diapositivas es precisamente esa: reunir en un solo método lo que ya sabemos que funciona bien. Hasta este punto hemos visto que:
+> Entonces con Adam se trata de reunir en un solo método lo que ya sabemos que funciona bien. Hasta este punto hemos visto que:
 > - **SGD** suele ser más efectivo que GD en datasets grandes.
 > - **MBGD** mejora la eficiencia usando subconjuntos y operaciones vectorizadas.
 > - **Momentum** agrega historial de gradientes para acelerar la convergencia.
@@ -313,74 +313,137 @@
 > 
 > La idea principal es que el entrenamiento no debe continuar indefinidamente: si el **validation error** empieza a aumentar mientras el **training error** sigue disminuyendo, eso indica que el modelo está empezando a **sobreajustar** los datos de entrenamiento. Por tanto, el punto óptimo de parada se identifica monitorizando la **validation loss**.
 > 
-> En este sentido, Early Stopping ayuda a:
-> 
-> - **prevenir overfitting**,
->     
-> - **mejorar la generalización**,
->     
-> - seleccionar automáticamente un punto razonable de entrenamiento.
->     
+> En este sentido, Early Stopping ayuda a **prevenir overfitting**, **mejorar la generalización**, y **seleccionar automáticamente** un punto razonable de entrenamiento.
 > 
 > Un concepto importante es la **patience**, que define el número de épocas o pasos consecutivos en los que se permite que la validación empeore antes de detener el entrenamiento. Esto evita parar demasiado pronto por pequeñas fluctuaciones en la validation loss y da al modelo margen para recuperarse de inestabilidades temporales.
 > 
 > El procedimiento básico con _patience_ es:
+> 1. Entrenar el modelo durante varias iteraciones,
+> 2. Monitorizar la **validation loss** en cada evaluación,
+> 3. Si la pérdida de validación empeora durante $p$ pasos consecutivos, detener el entrenamiento,
+> 4. Devolver los **mejores parámetros** encontrados.
 > 
-> 1. entrenar el modelo durante varias iteraciones,
->     
-> 2. monitorizar la **validation loss** en cada evaluación,
->     
-> 3. si la pérdida de validación empeora durante (p) pasos consecutivos, detener el entrenamiento,
->     
-> 4. devolver los **mejores parámetros** encontrados.
->     
-> 
-> Las diapositivas también remarcan que **Early Stopping actúa como un regularizador implícito**:
-> 
-> - evita que los pesos lleguen a configuraciones excesivamente complejas,
->     
-> - favorece soluciones más simples,
->     
-> - tiende a producir modelos con mejor capacidad de generalización.
->     
+> **Early Stopping** actúa como un regularizador implícito que evita que los pesos lleguen a configuraciones excesivamente complejas, favorece soluciones más simples, y tiende a producir modelos con mejor capacidad de generalización.
 > 
 > Sin embargo, también existe el riesgo contrario: **parar demasiado pronto**. Si se interrumpe el entrenamiento antes de tiempo, el modelo puede quedar en **underfitting**, es decir, sin haber aprendido lo suficiente de los datos. Una señal de ello es que la **validation loss todavía siga disminuyendo**, lo que indica que aún hay margen de mejora.
 > 
 > En resumen, Early Stopping busca un equilibrio: **ni entrenar tanto como para sobreajustar, ni detenerse tan pronto que el modelo se quede corto**.
 #### 3. Dropout
-> **Dropout** es una técnica de **regularización** diseñada para prevenir el **overfitting** desactivando aleatoriamente neuronas durante el entrenamiento con probabilidad (p).
+> **Dropout** es una técnica de **regularización** diseñada para prevenir el **overfitting** desactivando aleatoriamente neuronas durante el entrenamiento con probabilidad $p$.
+> La idea es que, en cada paso de entrenamiento, una parte de las unidades no participa en el cálculo. Esto obliga a la red a no depender demasiado de neuronas concretas y a aprender **representaciones redundantes y más robustas**, mejorando así la **generalización**.
 > 
-> La idea es que, en cada paso de entrenamiento, una parte de las unidades no participa en el cálculo. Esto obliga a la red a no depender demasiado de neuronas concretas y a aprender **representaciones redundantes y más robustas**, mejorando así la **generalización**.  
-> _(Diapositivas: “Dropout: Preventing Overfitting”)_
+> El mecanismo puede entenderse así: si una capa tiene 100 neuronas con activación 1 y aplicamos dropout con $p=0.4$, durante entrenamiento solo permanecerán activas, en media, unas **60 neuronas**. En inferencia, en cambio, **no se aplica dropout**, por lo que participan todas las neuronas. 
 > 
-> El mecanismo puede entenderse así: si una capa tiene 100 neuronas con activación 1 y aplicamos dropout con (p=0.4), durante entrenamiento solo permanecerán activas, en media, unas **60 neuronas**. En inferencia, en cambio, **no se aplica dropout**, por lo que participan todas las neuronas.  
-> _(Diapositivas: “Dropout Mechanism”)_
+> Como al eliminar neuronas disminuye la suma de activaciones, durante entrenamiento se compensa reescalando las activaciones por: $$\frac{1}{1-p}$$De este modo se mantiene aproximadamente la misma magnitud esperada entre entrenamiento e inferencia. Por ejemplo:  $$60 \cdot \frac{1}{1-0.4}=100$$Es decir, la salida se reescala para que sea consistente con la fase de evaluación.  
 > 
-> Como al eliminar neuronas disminuye la suma de activaciones, durante entrenamiento se compensa reescalando las activaciones por:  
-> $$\frac{1}{1-p}$$  
-> De este modo se mantiene aproximadamente la misma magnitud esperada entre entrenamiento e inferencia. En el ejemplo de las diapositivas:  
-> $$60 \cdot \frac{1}{1-0.4}=100$$  
-> Es decir, la salida se reescala para que sea consistente con la fase de evaluación.  
-> _(Diapositivas: “Effect on Activations”)_
-> 
-> En cuanto a **dónde aplicarlo**, las diapositivas indican que Dropout se usa sobre todo:
-> 
-> - **antes de capas fully connected / linear**, para mejorar la generalización,
->     
-> - **antes de capas convolucionales 1x1** en algunas arquitecturas.
->     
+> Dropout se usa sobre todo **antes de capas fully connected / linear**, para mejorar la generalización, y **antes de capas convolucionales 1x1** en algunas arquitecturas.
 > 
 > En cambio, **no se recomienda antes de convoluciones generales**, porque en imágenes existe una fuerte **correlación espacial** y el efecto de dropout ahí suele ser menos adecuado.  
-> _(Diapositivas: “Where to Apply Dropout?”)_
 > 
 > En resumen, Dropout introduce ruido controlado durante el entrenamiento, reduce la coadaptación entre neuronas y actúa como una técnica efectiva para mejorar la capacidad de generalización del modelo.
 #### 4. Residual Connections
-> Rellenar
-#### 5. Learning Rates Schedulers 
-> Rellenar
+> Las **residual connections** o **skip connections** se introducen para aliviar los problemas de optimización de redes profundas. Al aumentar la profundidad aparecen dificultades como **vanishing gradients** y **degradation**, y simplemente apilar más capas **no garantiza** una mejora del rendimiento. De hecho, se indica que sin normalización la profundidad práctica ronda unas **10–12 capas convolucionales**, y con normalización puede llegar a **20–30 capas**, pero aun así siguen existiendo problemas de entrenamiento.
+> 
+> La idea central del bloque residual es que la capa no aprenda directamente una transformación completa, sino un **incremento respecto a la identidad**. La formulación es: $$f(x)=g(x)+x$$donde $g(x)$ es la **residual mapping**. Así, el bloque aprende una corrección sobre la entrada en lugar de reconstruir toda la función desde cero.
+> 
+> Esta formulación hace que una red profunda pueda comportarse, como mínimo, tan bien como una más superficial, porque siempre existe el camino identidad. Por eso las residual connections ayudan a que aumentar la profundidad **expanda** la clase de funciones de forma más útil y evitan parte de la degradación observada en redes muy profundas.
+> 
+> En el caso convolucional, si la entrada y la salida del bloque no tienen la misma forma, se puede usar una **convolución 1×1** en la rama residual para igualar dimensiones. Es decir, la conexión identidad deja de ser una identidad pura y pasa a ser una proyección que adapta el número de canales o el tamaño necesario para poder realizar la suma.
+> 
+> Desde el punto de vista del entrenamiento, una ventaja fundamental es que el **gradiente puede fluir a través de la conexión residual** hacia capas anteriores. Esto suaviza el proceso de optimización y hace el paisaje de pérdida más favorable que en arquitecturas sin skip connections.
+> 
+> Con residual connections, las redes profundas pueden alcanzar profundidades mucho mayores (incluso del orden de **1000 capas**) sin la misma pérdida de generalización que sufrirían arquitecturas profundas sin este mecanismo.
+> 
+> Sobre **dónde añadir la conexión residual**, se comenta que inicialmente se añadía antes de la activación de salida, pero experimentalmente resultó mejor dejar la conexión residual lo más cercana posible a una **función identidad**. Por eso las variantes modernas favorecen configuraciones donde la rama skip altera lo mínimo posible la señal.
+> 
+> En resumen, las **residual connections** combaten los problemas de optimización en redes profundas, permiten aprender una **corrección** sobre la identidad en vez de una transformación completa, facilitan el flujo del gradiente hacia capas tempranas, y hacen viable entrenar redes mucho más profundas.
+#### 5. Learning Rates Schedulers
+> Los **learning rate schedulers** definen cómo evoluciona la tasa de aprendizaje durante el entrenamiento. No basta con fijar una $\eta$ constante, ya se ha visto que $\eta=\eta(t)$ puede ser necesaria para un entrenamiento adecuado, e incluso usando optimizadores avanzados como **Adam** puede seguir siendo útil personalizar esa evolución.
+> 
+> La idea es seguir una función de planificación $f(t)$ para el learning rate. Además, una estrategia **decreciente** no siempre tiene por qué ser estrictamente monótona: “decaying is not always good”, así que la forma concreta del scheduler depende del problema.
+> 
+> **Step-LR**
+> Este primer scheduler reduce el learning rate en intervalos fijos. En este caso, la tasa de aprendizaje disminuye por un factor $\gamma$ cada cierto número de épocas definido por `step_size`. Resulta útil cuando una learning rate constante provoca convergencia lenta.
+> 
+> **MultiStep-LR**
+> Esta variante más flexible también reduce el learning rate por un factor $\gamma$ pero no en intervalos regulares sino en **milestones predefinidos**. Así se obtiene un control más fino sobre en qué momentos bajar el learning rate.
+> 
+> **Exponential-LR**
+> Aquí el learning rate decrece exponencialmente en cada época. La fórmula mostrada es:  $$lr_t = lr_{t-1}\cdot \gamma$$Este scheduler ayuda a reducir gradualmente el tamaño del paso para favorecer una convergencia más estable.
+>
+> **Learning Rate Warmup**
+> Consiste en **aumentar gradualmente** el learning rate al inicio del entrenamiento. Su objetivo es evitar inestabilidad en las primeras etapas de la optimización. Se mencionan como estrategias habituales **linear** warmup, **cosine** warmup, y **cyclic** warmup.
+> 
+> **Reduce Learning Rate on Plateau**
+> En este caso, el learning rate se reduce cuando una métrica de rendimiento deja de mejorar. El método usa **patience** para esperar durante cierto tiempo antes de reducirla, y así ajustar dinámicamente el learning rate cuando el entrenamiento entra en una meseta.
+> 
+> En conjunto una buena planificación del learning rate mejora la **convergencia** y la **estabilidad**, evita que una tasa demasiado alta produzca **oscilaciones o divergencia**, y evita que una tasa demasiado baja provoque **convergencia lenta**.
+> 
+> En resumen, los schedulers permiten controlar la evolución temporal de el learning rate para adaptar mejor el proceso de optimización a las distintas fases del entrenamiento: exploración inicial, estabilización y refinamiento final.
 #### 6. Regularization
-> Rellenar
+> La **regularización** añade una penalización a la función objetivo para controlar la complejidad del modelo a través de sus parámetros, mediante las **normas $L_p$** que miden el tamaño de un vector: $$L_p(x)=|x|_p=\left(\sum_{i=1}^{n}|x|^p\right)^{1/p}$$La idea es tomar como referencia la función más simple y medir cuán compleja es una solución observando la magnitud de sus pesos.
+> 
+> Una primera opción es la **regularización L1** o **Lasso**, que añade a la pérdida la suma de los valores absolutos de los pesos: $$L_1(x)=|x|_1=\sum_{i=1}^{n}|x|$$$$\tilde{\mathcal{L}}(w)=\mathcal{L}(w)+\alpha|w|_1$$L1 **favorece la esparsidad**, porque empuja algunos pesos exactamente a cero. Por eso también se dice que promueve cierta **selección de características**. Geométricamente, su paisaje de optimización tiene **bordes afilados**, y las soluciones tienden a caer sobre los ejes, dando lugar a modelos dispersos.
+> 
+> La otra opción principal es la **regularización L2** o **Ridge**, que añade la magnitud cuadrática de los pesos a la función de pérdida:  $$L_2(x)=|x|_2=\left(\sum_{i=1}^{n}|x|^2\right)^{1/2}$$$$\tilde{\mathcal{L}}(w)=\mathcal{L}(w)+\frac{\alpha}{2}\left(|w|_2\right)^2$$En este caso, la regularización no fuerza pesos exactamente nulos, sino que **evita valores extremos** y produce soluciones más **suaves** y **estables**. La optimización se vuelve **suave y convexo**, y los pesos se reparten de forma más uniforme en lugar de concentrarse en unos pocos coeficientes distintos de cero.
+> 
+> La comparación esencial entre ambas es que **L1** induce esparsidad y puede anular pesos, y **L2** reduce magnitudes grandes y reparte los pesos de forma más homogénea.
+>  
+> La **L2 regularization** añade explícitamente el término de penalización $\alpha|w|^2$ a la pérdida. Esto ayuda a reducir overfitting y favorece pesos pequeños, pero actúa modificando la **función objetivo**.
+> El **weight decay**, en cambio, aplica un factor de decaimiento directamente sobre los pesos en cada paso de gradiente. Esto es equivalente a L2 bajo **SGD estándar**, pero **difiere en optimizadores adaptativos** como **Adam** o **RMSProp**, y reduce la magnitud de los parámetros de forma explícita a lo largo del entrenamiento.
+> 
+> En resumen, ambas técnicas buscan evitar el overfitting reduciendo el tamaño de los pesos, pero no lo hacen del mismo modo, **L2** modifica la **loss**, y **weight decay** modifica directamente la **actualización de los parámetros**.
 #### 7. Ensembles
-> Rellenar
+> Los **ensembles** o **model averaging** consisten en **entrenar múltiples modelos** para mejorar la generalización y después **promediar sus predicciones** para reducir la varianza.
+> La idea básica es que distintos modelos cometen errores distintos. Si se combinan sus salidas, el resultado final suele ser más robusto que el de un único modelo.
+> 
+> Es un proceso donde se entrena más de un modelo, cada modelo produce su propia predicción, las predicciones se combinan mediante un promedio o combinación ponderada, y se obtiene una predicción final con mejor rendimiento.
+> 
+> Históricamente, **antes del deep learning**, el model averaging se hacía usando **distintos subconjuntos de datos de entrenamiento**.  
+> En **deep learning**, en cambio, se suelen obtener modelos diferentes mediante: **distintas inicializaciones aleatorias**, **data augmentation**, y la **convergencia hacia distintos mínimos locales**. En cuanto a su funcionamiento, cada modelo puede **sobreajustar de una manera distinta**, el promedio entre modelos suele **reducir varianza**, normalmente puede aportar una mejora de 
+> **1–3% en accuracy**, pero a costa de un **tiempo de entrenamiento más largo**. Hay dos esquemas:
+> - **Bagging**: combinación en **paralelo** de varios modelos.
+> - **Boosting**: combinación **secuencial** de modelos.
+> 
+> Los ensembles son útiles cuando se busca exprimir el rendimiento final del sistema, especialmente **cuando la capacidad computacional lo permite**, y **cuando es importante obtener el último extra de precisión**.
+> 
+> En resumen, un ensemble no cambia la arquitectura básica de cada red, sino que combina varias redes entrenadas de forma diferente para conseguir una predicción final más estable y con mejor capacidad de generalización.
 #### 8. Transfer Learning
-> Rellenar
+> **Transfer Learning** consiste en reutilizar total o parcialmente un modelo ya entrenado para resolver una nueva tarea o trabajar sobre un nuevo dataset.
+> 
+> Primero se entrena un modelo $M$ para una tarea $T$ usando un dataset fuente $D_S$. Después, ese conocimiento puede reutilizarse de varias formas:
+> - usar $M$ sobre un nuevo dataset $D_T$ para la misma tarea $T$,
+> - usar parte de $M$ sobre el dataset original $D_S$ para una nueva tarea $T_n$,
+> - usar parte de $M$ sobre un nuevo dataset $D_T$ para una nueva tarea $T_n$.
+> 
+> El caso más importante en deep learning es usar **modelos preentrenados**. Un problema práctico para esto sería entrenar desde cero redes grandes como **VGG16** puede no ser viable.
+> 
+> En particular, para clasificar **animales raros**, un dataset de solo unos cientos de imágenes no es suficiente para entrenar un modelo con más de **134 millones de parámetros**; mientras que para clasificar **animales comunes**, sí puede haber suficientes datos, pero entrenar desde cero sigue siendo costoso en tiempo. Por tanto, el entrenamiento completo de modelos grandes puede requerir demasiado tiempo y demasiados datos.
+> 
+> Por eso, la idea básica de transfer learning es:
+> 1. **Pretraining** sobre un dataset grande y general.
+> 2. **Transfer** del modelo preentrenado al problema objetivo.
+> 3. **Fine-tuning** o adaptación final sobre el dataset específico de destino.
+> 
+> La intuición central es que las **capas tempranas** de una red aprenden **características de bajo nivel** y esas características pueden reutilizarse en nuevos dominios. Después, las capas más tardías o las capas fully connected pueden modificarse para adaptarse a la nueva tarea.
+> 
+> En otras palabras, transfer learning permite construir clasificadores que puedan entrenarse en **menos tiempo**, con **menos datos**, aprovechando pesos ya conocidos en lugar de empezar desde inicialización aleatoria.
+> 
+> **Aplicaciones** de transfer learning:
+> - Aprendizaje a partir de **simulaciones** (por ejemplo, coches autónomos).
+> - **Adaptación de dominio**.
+> - Reconocimiento de voz para grupos o contextos con menos datos.
+> - Adaptación entre idiomas para _few-shot learning_.
+> - En NLP, reutilizar un modelo del lenguaje entrenado en grandes corpus y adaptarlo luego a documentos de un dominio concreto.
+> 
+> Finalmente, se muestra una **taxonomía** del transfer learning:
+> - **Inductive Transfer Learning**,
+> - **Transductive Transfer Learning**,
+> - **Unsupervised Transfer Learning**.
+> Dentro de esa taxonomía aparecen además varios casos relacionados:
+> - **Self-taught Learning**,
+> - **Multi-task Learning**,
+> - **Domain Adaptation**,
+> - **Sample Selection Bias / Covariance Shift**.
+>
+> En resumen, el **transfer learning** reutiliza conocimiento aprendido previamente para reducir el coste de entrenamiento y mejorar el aprendizaje en nuevas tareas o dominios, especialmente cuando los datos son escasos o entrenar desde cero resulta demasiado caro.
