@@ -161,7 +161,7 @@
 > - $g_t$ es el gradiente en la iteración $t$
 > - $v_t$ acumula información de dirección
 > - $s_t$ acumula información sobre la magnitud cuadrática del gradiente
-> - valores típicos en las diapositivas: $\beta_1 = 0.9, \ \beta_2 = 0.999$
+> - valores típicos: $\beta_1 = 0.9, \ \beta_2 = 0.999$
 > 
 > Un detalle importante de Adam es la **bias correction**. Como al inicio se parte de $v_0=0$ y $s_0=0$, las primeras estimaciones quedan sesgadas hacia cero. Para corregir ese sesgo, Adam usa: $$\hat{v}_t = \frac{v_t}{1-(\beta_1)^t}, \qquad \hat{s}_t = \frac{s_t}{1-(\beta_2)^t}$$Esta corrección compensa el sesgo introducido por la inicialización, es especialmente importante en las primeras iteraciones y permite obtener estimaciones más precisas de ambos momentos
 > 
@@ -178,7 +178,7 @@
 > 
 > La idea central es que, para tener un buen modelo, el **training error** debe ser pequeño, pero también debe ser **similar al test error**. En otras palabras, no solo importa minimizar el error de entrenamiento, sino también minimizar el error de generalización.
 > 
-> La interpretación que aparece en las diapositivas es:
+> La interpretación es que:
 > - Si **test error $\gg$ training error**, entonces hay **high variance error** y aparece un **generalization gap** grande.
 > - Si **training error $\approx$ test error $\gg 0$**, entonces el problema es de **high bias error**.
 > 
@@ -195,7 +195,7 @@
 > En resumen, **underfitting** significa que el modelo es demasiado simple y comete error alto tanto en entrenamiento como en test. **Overfitting** significa que el modelo aprende demasiado bien el entrenamiento pero pierde capacidad de generalización. El punto deseable es un ajuste intermedio, donde el error total sea mínimo y la diferencia entre entrenamiento y test se mantenga controlada.
 ### II. Normalization
 #### 1. Vanishing & Exploding Gradients
-> Antes de introducir técnicas de normalización, las diapositivas motivan el problema que estas intentan aliviar: los **vanishing gradients** y los **exploding gradients** durante la retropropagación.
+> Estos son los problemas que las técnicas de normalización intentan aliviar: los **vanishing gradients** y los **exploding gradients** durante la retropropagación.
 > 
 > Los **vanishing gradients** aparecen cuando los gradientes se vuelven demasiado pequeños al propagarse hacia atrás por la red. Como consecuencia, las actualizaciones de los parámetros son mínimas y el entrenamiento se vuelve muy lento o incluso se detiene, especialmente en redes profundas.
 > Los **exploding gradients** aparecen cuando los gradientes crecen sin control. Esto provoca inestabilidad numérica, hace que los parámetros diverjan y puede terminar haciendo fallar el entrenamiento del modelo.
@@ -222,7 +222,7 @@
 > 
 > Una vez obtenidos estos valores normalizados, Batch-Norm no se limita a dejar la salida con media 0 y varianza 1, sino que introduce dos parámetros entrenables por canal para recuperar capacidad de representación: $$Y_i=\gamma \hat{Z}_i+\beta$$donde $\gamma$ escala la activación normalizada y $\beta$ la desplaza.
 > 
-> Durante la **inferencia**, las estadísticas del batch pueden no ser fiables, especialmente si el batch es muy pequeño. Por eso no se usan directamente las medias y varianzas del batch actual, sino estimaciones acumuladas durante entrenamiento. Las diapositivas indican que estas medias móviles se actualizan con: $$\mu_{c,\text{running}}=\alpha \mu_{\text{running}}+(1-\alpha)\mu_c$$$$\sigma^2_{c,\text{running}}=\alpha \sigma^2_{\text{running}}+(1-\alpha)\sigma_c^2$$Por tanto:
+> Durante la **inferencia**, las estadísticas del batch pueden no ser fiables, especialmente si el batch es muy pequeño. Por eso no se usan directamente las medias y varianzas del batch actual, sino estimaciones acumuladas durante entrenamiento. Estas medias móviles se actualizan con: $$\mu_{c,\text{running}}=\alpha \mu_{\text{running}}+(1-\alpha)\mu_c$$$$\sigma^2_{c,\text{running}}=\alpha \sigma^2_{\text{running}}+(1-\alpha)\sigma_c^2$$Por tanto:
 >- $\mu_{c, \text{running}}$ es la media acumulada o media móvil del canal $c$, estimada durante el entrenamiento y usada en inferencia.
 >- $\sigma^2_{c, \text{running}}$ es la varianza acumulada o varianza móvil del canal $c$, estimada durante el entrenamiento y usada en inferencia.
 > De este modo, el modelo dispone de estadísticas más estables para evaluación.
@@ -284,7 +284,7 @@
 > 
 > En resumen, **Group-Norm** introduce una normalización más flexible que **Layer-Norm** y más estable que **Instance-Norm**, evitando además la dependencia fuerte del tamaño de batch característica de **Batch-Norm**.
 #### 6. Where to Add
-> Una cuestión práctica importante en redes con normalización es **dónde colocar la capa de normalización** respecto a la convolución y la activación. En las diapositivas se presentan dos posibilidades principales:
+> Una cuestión práctica importante en redes con normalización es **dónde colocar la capa de normalización** respecto a la convolución y la activación. Hay dos posibilidades principales:
 > **Opción A:**  $$\text{Conv} \rightarrow \text{Norm} \rightarrow \text{ReLU}$$**Opción B:**  $$\text{ReLU} \rightarrow \text{Norm} \rightarrow \text{Conv}$$En la **Opción A**, primero se aplica la convolución, después la normalización y finalmente la activación. Es la disposición más habitual. Sus ventajas son que la convolución puede prescindir del sesgo, ya que la normalización elimina el desplazamiento de la media, y ayuda a estabilizar el entrenamiento al reducir el cambio en las activaciones internas. Como inconveniente, después de normalizar se aplica **ReLU**, por lo que una parte de las activaciones puede quedar anulada a cero, con la consiguiente posible pérdida de información.
 > En la **Opción B**, primero se aplica la activación, luego la normalización y después la convolución. Sus ventajas son que al aplicar **ReLU antes de normalizar**, se evita la posible pérdida de información asociada a anular activaciones justo después de la normalización, y tras Batch-Norm, los ajustes de escala y sesgo pueden considerarse opcionales.
 > 
@@ -294,15 +294,15 @@
 
 ### III. Generalization Techniques
 #### 1. Data Augmentation
-> **Data Augmentation** surge como respuesta a un síntoma claro de **overfitting**: pequeños cambios en la imagen pueden producir grandes cambios en la salida del modelo. En ese caso, el modelo necesita ver más variedad de ejemplos. Como etiquetar nuevas imágenes reales es costoso, la idea es **crear nuevas muestras sintéticas a partir de las ya disponibles**, manteniendo la misma etiqueta.
+> Surge como respuesta a un síntoma claro de **overfitting**: pequeños cambios en la imagen pueden producir grandes cambios en la salida del modelo. En ese caso, el modelo necesita ver más variedad de ejemplos. Como etiquetar nuevas imágenes reales es costoso, la idea es **crear nuevas muestras sintéticas a partir de las ya disponibles**, manteniendo la misma etiqueta.
 > 
 > En lugar de recoger y anotar más datos, se aplican **transformaciones** sobre las imágenes originales para generar nuevas versiones del mismo ejemplo. Así, a partir de una imagen etiquetada como _dog_, se pueden construir varias imágenes transformadas que siguen teniendo la misma etiqueta _dog_.
 > 
-> Entre los **tipos de augmentación** que aparecen en las diapositivas están **flip**, **shift**, **scale**, **rotate**, **saturation**, **brightness**, y **tint / hue**:
+> **Tipos de augmentación:** flip, shift, scale, rotate, saturation, brightness, y tint / hue.
 > 
 > La idea de fondo es que el modelo aprenda a ser más robusto frente a estas variaciones, en lugar de memorizar únicamente la apariencia exacta de las imágenes de entrenamiento.
 > 
-> Además, tenemos **Unsupervised Data Augmentation (UDA)**, que es una técnica de aprendizaje **semi-supervisado** que aprovecha datos **no etiquetados**:
+> Además, tenemos **Unsupervised Data Augmentation**, que es una técnica de aprendizaje **semi-supervisado** que aprovecha datos **no etiquetados**:
 > 1. se aplica una transformación a una imagen,
 > 2. la imagen original y la aumentada se pasan por la **misma red**,
 > 3. se comparan ambas salidas para imponer **consistencia**.
