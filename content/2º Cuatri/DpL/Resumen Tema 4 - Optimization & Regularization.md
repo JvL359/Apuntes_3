@@ -168,30 +168,212 @@
 > Después, Adam reescala el gradiente combinando ambas cantidades: $$g_t'=\frac{\eta \hat{v}_t}{\sqrt{\hat{s}_t}+\epsilon}$$y actualiza los parámetros con: $$x_t \leftarrow x_{t-1} - g_t'$$Es decir, Adam usa una dirección suavizada por el primer momento, una normalización adaptativa por coordenada mediante el segundo momento, y una corrección del sesgo inicial para que ambas estimaciones no empiecen demasiado pequeñas.
 > 
 > En resumen, **Adam** puede verse como una combinación de **Momentum + RMSProp + bias correction**. Por eso suele funcionar bien en la práctica: suaviza la dirección del descenso, adapta el tamaño del paso en cada coordenada y corrige el sesgo de las medias móviles en las primeras iteraciones.
-
 #### 8. Overfitting & Underfitting
-> Rellenar
+> Al optimizar una red neuronal no basta con reducir el error de entrenamiento. El objetivo real es obtener un modelo que **ajuste bien** y que además **generalice** correctamente a datos no vistos.
+> 
+> Distinguimos tres situaciones:
+> - **Underfitted**: ajuste insuficiente, asociado a **high bias error**.
+> - **Good fit / robust**: equilibrio adecuado entre bias y variance.
+> - **Overfitted**: ajuste excesivo al entrenamiento, asociado a **high variance error**.
+> 
+> La idea central es que, para tener un buen modelo, el **training error** debe ser pequeño, pero también debe ser **similar al test error**. En otras palabras, no solo importa minimizar el error de entrenamiento, sino también minimizar el error de generalización.
+> 
+> La interpretación que aparece en las diapositivas es:
+> - Si **test error $\gg$ training error**, entonces hay **high variance error** y aparece un **generalization gap** grande.
+> - Si **training error $\approx$ test error $\gg 0$**, entonces el problema es de **high bias error**.
+> 
+> Cuando se representa el error frente a la **capacidad** del modelo, se observa este comportamiento:
+> - En la zona de **underfitting**, el modelo tiene poca capacidad y no logra capturar bien la estructura de los datos.
+> - A medida que aumenta la capacidad, el error baja hasta llegar a una **capacidad óptima**.
+> - Si seguimos aumentando la capacidad, entramos en la zona de **overfitting**, donde el error de entrenamiento puede seguir bajando pero el error de generalización empieza a subir.
+> 
+> Aquí entra el balance **bias-variance**:
+> - El **bias** disminuye cuando aumenta la capacidad del modelo.
+> - La **variance** aumenta cuando la capacidad crece demasiado.
+> - El **generalization error** resulta del equilibrio entre ambas, y alcanza su mínimo cerca de la **optimal capacity**.
+> 
+> En resumen, **underfitting** significa que el modelo es demasiado simple y comete error alto tanto en entrenamiento como en test. **Overfitting** significa que el modelo aprende demasiado bien el entrenamiento pero pierde capacidad de generalización. El punto deseable es un ajuste intermedio, donde el error total sea mínimo y la diferencia entre entrenamiento y test se mantenga controlada.
 ### II. Normalization
-#### 1. Problem
-> Rellenar
+#### 1. Vanishing & Exploding Gradients
+> Antes de introducir técnicas de normalización, las diapositivas motivan el problema que estas intentan aliviar: los **vanishing gradients** y los **exploding gradients** durante la retropropagación.
+> 
+> Los **vanishing gradients** aparecen cuando los gradientes se vuelven demasiado pequeños al propagarse hacia atrás por la red. Como consecuencia, las actualizaciones de los parámetros son mínimas y el entrenamiento se vuelve muy lento o incluso se detiene, especialmente en redes profundas.
+> Los **exploding gradients** aparecen cuando los gradientes crecen sin control. Esto provoca inestabilidad numérica, hace que los parámetros diverjan y puede terminar haciendo fallar el entrenamiento del modelo.
+> 
+> En el caso de los **exploding gradients**, los síntomas más claros son:
+> - picos repentinos en la función de pérdida durante el entrenamiento,
+> - valores de gradiente muy grandes en capas concretas.
+> Para detectarlos, podemos representar la evolución de la loss durante el entrenamiento, y monitorizar la magnitud de pesos y gradientes capa a capa, .
+> 
+> En el caso de los **vanishing gradients**, los síntomas típicos son:
+> - convergencia extremadamente lenta o estancamiento,
+> - gradientes cercanos a cero en las primeras capas.
+> Para detectarlos, podemos observar si la función de pérdida entra en una meseta, y analizar las magnitudes de gradiente por capa para comprobar si van disminuyendo excesivamente.
+> 
+> En resumen, esta subsección sirve como motivación: antes de estudiar **normalization**, hay que entender que en redes profundas el flujo del gradiente puede degradarse. La normalización aparece precisamente como una herramienta para hacer el entrenamiento más estable y evitar que los gradientes desaparezcan o exploten.
 #### 2. Batch-Norm
-> Rellenar
+> **Batch Normalization** es una técnica diseñada para *estabilizar y acelerar el entrenamiento* de redes profundas. Aparece situada típicamente entre una capa convolucional y la activación, siguiendo el esquema: $$\text{Conv} \rightarrow \text{BN} \rightarrow \text{ReLU}$$La idea básica es **normalizar las activaciones dentro de un mini-batch**. Esto evita desplazamientos en las activaciones, reduce la dependencia respecto a la inicialización, ayuda a prevenir _vanishing_ y _exploding gradients_, y además actúa como regularizador.
+> 
+> En una capa convolucional, si el batch de activaciones tiene forma $$B \times W \times H \times C$$donde $B$ es el tamaño de batch, $W,H$ son las dimensiones espaciales y $C$ el número de canales, Batch-Norm calcula la media y la varianza **por canal**: $$\mu_c=\frac{1}{BWH}\sum_{k,x,y} Z_{k,x,y,c}$$$$\sigma_c^2=\frac{1}{BWH}\sum_{k,x,y}(Z_{k,x,y,c}-\mu_c)^2$$Por tanto:
+> - $\mu_{c}$ es la media calculada para un canal concreto, usando todas las muestras del mini-batch y todas las posiciones espaciales.
+> - $\sigma^2_{c}$ es la varianza calculada para ese mismo canal, sobre todas las muestras del mini-batch y todas las posiciones espaciales.
+> 
+> Después, cada activación se normaliza usando esas estadísticas: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_c}{\sqrt{\sigma_c^2+\epsilon}}$$donde $\epsilon$ es una constante pequeña que aporta estabilidad numérica.
+> 
+> Una vez obtenidos estos valores normalizados, Batch-Norm no se limita a dejar la salida con media 0 y varianza 1, sino que introduce dos parámetros entrenables por canal para recuperar capacidad de representación: $$Y_i=\gamma \hat{Z}_i+\beta$$donde $\gamma$ escala la activación normalizada y $\beta$ la desplaza.
+> 
+> Durante la **inferencia**, las estadísticas del batch pueden no ser fiables, especialmente si el batch es muy pequeño. Por eso no se usan directamente las medias y varianzas del batch actual, sino estimaciones acumuladas durante entrenamiento. Las diapositivas indican que estas medias móviles se actualizan con: $$\mu_{c,\text{running}}=\alpha \mu_{\text{running}}+(1-\alpha)\mu_c$$$$\sigma^2_{c,\text{running}}=\alpha \sigma^2_{\text{running}}+(1-\alpha)\sigma_c^2$$Por tanto:
+>- $\mu_{c, \text{running}}$ es la media acumulada o media móvil del canal $c$, estimada durante el entrenamiento y usada en inferencia.
+>- $\sigma^2_{c, \text{running}}$ es la varianza acumulada o varianza móvil del canal $c$, estimada durante el entrenamiento y usada en inferencia.
+> De este modo, el modelo dispone de estadísticas más estables para evaluación.
+> 
+> Aun así, Batch-Norm también tiene **limitaciones**, ya que introduce coste computacional adicional, no funciona bien con tamaños de batch muy pequeños, introduce dependencia entre muestras del mismo batch, y no es adecuado para modelos recurrentes cuando las estadísticas cambian mucho entre batches.
+> 
+> En resumen, Batch-Norm normaliza activaciones a nivel de mini-batch para hacer el entrenamiento más estable y rápido, pero su eficacia depende bastante del tamaño del batch y del tipo de arquitectura.
 #### 3. Layer-Norm
-> Rellenar
+> **Layer Normalization** es una técnica de normalización que, a diferencia de Batch-Norm, **no normaliza a través del batch**, sino **a través de las dimensiones de características de cada muestra individual**. De igual manera que *Batch-Norm*, aparece colocada dentro del bloque: $$\text{Conv} \rightarrow \text{LN} \rightarrow \text{ReLU}$$La idea principal es que cada entrada se normaliza **de manera independiente**, usando sus propias estadísticas. Por eso resulta especialmente útil cuando el tamaño de batch es pequeño o cuando las estadísticas entre batches cambian mucho.
+> 
+> Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$entonces Layer-Norm normaliza cada muestra $k$ a lo largo de todas sus dimensiones espaciales y de canal. La activación normalizada viene dada por: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_k}{\sigma_k}$$donde la media y la varianza para cada muestra son: $$\mu_k=\frac{1}{WHC}\sum_{x,y,c} Z_{k,x,y,c}$$ $$\sigma_k^2=\frac{1}{WHC}\sum_{x,y,c}(Z_{k,x,y,c}-\mu_k)^2$$Por tanto:
+> - $\mu_k$ es la media calculada sobre todas las características de una única entrada.
+> - $\sigma_k^2$ es la varianza calculada sobre todas las características de esa misma entrada.
+> 
+> Por tanto, Layer-Norm garantiza que **cada muestra tenga activaciones con media cero y varianza unidad** a través de sus canales y dimensiones internas.
+> 
+> La *diferencia clave frente a Batch-Norm* es que Batch-Norm normaliza a través de la dimensión batch, y por eso necesita batches suficientemente grandes para obtener estadísticas estables. Mientras que *Layer-Norm* normaliza a través de las características de cada muestra, por lo que **no depende del tamaño de batch**.
+> Esto hace que Layer-Norm esté mejor adaptada a **batches pequeños**, **modelos recurrentes**, y **transformers**, donde las estadísticas de batch pueden variar mucho.
+> 
+> Sus ventajas principales son que:
+> - funciona bien en modelos secuenciales
+> - no requiere batch grande para comportarse de forma estable
+> - evita el coste de mantener estadísticas de batch durante entrenamiento e inferencia
+> - consigue activaciones con media 0 y varianza 1 sin depender de otras muestras del batch
+> 
+> En resumen, **Layer-Norm normaliza cada muestra por separado**, mientras que **Batch-Norm normaliza usando el batch completo**. Por eso Layer-Norm es más adecuada cuando no se puede asumir estabilidad estadística entre batches.
 #### 4. Instance-Norm
-> Rellenar
+> **Instance Normalization** es una técnica de normalización aplicada **a cada imagen individual** de un batch. A diferencia de **Batch-Norm**, que normaliza usando estadísticas del batch completo, **Instance-Norm normaliza cada muestra por separado** y además lo hace **canal a canal**, usando únicamente las dimensiones espaciales de cada canal. Su arquitectura es la misma que anteriores: $$\text{Conv} \rightarrow \text{IN} \rightarrow \text{ReLU}$$Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$ entonces Instance-Norm normaliza cada activación según: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_{kc}}{\sigma_{kc}}$$donde, para cada muestra $k$ y cada canal $c$, la media y la varianza se calculan sobre las dimensiones espaciales: $$\mu_{kc}=\frac{1}{WH}\sum_{x,y} Z_{k,x,y,c}$$$$\sigma^2_{kc}=\frac{1}{WH}\sum_{x,y}(Z_{k,x,y,c}-\mu_{kc})^2$$Por tanto:
+> - $\mu_{kc}$ es la media de un canal concreto en una muestra concreta.
+> - $\sigma^2_{kc}$ es la varianza de ese canal en esa muestra.
+> 
+> Comparando las tres normalizaciones vistas:
+> - **Batch-Norm:** normaliza sobre el batch para cada característica.
+> - **Layer-Norm:** normaliza sobre todas las características de una sola muestra.
+> - **Instance-Norm:** normaliza sobre las dimensiones espaciales de cada característica, de forma independiente para cada muestra.
+> 
+> En cuanto a su uso, **Instance-Norm** aparece sobre todo en tareas donde importa mantener estadísticas individuales de cada imagen, especialmente en **style transfer** y **image synthesis**
+> La idea es que cada instancia se normaliza de forma autónoma, lo que resulta útil cuando el estilo o la apariencia concreta de cada imagen tiene mucho peso.
+> Como observación final, **no se usa demasiado**, porque puede dar **estadísticas inestables**.
+> 
+> En resumen, **Instance-Norm** normaliza **por instancia y por canal**, usando solo la información espacial de cada mapa de características, y por eso resulta especialmente adecuada en problemas de generación y transferencia de estilo.
 #### 5. Group-Norm
-> Rellenar
+> **Group Normalization** normaliza las activaciones *dentro de grupos de canales*, situándose a medio camino entre *Layer-Norm* e *Instance-Norm*. Su idea principal es **dividir los canales en G grupos** y calcular la normalización de manera independiente dentro de cada grupo. Así, no usa estadísticas del batch completo como **Batch-Norm**pero tampoco mezcla todos los canales de una muestra como hace **Layer-Norm**. Su arquitectura es la misma que los modelos anteriores: $$\text{Conv} \rightarrow \text{GN} \rightarrow \text{ReLU}$$Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$se divide la dimensión de canales en G grupos. Para cada muestra $k$ y cada grupo $g$ y se calcula:  $$\mu_{kg}=\frac{1}{WHG}\sum_{c=gG}^{(g+1)G-1}\sum_{x,y} Z_{k,x,y,c}$$$$\sigma^2_{kg}=\frac{1}{WHG}\sum_{c=gG}^{(g+1)G-1}\sum_{x,y}(Z_{k,x,y,c}-\mu_{kg})^2$$donde $g=\left[ c/G \right]$ y $G$ es el número de grupos. Por tanto:
+> - $\mu_{kg}$ es la media calculada sobre todas las posiciones espaciales y todos los canales del grupo $g$ en la muestra $k$.
+> - $\sigma^2_{kg}$ es la varianza calculada sobre esas mismas activaciones, es decir, sobre todas las posiciones espaciales y todos los canales del grupo $g$ en la muestra $k$.
+> 
+> Una vez calculadas la media y la varianza del grupo, la salida normalizada se obtiene como: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_{kg}}{\sigma_{kg}}$$El funcionamiento, por tanto, es:
+> 1. Dividir los canales en $G$ grupos.
+> 2. Calcular media y varianza dentro de cada grupo.
+> 3. Normalizar cada activación usando las estadísticas de su grupo.
+> 
+> Group-Norm tiene dos resultados importantes, produce **estadísticas más estables que Instance Normalization** cuando $G=C$, y a diferencia de Layer-Norm, **no fuerza a todos los canales a compartir una única estadística** cuando $G=1$.
+> 
+> Comparativa Final:
+> - **Batch-Norm** usa estadísticas del batch y funciona peor con batch sizes pequeños,
+> - **Layer-Norm** normaliza sobre todos los canales de una muestra, sin distinguir grupos,
+> - **Instance-Norm** normaliza por muestra y por canal,
+> - **Group-Norm** busca un compromiso, normalizando **por grupos de canales**.
+> 
+> En resumen, **Group-Norm** introduce una normalización más flexible que **Layer-Norm** y más estable que **Instance-Norm**, evitando además la dependencia fuerte del tamaño de batch característica de **Batch-Norm**.
 #### 6. Where to Add
-> Rellenar
+> Una cuestión práctica importante en redes con normalización es **dónde colocar la capa de normalización** respecto a la convolución y la activación. En las diapositivas se presentan dos posibilidades principales:
+> **Opción A:**  $$\text{Conv} \rightarrow \text{Norm} \rightarrow \text{ReLU}$$**Opción B:**  $$\text{ReLU} \rightarrow \text{Norm} \rightarrow \text{Conv}$$En la **Opción A**, primero se aplica la convolución, después la normalización y finalmente la activación. Es la disposición más habitual. Sus ventajas son que la convolución puede prescindir del sesgo, ya que la normalización elimina el desplazamiento de la media, y ayuda a estabilizar el entrenamiento al reducir el cambio en las activaciones internas. Como inconveniente, después de normalizar se aplica **ReLU**, por lo que una parte de las activaciones puede quedar anulada a cero, con la consiguiente posible pérdida de información.
+> En la **Opción B**, primero se aplica la activación, luego la normalización y después la convolución. Sus ventajas son que al aplicar **ReLU antes de normalizar**, se evita la posible pérdida de información asociada a anular activaciones justo después de la normalización, y tras Batch-Norm, los ajustes de escala y sesgo pueden considerarse opcionales.
+> 
+> En cualquier caso, ambas configuraciones son **válidas** y pueden funcionar bien en práctica. Sin embargo, **Option A** es la más usada en arquitecturas modernas de deep learning, y **Option B** simplifica algunos aspectos de implementación, pero es menos frecuente.
+> 
+> Como conclusión la disposición estándar en CNNs modernas es la **Opción A**, es decir, aplicar la normalización **después de la convolución y antes de la activación**.
 
-### III. Rellenar Techniques
+### III. Generalization Techniques
 #### 1. Data Augmentation
-> Rellenar
+> **Data Augmentation** surge como respuesta a un síntoma claro de **overfitting**: pequeños cambios en la imagen pueden producir grandes cambios en la salida del modelo. En ese caso, el modelo necesita ver más variedad de ejemplos. Como etiquetar nuevas imágenes reales es costoso, la idea es **crear nuevas muestras sintéticas a partir de las ya disponibles**, manteniendo la misma etiqueta.
+> 
+> En lugar de recoger y anotar más datos, se aplican **transformaciones** sobre las imágenes originales para generar nuevas versiones del mismo ejemplo. Así, a partir de una imagen etiquetada como _dog_, se pueden construir varias imágenes transformadas que siguen teniendo la misma etiqueta _dog_.
+> 
+> Entre los **tipos de augmentación** que aparecen en las diapositivas están **flip**, **shift**, **scale**, **rotate**, **saturation**, **brightness**, y **tint / hue**:
+> 
+> La idea de fondo es que el modelo aprenda a ser más robusto frente a estas variaciones, en lugar de memorizar únicamente la apariencia exacta de las imágenes de entrenamiento.
+> 
+> Además, tenemos **Unsupervised Data Augmentation (UDA)**, que es una técnica de aprendizaje **semi-supervisado** que aprovecha datos **no etiquetados**:
+> 1. se aplica una transformación a una imagen,
+> 2. la imagen original y la aumentada se pasan por la **misma red**,
+> 3. se comparan ambas salidas para imponer **consistencia**.
+> 
+> Esta consistencia se fuerza mediante una **consistency loss**, que minimiza la diferencia entre las predicciones de la imagen original y la transformada. Con ello, el modelo aprende que su salida debería mantenerse estable ante transformaciones como rotaciones, flips o cambios de color, mejorando así su **robustez** y su **generalización**.
 #### 2. Early Stopping
-> Rellenar
+> **Early Stopping** consiste en detener el entrenamiento cuando el rendimiento en **validación** deja de mejorar, aunque el error de entrenamiento siga bajando.
+> 
+> La idea principal es que el entrenamiento no debe continuar indefinidamente: si el **validation error** empieza a aumentar mientras el **training error** sigue disminuyendo, eso indica que el modelo está empezando a **sobreajustar** los datos de entrenamiento. Por tanto, el punto óptimo de parada se identifica monitorizando la **validation loss**.
+> 
+> En este sentido, Early Stopping ayuda a:
+> 
+> - **prevenir overfitting**,
+>     
+> - **mejorar la generalización**,
+>     
+> - seleccionar automáticamente un punto razonable de entrenamiento.
+>     
+> 
+> Un concepto importante es la **patience**, que define el número de épocas o pasos consecutivos en los que se permite que la validación empeore antes de detener el entrenamiento. Esto evita parar demasiado pronto por pequeñas fluctuaciones en la validation loss y da al modelo margen para recuperarse de inestabilidades temporales.
+> 
+> El procedimiento básico con _patience_ es:
+> 
+> 1. entrenar el modelo durante varias iteraciones,
+>     
+> 2. monitorizar la **validation loss** en cada evaluación,
+>     
+> 3. si la pérdida de validación empeora durante (p) pasos consecutivos, detener el entrenamiento,
+>     
+> 4. devolver los **mejores parámetros** encontrados.
+>     
+> 
+> Las diapositivas también remarcan que **Early Stopping actúa como un regularizador implícito**:
+> 
+> - evita que los pesos lleguen a configuraciones excesivamente complejas,
+>     
+> - favorece soluciones más simples,
+>     
+> - tiende a producir modelos con mejor capacidad de generalización.
+>     
+> 
+> Sin embargo, también existe el riesgo contrario: **parar demasiado pronto**. Si se interrumpe el entrenamiento antes de tiempo, el modelo puede quedar en **underfitting**, es decir, sin haber aprendido lo suficiente de los datos. Una señal de ello es que la **validation loss todavía siga disminuyendo**, lo que indica que aún hay margen de mejora.
+> 
+> En resumen, Early Stopping busca un equilibrio: **ni entrenar tanto como para sobreajustar, ni detenerse tan pronto que el modelo se quede corto**.
 #### 3. Dropout
-> Rellenar
+> **Dropout** es una técnica de **regularización** diseñada para prevenir el **overfitting** desactivando aleatoriamente neuronas durante el entrenamiento con probabilidad (p).
+> 
+> La idea es que, en cada paso de entrenamiento, una parte de las unidades no participa en el cálculo. Esto obliga a la red a no depender demasiado de neuronas concretas y a aprender **representaciones redundantes y más robustas**, mejorando así la **generalización**.  
+> _(Diapositivas: “Dropout: Preventing Overfitting”)_
+> 
+> El mecanismo puede entenderse así: si una capa tiene 100 neuronas con activación 1 y aplicamos dropout con (p=0.4), durante entrenamiento solo permanecerán activas, en media, unas **60 neuronas**. En inferencia, en cambio, **no se aplica dropout**, por lo que participan todas las neuronas.  
+> _(Diapositivas: “Dropout Mechanism”)_
+> 
+> Como al eliminar neuronas disminuye la suma de activaciones, durante entrenamiento se compensa reescalando las activaciones por:  
+> $$\frac{1}{1-p}$$  
+> De este modo se mantiene aproximadamente la misma magnitud esperada entre entrenamiento e inferencia. En el ejemplo de las diapositivas:  
+> $$60 \cdot \frac{1}{1-0.4}=100$$  
+> Es decir, la salida se reescala para que sea consistente con la fase de evaluación.  
+> _(Diapositivas: “Effect on Activations”)_
+> 
+> En cuanto a **dónde aplicarlo**, las diapositivas indican que Dropout se usa sobre todo:
+> 
+> - **antes de capas fully connected / linear**, para mejorar la generalización,
+>     
+> - **antes de capas convolucionales 1x1** en algunas arquitecturas.
+>     
+> 
+> En cambio, **no se recomienda antes de convoluciones generales**, porque en imágenes existe una fuerte **correlación espacial** y el efecto de dropout ahí suele ser menos adecuado.  
+> _(Diapositivas: “Where to Apply Dropout?”)_
+> 
+> En resumen, Dropout introduce ruido controlado durante el entrenamiento, reduce la coadaptación entre neuronas y actúa como una técnica efectiva para mejorar la capacidad de generalización del modelo.
 #### 4. Residual Connections
 > Rellenar
 #### 5. Learning Rates Schedulers 
