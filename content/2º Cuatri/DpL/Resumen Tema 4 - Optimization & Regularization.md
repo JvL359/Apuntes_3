@@ -1,14 +1,13 @@
 ### I. Optimization Algorithms
-
 #### 1. Fundamentos y Motivación de la Optimización
 > En deep learning, **optimizar** no significa solo reducir la pérdida en entrenamiento, sino hacerlo de forma que el modelo también **generalice bien** a datos no vistos. Por eso hay que distinguir entre:
 > - **Error de entrenamiento / riesgo empírico**: pérdida media sobre el conjunto de entrenamiento.
 > - **Error de generalización / riesgo**: pérdida esperada sobre la distribución real de los datos.
 > 
-> El mínimo del riesgo empírico no tiene por qué coincidir con el mínimo del riesgo real, así que minimizar muy bien la loss de entrenamiento no garantiza el mejor rendimiento en validación o test.
+> El mínimo del riesgo empírico no tiene por qué coincidir con el mínimo del riesgo real, así que minimizar muy bien la loss de train no garantiza el mejor rendimiento en validación o test. ![[Pasted image 20260319192500.png]]
 > 
 > Uno de los principales problemas al optimizar redes profundas es el de los **vanishing gradients**.  
-> Cuando las derivadas se vuelven muy pequeñas durante backpropagation, las actualizaciones de los pesos casi desaparecen y el aprendizaje se ralentiza o incluso se detiene. Esto ocurre especialmente con activaciones saturables como `tanh`, cuya derivada: $f'(x)=1-\tanh^2(x)$ se aproxima a cero para valores grandes de $x$.
+> Cuando las derivadas se vuelven muy pequeñas durante backpropagation, las actualizaciones de los pesos casi desaparecen y el aprendizaje se ralentiza o incluso se detiene. Esto ocurre especialmente con activaciones saturables como `tanh`, cuya derivada: $f'(x)=1-\tanh^2(x)$ se aproxima a cero para valores grandes de $x$. ![[Pasted image 20260319192607.png]]
 > 
 > La idea básica del **gradient descent** parte de una aproximación de Taylor. En una dimensión, si queremos minimizar una función $f:\mathbb{R}\to\mathbb{R}$, actualizamos: $x \leftarrow x - \eta f'(x)$ donde $\eta$ es la **learning rate**. En varias dimensiones, para una función $f:\mathbb{R}^d\to\mathbb{R}$, la regla pasa a ser: $\mathbf{x} \leftarrow \mathbf{x} - \eta \nabla f(\mathbf{x})$ con: $$\nabla f(\mathbf{x})= \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_d} \right]^T$$El gradiente marca la dirección de máximo crecimiento, así que $-\nabla f(\mathbf{x})$ define la dirección de descenso más pronunciado.
 > 
@@ -16,8 +15,9 @@
 > - Si es **demasiado pequeña**, la convergencia es muy lenta.
 > - Si es **demasiado grande**, el algoritmo puede oscilar o divergir.
 > - Si está bien ajustada, el descenso es estable y eficiente.
+> ![[Pasted image 20260319192713.png]]
 > 
-> Otro problema importante es que en funciones **no convexas** puede haber muchos mínimos locales. En ese caso, el punto al que llega el algoritmo depende de la inicialización y de el learning rate. En deep learning esto es habitual, porque las funciones objetivo suelen ser altamente no convexas.
+> Otro problema importante es que en funciones **no convexas** puede haber muchos mínimos locales. En ese caso, el punto al que llega el algoritmo depende de la inicialización y de el learning rate. En deep learning esto es habitual, porque las funciones objetivo suelen ser altamente no convexas. ![[Pasted image 20260319192756.png]]
 > 
 > Para mejorar el descenso básico aparecen los **métodos adaptativos** y de **segundo orden**. La motivación es que una learning rate fija no siempre funciona bien en todas las direcciones del espacio de parámetros.
 > 
@@ -41,12 +41,25 @@
 > Su coste computacional pasa a ser $O(1)$. Además, el gradiente estocástico es un estimador insesgado del gradiente completo: $$\mathbb{E}_i \nabla f(\mathbf{x}_i)=\frac{1}{n}\sum_{i=1}^{n}\nabla f(\mathbf{x}_i)=\nabla f(\mathbf{x})$$
 > - **Mini-Batch Gradient Descent (MBGD)**  
 > Aunque SGD es insesgado, puede necesitar demasiadas iteraciones. Para equilibrar coste y estabilidad, se usa un subconjunto o batch de muestras: $$\mathbf{x}\leftarrow \mathbf{x}-\eta \frac{1}{|\mathcal{B}_t|}\sum_{i\in |\mathcal{B}_t|}\nabla f(\mathbf{x}_i)$$donde $\mathcal{B}_t$ es el batch usado en la iteración $t$
-> 
-> El coste computacional es: $O(b) \ \text{con } b \ll n$ por lo que MBGD queda en mitad entre GD y SGD:
+>![[Pasted image 20260319193045.png]] El coste computacional es: $O(b) \ \text{con } b \ll n$ por lo que MBGD queda en mitad entre GD y SGD:
 > - **GD:** usa todo el dataset, trayectoria más estable.
 > - **SGD:** usa una sola muestra, trayectoria más ruidosa.
 > - **MBGD:** usa un lote pequeño, combinando eficiencia y mayor estabilidad que SGD.
-#### 3. Momentum
+#### 3. Dynamic Learning Rate
+> Un **learning rate dinámico** sustituye la tasa fija $\eta$ por una función dependiente del tiempo $\eta(t)$.
+> La motivación es que una tasa de aprendizaje fija presenta varios problemas:
+> - si $\eta$ es muy pequeña, la convergencia es muy lenta
+> - si $\eta$ es muy grande, la optimización puede oscilar o divergir
+> Además, en métodos como **SGD** y **MBGD**, el ruido en la estimación del gradiente introduce variabilidad en la convergencia.
+> 
+> Por ello, se ajusta $\eta$ a lo largo del entrenamiento para combinar **convergencia rápida al principio**, y **estabilidad cerca del mínimo**. Las estrategias son las siguientes:
+>
+> **Piecewise Constant**:  $$\eta(t)=\eta_i,\quad \text{si } t_i \le t < t_{i+1}$$**Exponential Decay**:  $$\eta(t)=\eta_0\cdot e^{-\lambda t}$$**Polynomial Decay**:  $$\eta(t)=\eta_0\cdot (\beta t+1)^{-\alpha}$$donde una elección común es $\alpha=0.5$.
+> 
+> En comparación, los esquemas **piecewise constant** son simples y muy usados, el **exponential decay** puede reducir la learning rate demasiado pronto, y el **polynomial decay** destaca por equilibrar velocidad y estabilidad de convergencia. ![[Pasted image 20260319194057.png]]![[Pasted image 20260319194123.png]]
+> 
+> En resumen, la idea de esta sección es que **hacer evolucionar la learning rate durante el entrenamiento suele dar un comportamiento más robusto que mantenerla fija**.
+#### 4. Momentum
 > En SGD y MBGD los gradientes pueden ser ruidosos. Si el learning rate disminuye demasiado rápido, la convergencia se frena; si disminuye demasiado poco, el ruido puede alejar la optimización del óptimo. La idea de _momentum_ es usar el historial de gradientes para suavizar la trayectoria y hacer el proceso más estable.
 > 
 > **Promedio con memoria (leaky average)**  
@@ -68,7 +81,7 @@
 > **Problemas mal condicionados**  
 > En valles estrechos, el gradiente transversal a las paredes puede ser mucho mayor que el gradiente en la dirección útil de descenso. Esto hace que la elección de learning rate sea muy sensible. 
 > ![[Pasted image 20260319111437.png]]
-> El ejemplo: $f(x)=0.1x_1^2+2x_2^2$  muestra precisamente este comportamiento: con ciertos valores de $\eta$ el método puede oscilar o incluso divergir. Momentum ayuda a amortiguar estas oscilaciones y a avanzar de forma más consistente hacia el mínimo.
+> El ejemplo: $f(x)=0.1x_1^2+2x_2^2$  muestra precisamente este comportamiento: con ciertos valores de $\eta$ el método puede oscilar o incluso divergir. Momentum ayuda a amortiguar estas oscilaciones y a avanzar de forma más consistente hacia el mínimo. ![[Pasted image 20260319194217.png]]
 > 
 > **Método de Momentum**  
 > Momentum ajusta la actualización de parámetros acumulando información de gradientes pasados en una variable de **velocidad**.
@@ -87,7 +100,7 @@
 > - Si los gradientes cambian de signo entre iteraciones, la acumulación amortigua la oscilación.
 >
 > Por lo tanto, Momentum puede verse como una extensión de gradient descent que introduce inercia en la trayectoria de optimización, haciendo el descenso más estable y más rápido en muchos problemas.
-#### 4. Nesterov Accelerated Gradient
+#### 5. Nesterov Accelerated Gradient
 > **NAG** es una variante de _momentum_ que mejora la actualización usando una estimación “anticipada” de la posición futura del parámetro.
 > 
 > El *problema del momentum estándar* es que los parámetros se actualizan usando la velocidad acumulada. Sin embargo, el gradiente se calcula en la posición actual $x_{t-1}$​ sin tener en cuenta completamente el efecto de esa velocidad.
@@ -100,8 +113,8 @@
 > *Comparación con momentum*
 > - **Momentum estándar**: calcula el gradiente en la posición actual.
 > - **Nesterov**: calcula el gradiente en la posición “lookahead”.
-> Por ello, Nesterov suele anticipar mejor la trayectoria de descenso, ya que con Momentum acumula inercia y añade una corrección anticipada sobre esa inercia.
-#### 5. Adagrad
+> Por ello, Nesterov suele anticipar mejor la trayectoria de descenso, ya que con Momentum acumula inercia y añade una corrección anticipada sobre esa inercia. ![[Pasted image 20260319194359.png]]
+#### 6. Adagrad
 > **Adagrad** es un método de optimización adaptativo que ajusta la tasa de aprendizaje de cada parámetro de forma independiente a partir del historial de gradientes cuadrados acumulados.
 > 
 > Su *idea principal* es ir acumulando la magnitud de los gradientes al cuadrado para cada coordenada. Los parámetros que han recibido gradientes grandes muchas veces reducen su paso de actualización. Los parámetros con gradientes pequeños conservan una tasa de aprendizaje relativamente mayor.
@@ -125,7 +138,7 @@
 > 3. Repetir hasta convergencia.
 > 
 > En resumen, Adagrad hace que la tasa de aprendizaje vaya decreciendo automáticamente en las direcciones donde ya se ha aprendido mucho. Por eso puede funcionar bien incluso con valores iniciales de $\eta$ relativamente grandes. No usa una única learning rate fija para todos los parámetros, sino que usa una learning rate adaptativa por coordenada basada en el historial acumulado de gradientes.
-#### 6. RMSProp
+#### 7. RMSProp
 > **RMSProp** es un método de optimización adaptativo diseñado para corregir una limitación importante de Adagrad: en Adagrad, el estado acumulado crece sin límite y eso hace que la tasa de aprendizaje efectiva se vuelva demasiado pequeña con el paso de las iteraciones.
 > 
 > Su _idea principal_ es no acumular todos los gradientes cuadrados desde el inicio, sino usar una *media móvil exponencial* o _leaky average_. De este modo, el algoritmo da más peso a los gradientes recientes y evita que la acumulación crezca indefinidamente.
@@ -146,7 +159,7 @@
 > Por eso RMSProp evita que el learning rate efectivo se haga demasiado pequeña demasiado pronto.
 > 
 > En resumen, **RMSProp** conserva la adaptatividad por parámetro de Adagrad, pero introduce un mecanismo de control en el estado acumulado. Gracias a esa media móvil de gradientes cuadrados, el algoritmo sigue adaptando el tamaño del paso en cada coordenada sin sufrir la caída excesiva de la tasa de aprendizaje que aparece en Adagrad.
-#### 7. Adam
+#### 8. Adam
 > **Adam** combina varias ideas de los métodos vistos anteriormente en un único optimizador. Toma de **Momentum** la media móvil de los gradientes para estabilizar y acelerar la dirección de descenso, y de **RMSProp** la media móvil de los gradientes cuadrados para reescalar cada coordenada de forma adaptativa.
 > 
 > Entonces con Adam se trata de reunir en un solo método lo que ya sabemos que funciona bien. Hasta este punto hemos visto que:
@@ -168,10 +181,10 @@
 > Después, Adam reescala el gradiente combinando ambas cantidades: $$g_t'=\frac{\eta \hat{v}_t}{\sqrt{\hat{s}_t}+\epsilon}$$y actualiza los parámetros con: $$x_t \leftarrow x_{t-1} - g_t'$$Es decir, Adam usa una dirección suavizada por el primer momento, una normalización adaptativa por coordenada mediante el segundo momento, y una corrección del sesgo inicial para que ambas estimaciones no empiecen demasiado pequeñas.
 > 
 > En resumen, **Adam** puede verse como una combinación de **Momentum + RMSProp + bias correction**. Por eso suele funcionar bien en la práctica: suaviza la dirección del descenso, adapta el tamaño del paso en cada coordenada y corrige el sesgo de las medias móviles en las primeras iteraciones.
-#### 8. Overfitting & Underfitting
+#### 9. Overfitting & Underfitting
 > Al optimizar una red neuronal no basta con reducir el error de entrenamiento. El objetivo real es obtener un modelo que **ajuste bien** y que además **generalice** correctamente a datos no vistos.
 > 
-> Distinguimos tres situaciones:
+> Distinguimos tres situaciones: ![[Pasted image 20260319194528.png]]
 > - **Underfitted**: ajuste insuficiente, asociado a **high bias error**.
 > - **Good fit / robust**: equilibrio adecuado entre bias y variance.
 > - **Overfitted**: ajuste excesivo al entrenamiento, asociado a **high variance error**.
@@ -179,6 +192,7 @@
 > La idea central es que, para tener un buen modelo, el **training error** debe ser pequeño, pero también debe ser **similar al test error**. En otras palabras, no solo importa minimizar el error de entrenamiento, sino también minimizar el error de generalización.
 > 
 > La interpretación es que:
+> ![[Pasted image 20260319194557.png]]
 > - Si **test error $\gg$ training error**, entonces hay **high variance error** y aparece un **generalization gap** grande.
 > - Si **training error $\approx$ test error $\gg 0$**, entonces el problema es de **high bias error**.
 > 
@@ -187,7 +201,7 @@
 > - A medida que aumenta la capacidad, el error baja hasta llegar a una **capacidad óptima**.
 > - Si seguimos aumentando la capacidad, entramos en la zona de **overfitting**, donde el error de entrenamiento puede seguir bajando pero el error de generalización empieza a subir.
 > 
-> Aquí entra el balance **bias-variance**:
+> Aquí entra el balance **bias-variance**: ![[Pasted image 20260319194635.png]]
 > - El **bias** disminuye cuando aumenta la capacidad del modelo.
 > - La **variance** aumenta cuando la capacidad crece demasiado.
 > - El **generalization error** resulta del equilibrio entre ambas, y alcanza su mínimo cerca de la **optimal capacity**.
@@ -212,7 +226,7 @@
 > 
 > En resumen, esta subsección sirve como motivación: antes de estudiar **normalization**, hay que entender que en redes profundas el flujo del gradiente puede degradarse. La normalización aparece precisamente como una herramienta para hacer el entrenamiento más estable y evitar que los gradientes desaparezcan o exploten.
 #### 2. Batch-Norm
-> **Batch Normalization** es una técnica diseñada para *estabilizar y acelerar el entrenamiento* de redes profundas. Aparece situada típicamente entre una capa convolucional y la activación, siguiendo el esquema: $$\text{Conv} \rightarrow \text{BN} \rightarrow \text{ReLU}$$La idea básica es **normalizar las activaciones dentro de un mini-batch**. Esto evita desplazamientos en las activaciones, reduce la dependencia respecto a la inicialización, ayuda a prevenir _vanishing_ y _exploding gradients_, y además actúa como regularizador.
+> **Batch Normalization** es una técnica diseñada para *estabilizar y acelerar el entrenamiento* de redes profundas. Aparece situada típicamente entre una capa convolucional y la activación, siguiendo el esquema: $$\text{Conv} \rightarrow \text{BN} \rightarrow \text{ReLU}$$La idea básica es **normalizar las activaciones dentro de un mini-batch**. Esto evita desplazamientos en las activaciones, reduce la dependencia respecto a la inicialización, ayuda a prevenir _vanishing_ y _exploding gradients_, y además actúa como regularizador. ![[Pasted image 20260319194844.png]]
 > 
 > En una capa convolucional, si el batch de activaciones tiene forma $$B \times W \times H \times C$$donde $B$ es el tamaño de batch, $W,H$ son las dimensiones espaciales y $C$ el número de canales, Batch-Norm calcula la media y la varianza **por canal**: $$\mu_c=\frac{1}{BWH}\sum_{k,x,y} Z_{k,x,y,c}$$$$\sigma_c^2=\frac{1}{BWH}\sum_{k,x,y}(Z_{k,x,y,c}-\mu_c)^2$$Por tanto:
 > - $\mu_{c}$ es la media calculada para un canal concreto, usando todas las muestras del mini-batch y todas las posiciones espaciales.
@@ -231,7 +245,7 @@
 > 
 > En resumen, Batch-Norm normaliza activaciones a nivel de mini-batch para hacer el entrenamiento más estable y rápido, pero su eficacia depende bastante del tamaño del batch y del tipo de arquitectura.
 #### 3. Layer-Norm
-> **Layer Normalization** es una técnica de normalización que, a diferencia de Batch-Norm, **no normaliza a través del batch**, sino **a través de las dimensiones de características de cada muestra individual**. De igual manera que *Batch-Norm*, aparece colocada dentro del bloque: $$\text{Conv} \rightarrow \text{LN} \rightarrow \text{ReLU}$$La idea principal es que cada entrada se normaliza **de manera independiente**, usando sus propias estadísticas. Por eso resulta especialmente útil cuando el tamaño de batch es pequeño o cuando las estadísticas entre batches cambian mucho.
+> **Layer Normalization** es una técnica de normalización que, a diferencia de Batch-Norm, **no normaliza a través del batch**, sino **a través de las dimensiones de características de cada muestra individual**. De igual manera que *Batch-Norm*, aparece colocada dentro del bloque: $$\text{Conv} \rightarrow \text{LN} \rightarrow \text{ReLU}$$La idea principal es que cada entrada se normaliza **de manera independiente**, usando sus propias estadísticas. Por eso resulta especialmente útil cuando el tamaño de batch es pequeño o cuando las estadísticas entre batches cambian mucho. ![[Pasted image 20260319194932.png]]
 > 
 > Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$entonces Layer-Norm normaliza cada muestra $k$ a lo largo de todas sus dimensiones espaciales y de canal. La activación normalizada viene dada por: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_k}{\sigma_k}$$donde la media y la varianza para cada muestra son: $$\mu_k=\frac{1}{WHC}\sum_{x,y,c} Z_{k,x,y,c}$$ $$\sigma_k^2=\frac{1}{WHC}\sum_{x,y,c}(Z_{k,x,y,c}-\mu_k)^2$$Por tanto:
 > - $\mu_k$ es la media calculada sobre todas las características de una única entrada.
@@ -250,7 +264,8 @@
 > 
 > En resumen, **Layer-Norm normaliza cada muestra por separado**, mientras que **Batch-Norm normaliza usando el batch completo**. Por eso Layer-Norm es más adecuada cuando no se puede asumir estabilidad estadística entre batches.
 #### 4. Instance-Norm
-> **Instance Normalization** es una técnica de normalización aplicada **a cada imagen individual** de un batch. A diferencia de **Batch-Norm**, que normaliza usando estadísticas del batch completo, **Instance-Norm normaliza cada muestra por separado** y además lo hace **canal a canal**, usando únicamente las dimensiones espaciales de cada canal. Su arquitectura es la misma que anteriores: $$\text{Conv} \rightarrow \text{IN} \rightarrow \text{ReLU}$$Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$ entonces Instance-Norm normaliza cada activación según: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_{kc}}{\sigma_{kc}}$$donde, para cada muestra $k$ y cada canal $c$, la media y la varianza se calculan sobre las dimensiones espaciales: $$\mu_{kc}=\frac{1}{WH}\sum_{x,y} Z_{k,x,y,c}$$$$\sigma^2_{kc}=\frac{1}{WH}\sum_{x,y}(Z_{k,x,y,c}-\mu_{kc})^2$$Por tanto:
+> **Instance Normalization** es una técnica de normalización aplicada **a cada imagen individual** de un batch. Su arquitectura es la misma que anteriores: $$\text{Conv} \rightarrow \text{IN} \rightarrow \text{ReLU}$$A diferencia de **Batch-Norm**, que normaliza a partir de las estadísticas del batch completo, **Instance-Norm normaliza cada muestra por separado** y además lo hace **canal a canal**, usando únicamente las dimensiones espaciales de cada canal. ![[Pasted image 20260319195931.png]]
+> Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$ entonces Instance-Norm normaliza cada activación según: $$\hat{Z}_{k,x,y,c}=\frac{Z_{k,x,y,c}-\mu_{kc}}{\sigma_{kc}}$$donde, para cada muestra $k$ y cada canal $c$, la media y la varianza se calculan sobre las dimensiones espaciales: $$\mu_{kc}=\frac{1}{WH}\sum_{x,y} Z_{k,x,y,c}$$$$\sigma^2_{kc}=\frac{1}{WH}\sum_{x,y}(Z_{k,x,y,c}-\mu_{kc})^2$$Por tanto:
 > - $\mu_{kc}$ es la media de un canal concreto en una muestra concreta.
 > - $\sigma^2_{kc}$ es la varianza de ese canal en esa muestra.
 > 
@@ -265,7 +280,9 @@
 > 
 > En resumen, **Instance-Norm** normaliza **por instancia y por canal**, usando solo la información espacial de cada mapa de características, y por eso resulta especialmente adecuada en problemas de generación y transferencia de estilo.
 #### 5. Group-Norm
-> **Group Normalization** normaliza las activaciones *dentro de grupos de canales*, situándose a medio camino entre *Layer-Norm* e *Instance-Norm*. Su idea principal es **dividir los canales en G grupos** y calcular la normalización de manera independiente dentro de cada grupo. Así, no usa estadísticas del batch completo como **Batch-Norm**pero tampoco mezcla todos los canales de una muestra como hace **Layer-Norm**. Su arquitectura es la misma que los modelos anteriores: $$\text{Conv} \rightarrow \text{GN} \rightarrow \text{ReLU}$$Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$se divide la dimensión de canales en G grupos. Para cada muestra $k$ y cada grupo $g$ y se calcula:  $$\mu_{kg}=\frac{1}{WHG}\sum_{c=gG}^{(g+1)G-1}\sum_{x,y} Z_{k,x,y,c}$$$$\sigma^2_{kg}=\frac{1}{WHG}\sum_{c=gG}^{(g+1)G-1}\sum_{x,y}(Z_{k,x,y,c}-\mu_{kg})^2$$donde $g=\left[ c/G \right]$ y $G$ es el número de grupos. Por tanto:
+> **Group Normalization** normaliza las activaciones *dentro de grupos de canales*, situándose a medio camino entre *Layer-Norm* e *Instance-Norm*. Su arquitectura es la misma que las anteriores: $$\text{Conv} \rightarrow \text{GN} \rightarrow \text{ReLU}$$La idea principal es **dividir los canales en G grupos** y calcular la normalización de manera independiente dentro de cada grupo. Así, no usa estadísticas del batch completo como **Batch-Norm** pero tampoco mezcla todos los canales de una muestra como hace **Layer-Norm**. ![[Pasted image 20260319200327.png]]
+> 
+> Si la entrada es un tensor: $$Z \in \mathbb{R}^{B \times W \times H \times C}$$se divide la dimensión de canales en G grupos. Para cada muestra $k$ y cada grupo $g$ y se calcula:  $$\mu_{kg}=\frac{1}{WHG}\sum_{c=gG}^{(g+1)G-1}\sum_{x,y} Z_{k,x,y,c}$$$$\sigma^2_{kg}=\frac{1}{WHG}\sum_{c=gG}^{(g+1)G-1}\sum_{x,y}(Z_{k,x,y,c}-\mu_{kg})^2$$donde $g=\left[ c/G \right]$ y $G$ es el número de grupos. Por tanto:
 > - $\mu_{kg}$ es la media calculada sobre todas las posiciones espaciales y todos los canales del grupo $g$ en la muestra $k$.
 > - $\sigma^2_{kg}$ es la varianza calculada sobre esas mismas activaciones, es decir, sobre todas las posiciones espaciales y todos los canales del grupo $g$ en la muestra $k$.
 > 
@@ -277,6 +294,7 @@
 > Group-Norm tiene dos resultados importantes, produce **estadísticas más estables que Instance Normalization** cuando $G=C$, y a diferencia de Layer-Norm, **no fuerza a todos los canales a compartir una única estadística** cuando $G=1$.
 > 
 > Comparativa Final:
+> ![[Pasted image 20260319200357.png]]
 > - **Batch-Norm** usa estadísticas del batch y funciona peor con batch sizes pequeños,
 > - **Layer-Norm** normaliza sobre todos los canales de una muestra, sin distinguir grupos,
 > - **Instance-Norm** normaliza por muestra y por canal,
@@ -284,7 +302,7 @@
 > 
 > En resumen, **Group-Norm** introduce una normalización más flexible que **Layer-Norm** y más estable que **Instance-Norm**, evitando además la dependencia fuerte del tamaño de batch característica de **Batch-Norm**.
 #### 6. Where to Add
-> Una cuestión práctica importante en redes con normalización es **dónde colocar la capa de normalización** respecto a la convolución y la activación. Hay dos posibilidades principales:
+> Una cuestión práctica importante en redes con normalización es **dónde colocar la capa de normalización** respecto a la convolución y la activación. Hay dos posibilidades principales: 
 > **Opción A:**  $$\text{Conv} \rightarrow \text{Norm} \rightarrow \text{ReLU}$$**Opción B:**  $$\text{ReLU} \rightarrow \text{Norm} \rightarrow \text{Conv}$$En la **Opción A**, primero se aplica la convolución, después la normalización y finalmente la activación. Es la disposición más habitual. Sus ventajas son que la convolución puede prescindir del sesgo, ya que la normalización elimina el desplazamiento de la media, y ayuda a estabilizar el entrenamiento al reducir el cambio en las activaciones internas. Como inconveniente, después de normalizar se aplica **ReLU**, por lo que una parte de las activaciones puede quedar anulada a cero, con la consiguiente posible pérdida de información.
 > En la **Opción B**, primero se aplica la activación, luego la normalización y después la convolución. Sus ventajas son que al aplicar **ReLU antes de normalizar**, se evita la posible pérdida de información asociada a anular activaciones justo después de la normalización, y tras Batch-Norm, los ajustes de escala y sesgo pueden considerarse opcionales.
 > 
