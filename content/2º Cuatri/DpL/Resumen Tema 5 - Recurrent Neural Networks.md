@@ -121,7 +121,7 @@
 #### 1. Cálculo de Gradientes y Backpropagation en RNNs
 > En una RNN, el cálculo de gradientes es más difícil que en una red feedforward porque el estado oculto $h_t$ depende tanto de la entrada actual $x_t$ como del estado oculto anterior $h_{t-1}$. Esto introduce una **dependencia recurrente**, de modo que los gradientes deben propagarse hacia atrás a través de múltiples pasos temporales.
 > 
-> Las ecuaciones básicas del modelo son: $$h_t = f(W_{hx}x_t + W_{hh}h_{t-1}), \qquad o_t = W_{qh}h_t$$La función de pérdida total se construye agregando la pérdida en cada instante temporal. En las diapositivas aparece como la media de las pérdidas a lo largo de $T$ pasos:  $$L = \frac{1}{T}\sum_{t=1}^{T} \ell(o_t, y_t)$$donde cada $\ell$ compara la predicción $o_t$ con el objetivo $y_t$, por ejemplo mediante **CE** o **MSE**.
+> Las ecuaciones básicas del modelo son: $$h_t = f(W_{hx}x_t + W_{hh}h_{t-1}), \qquad o_t = W_{qh}h_t$$La función de pérdida total se construye agregando la pérdida en cada instante temporal. Esto es la media de las pérdidas a lo largo de $T$ pasos:  $$L = \frac{1}{T}\sum_{t=1}^{T} \ell(o_t, y_t)$$donde cada $\ell$ compara la predicción $o_t$ con el objetivo $y_t$, por ejemplo mediante **CE** o **MSE**.
 > 
 > Como la pérdida depende de todas las salidas de la secuencia, el gradiente respecto a los parámetros del modelo debe tener en cuenta **todos los time steps**. Por eso, en una RNN el proceso de entrenamiento requiere propagar los gradientes hacia atrás a través de la cadena de estados ocultos, acumulando la contribución de cada paso temporal.
 #### 2. Backpropagation Through Time
@@ -184,7 +184,7 @@
 > 
 > La principal ventaja de las BiRNNs es que capturan dependencias en las dos direcciones y son más conscientes del contexto que una RNN unidireccional. Por eso se han usado en tareas como **POS tagging**, **Named Entity Recognition (NER)**, **speech recognition** y **machine translation**.
 > 
-> Como limitaciones, requieren disponer de la **secuencia completa** antes de procesarla, por lo que no son ideales para tareas en tiempo real. Además, son más costosas computacionalmente que las RNNs estándar y siguen pudiendo sufrir problemas de **vanishing** o **exploding gradients**. Las diapositivas señalan también que han sido reemplazadas en gran medida por **attention mechanisms**.
+> Como limitaciones, requieren disponer de la **secuencia completa** antes de procesarla, por lo que no son ideales para tareas en tiempo real. Además, son más costosas computacionalmente que las RNNs estándar y siguen pudiendo sufrir problemas de **vanishing** o **exploding gradients**. Por último, éstas han sido reemplazadas en gran medida por **attention mechanisms**.
 
 #### 3. Encoder - Decoder
 > La arquitectura **Encoder-Decoder** se utiliza en tareas **sequence-to-sequence (Seq2Seq)**, como **machine translation**, **text summarization** y **speech-to-text**. Su objetivo es transformar una **secuencia de entrada** en una **secuencia de salida**, permitiendo además trabajar con longitudes variables tanto en la entrada como en la salida.
@@ -204,7 +204,7 @@
 > $$s_{t'} = g(y_{t'-1}, c, s_{t'-1})$$  
 > El proceso continúa hasta generar un token de fin de secuencia (**EOS**).
 > 
-> Durante el entrenamiento se usa normalmente **teacher forcing**, es decir, en cada paso se alimenta al decoder con el **token correcto anterior** en lugar del token predicho por el propio modelo. Esto acelera el entrenamiento, pero introduce **exposure bias**. La función de pérdida indicada en las diapositivas es **Cross-Entropy Loss** con enmascarado para ignorar tokens de padding.
+> Durante el entrenamiento se usa normalmente **teacher forcing**, es decir, en cada paso se alimenta al decoder con el **token correcto anterior** en lugar del token predicho por el propio modelo. Esto acelera el entrenamiento, pero introduce **exposure bias**. La función de pérdida usada en este caso  es **Cross-Entropy Loss** con enmascarado para ignorar tokens de padding.
 > 
 > En inferencia, el decoder ya no dispone de la secuencia correcta, así que genera los tokens uno a uno usando sus propias predicciones previas. Para decidir la salida puede emplearse:
 > 
