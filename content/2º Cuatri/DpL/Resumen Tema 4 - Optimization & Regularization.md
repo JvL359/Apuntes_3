@@ -438,7 +438,7 @@
 > 
 > En particular, para clasificar **animales raros**, un dataset de solo unos cientos de imágenes no es suficiente para entrenar un modelo con más de **134 millones de parámetros**; mientras que para clasificar **animales comunes**, sí puede haber suficientes datos, pero entrenar desde cero sigue siendo costoso en tiempo. Por tanto, el entrenamiento completo de modelos grandes puede requerir demasiado tiempo y demasiados datos.
 > 
-> Por eso, la idea básica de transfer learning es:
+> Por eso, la idea básica de transfer learning es: ![[Pasted image 20260320120410.png]]
 > 1. **Pretraining** sobre un dataset grande y general.
 > 2. **Transfer** del modelo preentrenado al problema objetivo.
 > 3. **Fine-tuning** o adaptación final sobre el dataset específico de destino.
