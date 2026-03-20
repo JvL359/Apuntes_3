@@ -377,32 +377,36 @@
 #### 5. Learning Rates Schedulers
 > Los **learning rate schedulers** definen cómo evoluciona la tasa de aprendizaje durante el entrenamiento. No basta con fijar una $\eta$ constante, ya se ha visto que $\eta=\eta(t)$ puede ser necesaria para un entrenamiento adecuado, e incluso usando optimizadores avanzados como **Adam** puede seguir siendo útil personalizar esa evolución.
 > 
-> La idea es seguir una función de planificación $f(t)$ para el learning rate. Además, una estrategia **decreciente** no siempre tiene por qué ser estrictamente monótona: “decaying is not always good”, así que la forma concreta del scheduler depende del problema.
+> La idea es seguir una función de planificación $f(t)$ para el learning rate. Además, una estrategia **decreciente** no siempre tiene por qué ser estrictamente monótona: “decaying is not always good”, así que la forma concreta del scheduler depende del problema. ![[Pasted image 20260320113107.png]]
 > 
 > **Step-LR**
-> Este primer scheduler reduce el learning rate en intervalos fijos. En este caso, la tasa de aprendizaje disminuye por un factor $\gamma$ cada cierto número de épocas definido por `step_size`. Resulta útil cuando una learning rate constante provoca convergencia lenta.
+> Este primer scheduler reduce el learning rate en intervalos fijos. En este caso, la tasa de aprendizaje disminuye por un factor $\gamma$ cada cierto número de épocas definido por `step_size`. Resulta útil cuando una learning rate constante provoca convergencia lenta. ![[Pasted image 20260320113136.png]]
 > 
 > **MultiStep-LR**
-> Esta variante más flexible también reduce el learning rate por un factor $\gamma$ pero no en intervalos regulares sino en **milestones predefinidos**. Así se obtiene un control más fino sobre en qué momentos bajar el learning rate.
+> Esta variante más flexible también reduce el learning rate por un factor $\gamma$ pero no en intervalos regulares sino en **milestones predefinidos**. Así se obtiene un control más fino sobre en qué momentos bajar el learning rate. ![[Pasted image 20260320113150.png]]
 > 
 > **Exponential-LR**
 > Aquí el learning rate decrece exponencialmente en cada época. La fórmula mostrada es:  $$lr_t = lr_{t-1}\cdot \gamma$$Este scheduler ayuda a reducir gradualmente el tamaño del paso para favorecer una convergencia más estable.
+> ![[Pasted image 20260320113203.png]]
 >
 > **Learning Rate Warmup**
-> Consiste en **aumentar gradualmente** el learning rate al inicio del entrenamiento. Su objetivo es evitar inestabilidad en las primeras etapas de la optimización. Se mencionan como estrategias habituales **linear** warmup, **cosine** warmup, y **cyclic** warmup.
+> Consiste en **aumentar gradualmente** el learning rate al inicio del entrenamiento. Su objetivo es evitar inestabilidad en las primeras etapas de la optimización. Se mencionan como estrategias habituales **linear** warmup, **cosine** warmup, y **cyclic** warmup. ![[Pasted image 20260320114308.png]]
 > 
 > **Reduce Learning Rate on Plateau**
-> En este caso, el learning rate se reduce cuando una métrica de rendimiento deja de mejorar. El método usa **patience** para esperar durante cierto tiempo antes de reducirla, y así ajustar dinámicamente el learning rate cuando el entrenamiento entra en una meseta.
+> En este caso, el learning rate se reduce cuando una métrica de rendimiento deja de mejorar. El método usa **patience** para esperar durante cierto tiempo antes de reducirla, y así ajustar dinámicamente el learning rate cuando el entrenamiento entra en una meseta. ![[Pasted image 20260320114354.png]]
 > 
 > En conjunto una buena planificación del learning rate mejora la **convergencia** y la **estabilidad**, evita que una tasa demasiado alta produzca **oscilaciones o divergencia**, y evita que una tasa demasiado baja provoque **convergencia lenta**.
 > 
 > En resumen, los schedulers permiten controlar la evolución temporal de el learning rate para adaptar mejor el proceso de optimización a las distintas fases del entrenamiento: exploración inicial, estabilización y refinamiento final.
 #### 6. Regularization
-> La **regularización** añade una penalización a la función objetivo para controlar la complejidad del modelo a través de sus parámetros, mediante las **normas $L_p$** que miden el tamaño de un vector: $$L_p(x)=|x|_p=\left(\sum_{i=1}^{n}|x|^p\right)^{1/p}$$La idea es tomar como referencia la función más simple y medir cuán compleja es una solución observando la magnitud de sus pesos.
+> La **regularización** añade una penalización a la función objetivo para controlar la complejidad del modelo a través de sus parámetros, mediante las **normas $L_p$** que miden el tamaño de un vector: $$L_p(x)=|x|_p=\left(\sum_{i=1}^{n}|x|^p\right)^{1/p}$$![[Pasted image 20260320114505.png]]
+> La idea es tomar como referencia la función más simple y medir cuán compleja es una solución observando la magnitud de sus pesos.
 > 
-> Una primera opción es la **regularización L1** o **Lasso**, que añade a la pérdida la suma de los valores absolutos de los pesos: $$L_1(x)=|x|_1=\sum_{i=1}^{n}|x|$$$$\tilde{\mathcal{L}}(w)=\mathcal{L}(w)+\alpha|w|_1$$L1 **favorece la esparsidad**, porque empuja algunos pesos exactamente a cero. Por eso también se dice que promueve cierta **selección de características**. Geométricamente, su paisaje de optimización tiene **bordes afilados**, y las soluciones tienden a caer sobre los ejes, dando lugar a modelos dispersos.
+> Una primera opción es la **regularización L1** o **Lasso**, que añade a la pérdida la suma de los valores absolutos de los pesos: $$L_1(x)=|x|_1=\sum_{i=1}^{n}|x|$$$$\tilde{\mathcal{L}}(w)=\mathcal{L}(w)+\alpha|w|_1$$L1 **favorece la esparsidad**, porque empuja algunos pesos exactamente a cero. Por eso también se dice que promueve cierta **selección de características**. Geométricamente, su paisaje de optimización tiene **bordes afilados**, y las soluciones tienden a caer sobre los ejes, dando lugar a modelos dispersos. 
+> ![[Pasted image 20260320114544.png]]
 > 
 > La otra opción principal es la **regularización L2** o **Ridge**, que añade la magnitud cuadrática de los pesos a la función de pérdida:  $$L_2(x)=|x|_2=\left(\sum_{i=1}^{n}|x|^2\right)^{1/2}$$$$\tilde{\mathcal{L}}(w)=\mathcal{L}(w)+\frac{\alpha}{2}\left(|w|_2\right)^2$$En este caso, la regularización no fuerza pesos exactamente nulos, sino que **evita valores extremos** y produce soluciones más **suaves** y **estables**. La optimización se vuelve **suave y convexo**, y los pesos se reparten de forma más uniforme en lugar de concentrarse en unos pocos coeficientes distintos de cero.
+> ![[Pasted image 20260320114628.png]]
 > 
 > La comparación esencial entre ambas es que **L1** induce esparsidad y puede anular pesos, y **L2** reduce magnitudes grandes y reparte los pesos de forma más homogénea.
 >  
@@ -413,16 +417,13 @@
 #### 7. Ensembles
 > Los **ensembles** o **model averaging** consisten en **entrenar múltiples modelos** para mejorar la generalización y después **promediar sus predicciones** para reducir la varianza.
 > La idea básica es que distintos modelos cometen errores distintos. Si se combinan sus salidas, el resultado final suele ser más robusto que el de un único modelo.
-> 
-> Es un proceso donde se entrena más de un modelo, cada modelo produce su propia predicción, las predicciones se combinan mediante un promedio o combinación ponderada, y se obtiene una predicción final con mejor rendimiento.
+> Es un proceso donde se entrena más de un modelo, cada modelo produce su propia predicción, las predicciones se combinan mediante un promedio o combinación ponderada, y se obtiene una predicción final con mejor rendimiento. ![[Pasted image 20260320114941.png]]
 > 
 > Históricamente, **antes del deep learning**, el model averaging se hacía usando **distintos subconjuntos de datos de entrenamiento**.  
-> En **deep learning**, en cambio, se suelen obtener modelos diferentes mediante: **distintas inicializaciones aleatorias**, **data augmentation**, y la **convergencia hacia distintos mínimos locales**. En cuanto a su funcionamiento, cada modelo puede **sobreajustar de una manera distinta**, el promedio entre modelos suele **reducir varianza**, normalmente puede aportar una mejora de 
-> **1–3% en accuracy**, pero a costa de un **tiempo de entrenamiento más largo**. Hay dos esquemas:
-> - **Bagging**: combinación en **paralelo** de varios modelos.
-> - **Boosting**: combinación **secuencial** de modelos.
+> En **deep learning**, en cambio, se suelen obtener modelos diferentes mediante: **distintas inicializaciones aleatorias**, **data augmentation**, y la **convergencia hacia distintos mínimos locales**. En cuanto a su funcionamiento, cada modelo puede **sobreajustar de manera distinta**, el promedio entre modelos suele **reducir varianza**, normalmente puede aportar una mejora de 
+> **1–3% en accuracy**, pero a costa de un **tiempo de entrenamiento más largo**. Hay dos esquemas principales, **Bagging** que es una combinación en **paralelo** de varios modelos, y **Boosting** que es una combinación **secuencial** de modelos. ![[Pasted image 20260320114842.png]]
 > 
-> Los ensembles son útiles cuando se busca exprimir el rendimiento final del sistema, especialmente **cuando la capacidad computacional lo permite**, y **cuando es importante obtener el último extra de precisión**.
+> Los ensembles son útiles cuando se busca exprimir el rendimiento final del sistema, especialmente **cuando la capacidad computacional lo permite**, y **cuando es importante obtener el último extra de precisión**. ![[Pasted image 20260320115047.png]]
 > 
 > En resumen, un ensemble no cambia la arquitectura básica de cada red, sino que combina varias redes entrenadas de forma diferente para conseguir una predicción final más estable y con mejor capacidad de generalización.
 #### 8. Transfer Learning
@@ -442,7 +443,7 @@
 > 2. **Transfer** del modelo preentrenado al problema objetivo.
 > 3. **Fine-tuning** o adaptación final sobre el dataset específico de destino.
 > 
-> La intuición central es que las **capas tempranas** de una red aprenden **características de bajo nivel** y esas características pueden reutilizarse en nuevos dominios. Después, las capas más tardías o las capas fully connected pueden modificarse para adaptarse a la nueva tarea.
+> La intuición central es que las **capas tempranas** de una red aprenden **características de bajo nivel** y esas características pueden reutilizarse en nuevos dominios. Después, las capas más tardías o las capas fully connected pueden modificarse para adaptarse a la nueva tarea. ![[Pasted image 20260320120148.png]]
 > 
 > En otras palabras, transfer learning permite construir clasificadores que puedan entrenarse en **menos tiempo**, con **menos datos**, aprovechando pesos ya conocidos en lugar de empezar desde inicialización aleatoria.
 > 
@@ -453,14 +454,6 @@
 > - Adaptación entre idiomas para _few-shot learning_.
 > - En NLP, reutilizar un modelo del lenguaje entrenado en grandes corpus y adaptarlo luego a documentos de un dominio concreto.
 > 
-> Finalmente, se muestra una **taxonomía** del transfer learning:
-> - **Inductive Transfer Learning**,
-> - **Transductive Transfer Learning**,
-> - **Unsupervised Transfer Learning**.
-> Dentro de esa taxonomía aparecen además varios casos relacionados:
-> - **Self-taught Learning**,
-> - **Multi-task Learning**,
-> - **Domain Adaptation**,
-> - **Sample Selection Bias / Covariance Shift**.
+> Finalmente, se muestra una **taxonomía** del transfer learning: ![[Pasted image 20260320115811.png]]
 >
 > En resumen, el **transfer learning** reutiliza conocimiento aprendido previamente para reducir el coste de entrenamiento y mejorar el aprendizaje en nuevas tareas o dominios, especialmente cuando los datos son escasos o entrenar desde cero resulta demasiado caro.
