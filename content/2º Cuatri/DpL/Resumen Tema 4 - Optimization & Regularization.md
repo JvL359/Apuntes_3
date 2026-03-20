@@ -316,7 +316,7 @@
 > 
 > En lugar de recoger y anotar más datos, se aplican **transformaciones** sobre las imágenes originales para generar nuevas versiones del mismo ejemplo. Así, a partir de una imagen etiquetada como _dog_, se pueden construir varias imágenes transformadas que siguen teniendo la misma etiqueta _dog_.
 > 
-> **Tipos de augmentación:** flip, shift, scale, rotate, saturation, brightness, y tint / hue.
+> **Tipos de augmentación:** flip, shift, scale, rotate, saturation, brightness, y tint / hue. ![[Pasted image 20260320104258.png]]
 > 
 > La idea de fondo es que el modelo aprenda a ser más robusto frente a estas variaciones, en lugar de memorizar únicamente la apariencia exacta de las imágenes de entrenamiento.
 > 
@@ -331,7 +331,7 @@
 > 
 > La idea principal es que el entrenamiento no debe continuar indefinidamente: si el **validation error** empieza a aumentar mientras el **training error** sigue disminuyendo, eso indica que el modelo está empezando a **sobreajustar** los datos de entrenamiento. Por tanto, el punto óptimo de parada se identifica monitorizando la **validation loss**.
 > 
-> En este sentido, Early Stopping ayuda a **prevenir overfitting**, **mejorar la generalización**, y **seleccionar automáticamente** un punto razonable de entrenamiento.
+> En este sentido, Early Stopping ayuda a **prevenir overfitting**, **mejorar la generalización**, y **seleccionar automáticamente** un punto razonable de entrenamiento. ![[Pasted image 20260320104339.png]]
 > 
 > Un concepto importante es la **patience**, que define el número de épocas o pasos consecutivos en los que se permite que la validación empeore antes de detener el entrenamiento. Esto evita parar demasiado pronto por pequeñas fluctuaciones en la validation loss y da al modelo margen para recuperarse de inestabilidades temporales.
 > 
@@ -348,14 +348,13 @@
 > En resumen, Early Stopping busca un equilibrio: **ni entrenar tanto como para sobreajustar, ni detenerse tan pronto que el modelo se quede corto**.
 #### 3. Dropout
 > **Dropout** es una técnica de **regularización** diseñada para prevenir el **overfitting** desactivando aleatoriamente neuronas durante el entrenamiento con probabilidad $p$.
-> La idea es que, en cada paso de entrenamiento, una parte de las unidades no participa en el cálculo. Esto obliga a la red a no depender demasiado de neuronas concretas y a aprender **representaciones redundantes y más robustas**, mejorando así la **generalización**.
+> La idea es que, en cada paso de entrenamiento, una parte de las unidades no participa en el cálculo. Esto obliga a la red a no depender demasiado de neuronas concretas y a aprender **representaciones redundantes y más robustas**, mejorando así la **generalización**. ![[Pasted image 20260320104438.png]]
 > 
-> El mecanismo puede entenderse así: si una capa tiene 100 neuronas con activación 1 y aplicamos dropout con $p=0.4$, durante entrenamiento solo permanecerán activas, en media, unas **60 neuronas**. En inferencia, en cambio, **no se aplica dropout**, por lo que participan todas las neuronas. 
+> El mecanismo puede entenderse así: si una capa tiene 100 neuronas con activación 1 y aplicamos dropout con $p=0.4$, durante entrenamiento solo permanecerán activas, en media, unas **60 neuronas**. En inferencia, en cambio, **no se aplica dropout**, por lo que participan todas las neuronas.  ![[Pasted image 20260320104510.png]]
 > 
-> Como al eliminar neuronas disminuye la suma de activaciones, durante entrenamiento se compensa reescalando las activaciones por: $$\frac{1}{1-p}$$De este modo se mantiene aproximadamente la misma magnitud esperada entre entrenamiento e inferencia. Por ejemplo:  $$60 \cdot \frac{1}{1-0.4}=100$$Es decir, la salida se reescala para que sea consistente con la fase de evaluación.  
+> Como al eliminar neuronas disminuye la suma de activaciones, durante entrenamiento se compensa reescalando las activaciones por: $$\frac{1}{1-p}$$De este modo se mantiene aproximadamente la misma magnitud esperada entre entrenamiento e inferencia. Es decir, la salida se reescala para que sea consistente con la fase de evaluación.  ![[Pasted image 20260320104611.png]]
 > 
-> Dropout se usa sobre todo **antes de capas fully connected / linear**, para mejorar la generalización, y **antes de capas convolucionales 1x1** en algunas arquitecturas.
-> 
+> Dropout se usa sobre todo **antes de capas fully connected / linear**, para mejorar la generalización, y **antes de capas convolucionales 1x1** en algunas arquitecturas. ![[Pasted image 20260320104744.png]]
 > En cambio, **no se recomienda antes de convoluciones generales**, porque en imágenes existe una fuerte **correlación espacial** y el efecto de dropout ahí suele ser menos adecuado.  
 > 
 > En resumen, Dropout introduce ruido controlado durante el entrenamiento, reduce la coadaptación entre neuronas y actúa como una técnica efectiva para mejorar la capacidad de generalización del modelo.
@@ -372,7 +371,7 @@
 > 
 > Con residual connections, las redes profundas pueden alcanzar profundidades mucho mayores (incluso del orden de **1000 capas**) sin la misma pérdida de generalización que sufrirían arquitecturas profundas sin este mecanismo.
 > 
-> Sobre **dónde añadir la conexión residual**, se comenta que inicialmente se añadía antes de la activación de salida, pero experimentalmente resultó mejor dejar la conexión residual lo más cercana posible a una **función identidad**. Por eso las variantes modernas favorecen configuraciones donde la rama skip altera lo mínimo posible la señal.
+> Sobre **dónde añadir la conexión residual**, inicialmente se añadía antes de la activación de salida, pero experimentalmente resultó mejor dejar la conexión residual lo más cercana posible a una **función identidad**. Por eso las variantes modernas favorecen configuraciones donde la rama skip altera lo mínimo posible la señal.
 > 
 > En resumen, las **residual connections** combaten los problemas de optimización en redes profundas, permiten aprender una **corrección** sobre la identidad en vez de una transformación completa, facilitan el flujo del gradiente hacia capas tempranas, y hacen viable entrenar redes mucho más profundas.
 #### 5. Learning Rates Schedulers
