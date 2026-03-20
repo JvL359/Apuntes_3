@@ -154,7 +154,7 @@
 #### 1. Deep RNNs
 > Las **Deep RNNs** extienden las RNNs tradicionales apilando **múltiples capas recurrentes** en lugar de usar una sola capa oculta. Mientras que una RNN estándar procesa la secuencia con una única capa recurrente, una Deep RNN organiza varias capas una encima de otra, de forma similar a la profundidad en MLPs o CNNs. ![[Pasted image 20260320170423.png]]
 > 
-> Esta mayor profundidad permite aprender **representaciones jerárquicas** y capturar relaciones más complejas en los datos secuenciales. Además, puede ayudar a modelar dependencias de largo alcance de forma más efectiva, por lo que resulta útil en tareas como **speech recognition**, **text generation** y **time-series forecasting**.
+> Esta mayor profundidad permite aprender **representaciones jerárquicas** y capturar relaciones más complejas en los datos secuenciales. Las primeras capas capturan información de alta frecuencia (corto plazo), y según se avanza en la red, las capas capturan información de frecuencias más bajas (largo plazo). Además, puede ayudar a modelar dependencias de largo alcance de forma más efectiva, por lo que resulta útil en tareas como **speech recognition**, **text generation** y **time-series forecasting**.
 > 
 > Si la entrada es una secuencia $X_t \in \mathbb{R}^{n \times d}$, una Deep RNN consta de $L$ capas ocultas y estados ocultos $H_t^{(l)} \in \mathbb{R}^{n \times h}$, donde $h$ es el número de unidades ocultas. La salida final es $O_t \in \mathbb{R}^{n \times q}$.
 > 
