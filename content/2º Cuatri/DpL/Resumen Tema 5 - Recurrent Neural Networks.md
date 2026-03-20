@@ -1,12 +1,11 @@
 ### I. Before RNNs
 #### 1. Modelos Autorregresivos
-> Los modelos autorregresivos asumen que el valor actual puede modelarse a partir de los valores pasados, es decir, se trabaja con distribuciones del tipo $$P(x_t \mid x_{t-1}, \ldots, x_1)$$o con su esperanza condicional $$\mathbb{E}[x_t \mid x_{t-1}, \ldots, x_1]$$En general, pueden usar un número variable de pasos temporales previos como entrada. Un ejemplo clásico es el modelo AR(p)AR(p)AR(p), que utiliza las ppp observaciones anteriores: $$x_t = c + \sum_{k=1}^{p} \phi_k x_{t-k} + \epsilon_t$$Su principal ventaja es que son fáciles de ajustar porque trabajan con una ventana fija de entradas. Sin embargo, suelen ser demasiado simples cuando los datos presentan dependencias complejas.
+> Los modelos autorregresivos asumen que el valor actual puede modelarse a partir de los valores pasados, es decir, se trabaja con distribuciones del tipo $$P(x_t \mid x_{t-1}, \ldots, x_1)$$o con su esperanza condicional $$\mathbb{E}[x_t \mid x_{t-1}, \ldots, x_1]$$En general, pueden usar un número variable de pasos temporales previos como entrada. Un ejemplo clásico es el modelo $AR(p)$, que utiliza las $p$ observaciones anteriores: $$x_t = c + \sum_{k=1}^{p} \phi_k x_{t-k} + \epsilon_t$$Su principal ventaja es que son fáciles de ajustar porque trabajan con una ventana fija de entradas. Sin embargo, suelen ser demasiado simples cuando los datos presentan dependencias complejas.
 #### 2. Modelos Autorregresivos Latentes
 > Los modelos autorregresivos latentes introducen un estado oculto $h_t$​ para capturar y resumir dependencias más complejas del pasado. En lugar de depender solo de una ventana fija de observaciones, el modelo mantiene una representación interna que se va actualizando con el tiempo. Una formulación general es: $$h_t = f(h_{t-1}, x_{t-1}; \theta), \qquad \hat{x}_t = g(h_t; \theta)$$donde $f$ y $g$ son funciones de tipo red neuronal.
 > La idea clave es que el estado oculto resume la información relevante de las entradas pasadas, haciendo al modelo más expresivo que un modelo autorregresivo clásico.![[Pasted image 20260317164610.png]]
 #### 3. Modelos de Secuencia y Orden de Decodificación
-> El objetivo general en un modelo de secuencia es modelar la probabilidad conjunta de una secuencia completa: $$P(x_1, x_2, \ldots, x_T)$$
-> Esta probabilidad se factoriza como: $$P(x_1, \ldots, x_T) = P(x_1)\prod_{t=2}^{T} P(x_t \mid x_{t-1}, \ldots, x_1)$$Esto refleja que los datos se tratan como secuencias en las que el orden importa, como ocurre en lenguaje natural o en series temporales. Cada término de la factorización expresa cómo un elemento depende de los anteriores, siguiendo la regla de la cadena de la probabilidad.
+> El objetivo general en un modelo de secuencia es modelar la probabilidad conjunta de una secuencia completa: $$P(x_1, x_2, \ldots, x_T)$$Esta probabilidad se factoriza como: $$P(x_1, \ldots, x_T) = P(x_1)\prod_{t=2}^{T} P(x_t \mid x_{t-1}, \ldots, x_1)$$Esto refleja que los datos se tratan como secuencias en las que el orden importa, como ocurre en lenguaje natural o en series temporales. Cada término de la factorización expresa cómo un elemento depende de los anteriores, siguiendo la regla de la cadena de la probabilidad.
 > En modelado del lenguaje, lo habitual es decodificar de izquierda a derecha: $$P(x_1, \ldots, x_T) = P(x_1)\prod_{t=2}^{T} P(x_t \mid x_1, \ldots, x_{t-1})$$Esta elección responde a una estructura causal: los eventos futuros no deben influir en el pasado. Además, suele ofrecer más capacidad predictiva cuando se trata de predecir el siguiente elemento de la secuencia.
 #### 4. Modelos de Markov
 > Los modelos de Markov introducen una simplificación adicional: asumen que el futuro es condicionalmente independiente del pasado dado el historial más reciente. En su forma más simple: $$P(x_t \mid x_{t-1}, \ldots, x_1) \approx P(x_t \mid x_{t-1})$$Con esta hipótesis, la probabilidad conjunta queda: $$P(x_1, \ldots, x_T) = P(x_1)\prod_{t=2}^{T} P(x_t \mid x_{t-1})$$Esto da lugar a modelos más sencillos, como las cadenas de Markov. El problema es que esta suposición suele ser demasiado restrictiva cuando existen dependencias de largo alcance. Los Hidden Markov Models (HMMs) introducen un estado no observado para intentar capturar parcialmente esos efectos más largos.
@@ -21,7 +20,7 @@
 > La extrapolación, en cambio, implica predecir fuera del rango bien cubierto por los datos observados. Aquí la incertidumbre es mayor, el modelo puede no generalizar bien y los errores suelen crecer, especialmente si cambia el patrón subyacente.
 #### 7. Modelos de Lenguaje Antes de las RNNs
 > Un modelo de lenguaje asigna una probabilidad a una secuencia de palabras: $$P(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} P(x_t \mid x_1, \ldots, x_{t-1})$$Esto permite medir lo probable que es una frase bajo el modelo y tiene aplicaciones en generación de texto, reconocimiento de voz o traducción automática.
-> Antes de las RNNs, una aproximación habitual eran los modelos n-gram, que aproximan la probabilidad condicional usando solo las $n-1$ palabras anteriores: $$P(x_t \mid x_{t-1}, x_{t-2}, \ldots, x_1) \approx P(x_t \mid x_{t-1}, \ldots, x_{t-n+1})$$Ejemplos para una secuencia de cuatro palabras $(x_1,x_2,x_3,x_4)$: $$P(x_1,x_2,x_3,x_4)=P(x_1)P(x_2)P(x_3)P(x_4) \quad \text{(unigram)}$$$$P(x_1,x_2,x_3,x_4)=P(x_1)P(x_2\mid x_1)P(x_3\mid x_2)P(x_4\mid x_3) \quad \text{(bigram)}$$ $$P(x_1,x_2,x_3,x_4)=P(x_1)P(x_2\mid x_1)P(x_3\mid x_1,x_2)P(x_4\mid x_2,x_3) \quad \text{(trigram)}$$Aumentar n permite capturar más contexto, pero también incrementa el problema de sparsity: muchos n-gramas aparecen poco o no aparecen nunca.
+> Antes de las RNNs, una aproximación habitual eran los modelos n-gram, que aproximan la probabilidad condicional usando solo las $n-1$ palabras anteriores: $$P(x_t \mid x_{t-1}, x_{t-2}, \ldots, x_1) \approx P(x_t \mid x_{t-1}, \ldots, x_{t-n+1})$$Ejemplos para una secuencia de cuatro palabras $(x_1,x_2,x_3,x_4)$: $$P(x_1,x_2,x_3,x_4)=P(x_1)P(x_2)P(x_3)P(x_4) \quad \text{(unigram)}$$$$P(x_1,x_2,x_3,x_4)=P(x_1)P(x_2\mid x_1)P(x_3\mid x_2)P(x_4\mid x_3) \quad \text{(bigram)}$$$$P(x_1,x_2,x_3,x_4)=P(x_1)P(x_2\mid x_1)P(x_3\mid x_1,x_2)P(x_4\mid x_2,x_3) \quad \text{(trigram)}$$Aumentar n permite capturar más contexto, pero también incrementa el problema de sparsity: muchos n-gramas aparecen poco o no aparecen nunca.
 > 
 > La estimación básica se hace por máxima verosimilitud a partir de frecuencias del corpus. Por ejemplo: $$\hat{P}(\text{learning} \mid \text{deep}) = \frac{n(\text{deep},\text{learning})}{n(\text{deep})}.$$Esta es, esencialmente, una frecuencia relativa. El problema aparece cuando ciertos pares o n-gramas tienen conteo cero. Para evitar probabilidades nulas se usa suavizado, por ejemplo Laplace o add-ϵ: $$\hat{P}(x)=\frac{n(x)+\epsilon_1/m}{n+\epsilon_1}, \qquad \hat{P}(x' \mid x)=\frac{n(x,x')+\epsilon_2 \hat{P}(x')}{n(x)+\epsilon_2}$$La idea es actuar como si cada evento se hubiese observado unas pocas veces extra.
 #### 8. Perplexity y Preparación de Secuencias
@@ -150,17 +149,9 @@
 > 
 > Esta mayor profundidad permite aprender **representaciones jerárquicas** y capturar relaciones más complejas en los datos secuenciales. Además, puede ayudar a modelar dependencias de largo alcance de forma más efectiva, por lo que resulta útil en tareas como **speech recognition**, **text generation** y **time-series forecasting**.
 > 
-> Si la entrada es una secuencia (X_t \in \mathbb{R}^{n \times d}), una Deep RNN consta de (L) capas ocultas y estados ocultos (H_t^{(l)} \in \mathbb{R}^{n \times h}), donde (h) es el número de unidades ocultas. La salida final es (O_t \in \mathbb{R}^{n \times q}).
+> Si la entrada es una secuencia $X_t \in \mathbb{R}^{n \times d}$, una Deep RNN consta de $L$ capas ocultas y estados ocultos $H_t^{(l)} \in \mathbb{R}^{n \times h}$, donde $h$ es el número de unidades ocultas. La salida final es $O_t \in \mathbb{R}^{n \times q}$.
 > 
-> La primera capa recurrente se calcula como:  
-> $$H_t^{(1)}=\phi_1\left(X_tW_{xh}^{(1)}+H_{t-1}^{(1)}W_{hh}^{(1)}+b_h^{(1)}\right)$$
-> 
-> Para las capas más profundas ((l=2,\dots,L)), la entrada ya no es (X_t), sino la salida de la capa anterior en el mismo instante temporal:  
-> $$H_t^{(l)}=\phi_l\left(H_t^{(l-1)}W_{xh}^{(l)}+H_{t-1}^{(l)}W_{hh}^{(l)}+b_h^{(l)}\right)$$
-> 
-> La salida se obtiene a partir de la última capa oculta:  
-> $$O_t=H_t^{(L)}W_{hq}+b_q$$  
-> donde (W_{hq}\in\mathbb{R}^{h\times q}) proyecta el estado oculto al espacio de salida y (b_q\in\mathbb{R}^{1\times q}) es el sesgo.
+> La primera capa recurrente se calcula como: $$H_t^{(1)}=\phi_1\left(X_tW_{xh}^{(1)}+H_{t-1}^{(1)}W_{hh}^{(1)}+b_h^{(1)}\right)$$Para las capas más profundas $(l=2,\dots,L)$, la entrada ya no es $X_t$, sino la salida de la capa anterior en el mismo instante temporal:  $$H_t^{(l)}=\phi_l\left(H_t^{(l-1)}W_{xh}^{(l)}+H_{t-1}^{(l)}W_{hh}^{(l)}+b_h^{(l)}\right)$$La salida se obtiene a partir de la última capa oculta:  $$O_t=H_t^{(L)}W_{hq}+b_q$$donde $W_{hq}\in\mathbb{R}^{h\times q}$ proyecta el estado oculto al espacio de salida y $b_q\in\mathbb{R}^{1\times q}$ es el sesgo.
 > 
 > En conjunto, la profundidad hace que cada capa extraiga características progresivamente más abstractas, lo que mejora la capacidad del modelo para representar dependencias complejas en secuencias. Además, esta arquitectura también puede combinarse con **LSTMs** o **GRUs** para mejorar la memoria a largo plazo.
 #### 2. Bidirectional RNNs
@@ -168,122 +159,72 @@
 > 
 > Esto es útil en tareas donde no basta con conocer solo las palabras anteriores, sino que conviene disponer de la **secuencia completa**. Por ejemplo, en **Part-of-Speech tagging** o en el relleno de palabras faltantes, la interpretación de un elemento puede depender tanto de lo que aparece antes como de lo que aparece después.
 > 
-> La arquitectura utiliza dos estados ocultos en cada instante (t):
-> 
+> La arquitectura utiliza dos estados ocultos en cada instante $t$:
 > - un estado hacia delante $\overrightarrow{H}_t$
->     
 > - un estado hacia atrás $\overleftarrow{H}_t$
->     
 > 
-> Sus ecuaciones son:  
-> $$\overrightarrow{H}_t=\phi\left(X_tW_{xh}^{(f)}+\overrightarrow{H}_{t-1}W_{hh}^{(f)}+b_h^{(f)}\right)$$  
-> $$\overleftarrow{H}_t=\phi\left(X_tW_{xh}^{(b)}+\overleftarrow{H}_{t+1}W_{hh}^{(b)}+b_h^{(b)}\right)$$
-> 
-> Después, ambos estados ocultos se **concatenan** antes de pasar a la capa de salida:  
-> $$O_t=[\overrightarrow{H}_t;\overleftarrow{H}_t]W_{hq}+b_q$$
-> 
+> Sus ecuaciones son:  $$\overrightarrow{H}_t=\phi\left(X_tW_{xh}^{(f)}+\overrightarrow{H}_{t-1}W_{hh}^{(f)}+b_h^{(f)}\right)$$$$\overleftarrow{H}_t=\phi\left(X_tW_{xh}^{(b)}+\overleftarrow{H}_{t+1}W_{hh}^{(b)}+b_h^{(b)}\right)$$Después, ambos estados ocultos se **concatenan** antes de pasar a la capa de salida:  $$O_t= \left [\overrightarrow{H}_t;\overleftarrow{H}_t \right] W_{hq}+b_q$$
 > La principal ventaja de las BiRNNs es que capturan dependencias en las dos direcciones y son más conscientes del contexto que una RNN unidireccional. Por eso se han usado en tareas como **POS tagging**, **Named Entity Recognition (NER)**, **speech recognition** y **machine translation**.
 > 
 > Como limitaciones, requieren disponer de la **secuencia completa** antes de procesarla, por lo que no son ideales para tareas en tiempo real. Además, son más costosas computacionalmente que las RNNs estándar y siguen pudiendo sufrir problemas de **vanishing** o **exploding gradients**. Por último, éstas han sido reemplazadas en gran medida por **attention mechanisms**.
-
 #### 3. Encoder - Decoder
 > La arquitectura **Encoder-Decoder** se utiliza en tareas **sequence-to-sequence (Seq2Seq)**, como **machine translation**, **text summarization** y **speech-to-text**. Su objetivo es transformar una **secuencia de entrada** en una **secuencia de salida**, permitiendo además trabajar con longitudes variables tanto en la entrada como en la salida.
 > 
 > El modelo consta de dos componentes principales:
-> 
 > - **Encoder**: procesa la secuencia de entrada y la comprime en un **estado** o **context vector** de longitud fija.
->     
 > - **Decoder**: genera la secuencia de salida a partir de ese estado codificado.
->     
 > 
-> El **encoder** recibe una secuencia de longitud variable y la transforma en una representación comprimida mediante una RNN, GRU o LSTM. Va procesando la entrada paso a paso y actualizando un estado oculto, de forma que el estado final resume la secuencia completa:  
-> $$h_t = f(x_t, h_{t-1})$$  
-> Puede ser **unidireccional**, usando solo información pasada, o **bidireccional**, incorporando tanto contexto pasado como futuro.
+> El **encoder** recibe una secuencia de longitud variable y la transforma en una representación comprimida mediante una RNN, GRU o LSTM. Va procesando la entrada paso a paso y actualizando un estado oculto, de forma que el estado final resume la secuencia completa:  $$h_t = f(x_t, h_{t-1})$$Puede ser **unidireccional**, usando solo información pasada, o **bidireccional**, incorporando tanto contexto pasado como futuro.
 > 
-> El **decoder** toma el estado del encoder y genera la salida **token a token**. En cada paso utiliza el token generado previamente, el vector de contexto y su estado anterior:  
-> $$s_{t'} = g(y_{t'-1}, c, s_{t'-1})$$  
-> El proceso continúa hasta generar un token de fin de secuencia (**EOS**).
+> El **decoder** toma el estado del encoder y genera la salida **token a token**. En cada paso utiliza el token generado previamente, el vector de contexto y su estado anterior:  $$s_{t'} = g(y_{t'-1}, c, s_{t'-1})$$El proceso continúa hasta generar un token de fin de secuencia (**EOS**).
 > 
 > Durante el entrenamiento se usa normalmente **teacher forcing**, es decir, en cada paso se alimenta al decoder con el **token correcto anterior** en lugar del token predicho por el propio modelo. Esto acelera el entrenamiento, pero introduce **exposure bias**. La función de pérdida usada en este caso  es **Cross-Entropy Loss** con enmascarado para ignorar tokens de padding.
 > 
 > En inferencia, el decoder ya no dispone de la secuencia correcta, así que genera los tokens uno a uno usando sus propias predicciones previas. Para decidir la salida puede emplearse:
-> 
 > - **Greedy decoding**: elige el token de mayor probabilidad en cada paso.
->     
 > - **Beam search**: mantiene varias secuencias candidatas.
->     
 > 
 > Esta arquitectura se ha aplicado en tareas como **traducción automática**, **speech-to-text**, **resumen de texto** e **image captioning**.
 #### 4. Decoding Strategies
-> En tareas **sequence-to-sequence**, la salida debe generarse token a token, y por eso hacen falta estrategias de búsqueda para decidir qué secuencia producir. La opción más simple es **greedy search**, pero no siempre encuentra la mejor secuencia. En el extremo opuesto, **exhaustive search** evalúa todas las secuencias posibles y elige la de mayor probabilidad, aunque su coste crece como  
-> $$O(|\mathcal{Y}|^{T'})$$  
-> donde (T') es la longitud de la secuencia y (\mathcal{Y}) el vocabulario, por lo que resulta computacionalmente inviable.
+> En tareas **sequence-to-sequence**, la salida debe generarse token a token, y por eso hacen falta estrategias de búsqueda para decidir qué secuencia producir. La opción más simple es **greedy search**, pero no siempre encuentra la mejor secuencia. En el extremo opuesto, **exhaustive search** evalúa todas las secuencias posibles y elige la de mayor probabilidad, aunque su coste crece como  $$O(|\mathcal{Y}|^{T'})$$donde $T'$ es la longitud de la secuencia y $\mathcal{Y}$ el vocabulario, por lo que resulta computacionalmente inviable.
 > 
-> En **greedy search**, en cada paso temporal (t') se selecciona el token con mayor probabilidad condicional:  
-> $$y_{t'}=\arg\max_{y\in\mathcal{Y}} P(y\mid y_1,\ldots,y_{t'-1},c)$$  
-> El proceso continúa hasta generar el token especial de fin de secuencia **\<eos\>**. Su ventaja es que es simple y rápido, pero su inconveniente es que una decisión localmente óptima en un paso puede impedir encontrar la mejor secuencia global.
+> En **greedy search**, en cada paso temporal $t'$ se selecciona el token con mayor probabilidad condicional:  $$y_{t'}=\arg\max_{y\in\mathcal{Y}} P(y\mid y_1,\ldots,y_{t'-1},c)$$El proceso continúa hasta generar el token especial de fin de secuencia **\<eos>**. Su ventaja es que es simple y rápido, pero su inconveniente es que una decisión localmente óptima en un paso puede impedir encontrar la mejor secuencia global.
 > 
-> Como punto intermedio aparece **beam search**, que busca equilibrar eficiencia y calidad. En lugar de conservar una sola hipótesis, mantiene en cada paso las (k) mejores secuencias candidatas, donde (k) es el **beam size**. En cada instante:
-> 
-> - se expanden las (k) secuencias actuales
->     
+> Como punto intermedio aparece **beam search**, que busca equilibrar eficiencia y calidad. En lugar de conservar una sola hipótesis, mantiene en cada paso las $k$ mejores secuencias candidatas, donde $k$ es el **beam size**. En cada instante:
+> - se expanden las $k$ secuencias actuales
 > - se evalúan sus extensiones
->     
-> - se conservan solo las (k) mejores
->     
+> - se conservan solo las $k$ mejores
 > 
-> Así, beam search reduce el coste frente a exhaustive search y normalmente mejora los resultados respecto a greedy search. Por ejemplo, con (k=2), el modelo mantiene siempre las dos mejores secuencias parciales en cada paso.
+> Así, beam search reduce el coste frente a exhaustive search y normalmente mejora los resultados respecto a greedy search. Por ejemplo, con $k=2$, el modelo mantiene siempre las dos mejores secuencias parciales en cada paso.
 > 
-> La secuencia final se elige maximizando una puntuación basada en la suma de log-probabilidades con normalización por longitud:  
-> $$\frac{1}{L^\alpha}\sum_{t'=1}^{L}\log P(y_{t'}\mid y_1,\ldots,y_{t'-1},c)$$  
-> donde (L) es la longitud de la secuencia y (\alpha) es un factor de normalización de longitud.
+> La secuencia final se elige maximizando una puntuación basada en la suma de log-probabilidades con normalización por longitud: $$\frac{1}{L^\alpha}\sum_{t'=1}^{L}\log P(y_{t'}\mid y_1,\ldots,y_{t'-1},c)$$donde $L$ es la longitud de la secuencia y $\alpha$ es un factor de normalización de longitud.
+
 ### V. Modern RNNs
-#### 1. Long Short-Term Memory (LSTM)
-> Las **Long Short-Term Memory (LSTM)** se diseñaron para abordar los problemas de **vanishing** y **exploding gradients** en RNNs. Su idea principal es introducir una **memory cell** capaz de mantener información a lo largo de secuencias largas.
+#### 1. Long Short-Term Memory
+> Las **LSTMs** se diseñaron para abordar los problemas de **vanishing** y **exploding gradients** en RNNs. Su idea principal es introducir una **memory cell** capaz de mantener información a lo largo de secuencias largas.
 > 
-> Cada celda LSTM incluye un **estado interno** (C_t) y tres puertas que regulan el flujo de información:
-> 
+> Cada celda LSTM incluye un **estado interno** $C_t$ y tres puertas que regulan el flujo de información:
 > - **Input gate**: controla cuánta información nueva se añade.
->     
 > - **Forget gate**: determina cuánta información pasada se conserva.
->     
 > - **Output gate**: controla cuánta información se transmite hacia delante.
->     
 > 
-> Estas puertas se implementan como capas totalmente conectadas con activación sigmoide:  
-> $$I_t=\sigma(X_tW_{xi}+H_{t-1}W_{hi}+b_i)$$  
-> $$F_t=\sigma(X_tW_{xf}+H_{t-1}W_{hf}+b_f)$$  
-> $$O_t=\sigma(X_tW_{xo}+H_{t-1}W_{ho}+b_o)$$
+> Estas puertas se implementan como capas totalmente conectadas con activación sigmoide:  $$I_t=\sigma(X_tW_{xi}+H_{t-1}W_{hi}+b_i)$$$$F_t=\sigma(X_tW_{xf}+H_{t-1}W_{hf}+b_f)$$$$O_t=\sigma(X_tW_{xo}+H_{t-1}W_{ho}+b_o)$$Además, calcula un **input node** o valor candidato para la memoria usando una activación **tanh**:  $$\tilde{C}_t=\tanh(X_tW_{xc}+H_{t-1}W_{hc}+b_c)$$Este término genera los posibles nuevos valores que podrían incorporarse al estado de memoria.
 > 
-> Además, la LSTM calcula un **input node** o valor candidato para la memoria usando una activación **tanh**:  
-> $$\tilde{C}_t=\tanh(X_tW_{xc}+H_{t-1}W_{hc}+b_c)$$  
-> Este término genera los posibles nuevos valores que podrían incorporarse al estado de memoria.
+> El **estado interno de la celda** se actualiza combinando la información previa y la nueva información candidata:  $$C_t=F_t\odot C_{t-1}+I_t\odot \tilde{C}_t$$Así, la forget gate decide qué parte de la memoria anterior se mantiene y la input gate cuánto contenido nuevo se añade.
 > 
-> El **estado interno de la celda** se actualiza combinando la información previa y la nueva información candidata:  
-> $$C_t=F_t\odot C_{t-1}+I_t\odot \tilde{C}_t$$  
-> Así, la forget gate decide qué parte de la memoria anterior se mantiene y la input gate cuánto contenido nuevo se añade.
+> Finalmente, el **estado oculto** se calcula a partir de la memoria y la output gate: $$H_t=O_t\odot \tanh(C_t)$$De este modo, la LSTM controla de forma selectiva qué información pasa al siguiente paso temporal.
 > 
-> Finalmente, el **estado oculto** se calcula a partir de la memoria y la output gate:  
-> $$H_t=O_t\odot \tanh(C_t)$$  
-> De este modo, la LSTM controla de forma selectiva qué información pasa al siguiente paso temporal.
-> 
-> En conjunto, la característica clave de las LSTM es su **gated memory cell**, que les permite decidir explícitamente cuándo **actualizar**, **olvidar** y **propagar** información, mejorando así la capacidad de modelar dependencias de largo plazo frente a una RNN estándar.
-#### 2. Gated Recurrent Units (GRU)
-> Las **Gated Recurrent Units (GRU)** son una arquitectura de RNN introducida como una **variante simplificada de las LSTM**. Su objetivo es controlar el flujo de información mediante mecanismos de compuertas, pero con una estructura más simple.
+> En conjunto, la característica clave de las LSTMs es su **gated memory cell**, que les permite decidir explícitamente cuándo **actualizar**, **olvidar** y **propagar** información, mejorando así la capacidad de modelar dependencias de largo plazo frente a una RNN estándar.
+#### 2. Gated Recurrent Units
+> Las **GRUs** son una arquitectura de RNN introducida como una **variante simplificada de las LSTMs**. Su objetivo es controlar el flujo de información mediante mecanismos de compuertas, pero con una estructura más simple.
 > 
 > Una GRU utiliza dos puertas:
+> - **Reset gate** $(R_t)$: controla cuánta información pasada se descarta.
+> - **Update gate** $(Z_t)$: determina cuánta información pasada se conserva.
 > 
-> - **Reset gate** ((R_t)): controla cuánta información pasada se descarta.
->     
-> - **Update gate** ((Z_t)): determina cuánta información pasada se conserva.
->     
-> 
-> A partir de estas compuertas, se calcula primero un **estado oculto candidato**:  
-> $$\tilde{H}_t=\tanh\left(X_tW_{xh}+(R_t\odot H_{t-1})W_{hh}+b_h\right)$$  
+> A partir de estas compuertas, se calcula primero un **estado oculto candidato**:  $$\tilde{H}_t=\tanh\left(X_tW_{xh}+(R_t\odot H_{t-1})W_{hh}+b_h\right)$$  
 > Aquí, la **reset gate** regula la influencia del estado oculto previo sobre el nuevo contenido candidato.
 > 
-> Después, el **estado oculto final** se actualiza combinando el estado anterior y el estado candidato:  
-> $$H_t=Z_t\odot H_{t-1}+(1-Z_t)\odot \tilde{H}_t$$  
-> Así, la **update gate** decide cuánto del pasado se mantiene y cuánto se reemplaza por la nueva información.
+> Después, el **estado oculto final** se actualiza combinando el estado anterior y el estado candidato:  $$H_t=Z_t\odot H_{t-1}+(1-Z_t)\odot \tilde{H}_t$$Así, la **update gate** decide cuánto del pasado se mantiene y cuánto se reemplaza por la nueva información.
 > 
-> En conjunto, las GRU simplifican la arquitectura de las LSTM, pero siguen permitiendo controlar qué información pasada se conserva y cuánto contenido nuevo se incorpora al estado oculto.
+> En conjunto, las GRUs simplifican la arquitectura de las LSTM, pero siguen permitiendo controlar qué información pasada se conserva y cuánto contenido nuevo se incorpora al estado oculto.
