@@ -351,7 +351,6 @@
 > La idea es que, en cada paso de entrenamiento, una parte de las unidades no participa en el cálculo. Esto obliga a la red a no depender demasiado de neuronas concretas y a aprender **representaciones redundantes y más robustas**, mejorando así la **generalización**. ![[Pasted image 20260320104438.png]]
 > 
 > El mecanismo puede entenderse así: si una capa tiene 100 neuronas con activación 1 y aplicamos dropout con $p=0.4$, durante entrenamiento solo permanecerán activas, en media, unas **60 neuronas**. En inferencia, en cambio, **no se aplica dropout**, por lo que participan todas las neuronas.  ![[Pasted image 20260320104510.png]]
-> 
 > Como al eliminar neuronas disminuye la suma de activaciones, durante entrenamiento se compensa reescalando las activaciones por: $$\frac{1}{1-p}$$De este modo se mantiene aproximadamente la misma magnitud esperada entre entrenamiento e inferencia. Es decir, la salida se reescala para que sea consistente con la fase de evaluación.  ![[Pasted image 20260320104611.png]]
 > 
 > Dropout se usa sobre todo **antes de capas fully connected / linear**, para mejorar la generalización, y **antes de capas convolucionales 1x1** en algunas arquitecturas. ![[Pasted image 20260320104744.png]]
