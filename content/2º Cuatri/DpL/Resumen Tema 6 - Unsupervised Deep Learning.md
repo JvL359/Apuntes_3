@@ -1,5 +1,4 @@
 ### I. Introduction
-
 #### 1. Autoencoders: idea general y objetivo
 > Los **autoencoders** son una herramienta central del _unsupervised deep learning_. Su objetivo es aprender una **representación eficiente** de los datos de entrada sin usar etiquetas explícitas y, a partir de ella, **reconstruir** la entrada original.
 > Un autoencoder se compone de tres partes:
