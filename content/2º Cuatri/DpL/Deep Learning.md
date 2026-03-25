@@ -4,6 +4,7 @@
 - [[Resumen Tema 3 - Convolutional NNs & Modern CNNs]]
 - [[Resumen Tema 4 - Optimization & Regularization]]
 - [[Resumen Tema 5 - Recurrent Neural Networks]]
+- [[Resumen Tema 6 - Unsupervised Deep Learning]]
 ### II. Clase
 - [[Tema 1 - Frameworks]]
 - [[Tema 2 - Neural Networks]]
