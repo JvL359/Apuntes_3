@@ -1,12 +1,15 @@
 ### I. Introduction
 #### 1. Autoencoders: idea general y objetivo
-> Los **autoencoders** son una herramienta central del _unsupervised deep learning_. Su objetivo es aprender una **representación eficiente** de los datos de entrada sin usar etiquetas explícitas y, a partir de ella, **reconstruir** la entrada original.
+> Los **autoencoders** son una herramienta central del _unsupervised deep learning_. Su objetivo es aprender una **representación eficiente** de los datos de entrada sin usar etiquetas explícitas y a partir de ella **reconstruir** la entrada original.
+> ![[Pasted image 20260325174402.png]]
 > Un autoencoder se compone de tres partes:
-> - **Encoder**: transforma la entrada (x) en una representación latente (h).
+> - **Encoder**: transforma la entrada $x$ en una representación latente $h$.
 > - **Latent layer**: contiene una representación comprimida del dato, normalmente de menor dimensión que la entrada.
 > - **Decoder**: reconstruye la entrada a partir de la representación latente.
 > 
-> De forma general:  $$h = f(x), \qquad r = g(h), \qquad r \approx x$$La idea importante no es solo reconstruir bien la entrada, sino conseguir que la **representación latente** capture la información relevante en un espacio más útil. Esto es especialmente importante porque trabajar directamente en el espacio original puede ser problemático: las distancias entre muestras no siempre reflejan bien sus relaciones reales. Un buen autoencoder aprende un **espacio embebido** donde esas relaciones quedan mejor organizadas, lo que permite aplicar después técnicas como _clustering_.
+> De forma general:  $h = f(x), \qquad r = g(h), \qquad r \approx x$
+> 
+> La idea importante no es solo reconstruir bien la entrada, sino conseguir que la **representación latente** capture la información relevante en un espacio más útil. Esto es especialmente importante porque trabajar directamente en el espacio original puede ser problemático: las distancias entre muestras no siempre reflejan bien sus relaciones reales. Un buen autoencoder aprende un **espacio embebido** donde esas relaciones quedan mejor organizadas, lo que permite aplicar después técnicas como _clustering_.
 > 
 > Aplicaciones destacadas:
 > - reducción de dimensionalidad
@@ -25,7 +28,7 @@
 
 ### II. Auto-Encoders
 #### 1. Sparse Autoencoders
-> Los **sparse autoencoders** introducen una restricción de **esparsidad** sobre la representación oculta. La motivación es que un autoencoder estándar, si no está suficientemente restringido, puede aprender representaciones triviales o demasiado distribuidas. Para evitarlo, se fuerza a que, para una entrada dada, **muchas neuronas de la capa oculta permanezcan inactivas** o con activación cercana a cero.
+> Los **sparse autoencoders** introducen una restricción de **esparsidad** sobre la representación oculta. La motivación es que un autoencoder estándar, si no está suficientemente restringido, puede aprender representaciones triviales o demasiado distribuidas. Para evitarlo, se fuerza a que, para una entrada dada, **muchas neuronas de la capa oculta permanezcan inactivas** o con activación cercana a cero. ![[Pasted image 20260325174519.png]]
 > 
 > La idea es que la red aprenda **características más selectivas y localizadas**, lo que suele mejorar la extracción de _features_, la interpretabilidad y reducir el _overfitting_. En este caso, la capa latente suele ser **más grande que la entrada**, de modo que la separación de características no depende de comprimir dimensionalmente, sino de imponer activaciones escasas.
 > 
@@ -48,7 +51,8 @@
 > - El **encoder** recibe $\tilde{x}$ y produce una representación latente $h$.
 > - El **decoder** reconstruye una salida $\hat{x}$ a partir de $h$, intentando aproximar la entrada limpia original $x$.
 > 
-> La pérdida se define comparando la reconstrucción con la entrada limpia, no con la entrada corrupta. En las diapositivas aparece, por ejemplo: $$\mathcal{L} = |x-\hat{x}|^2$$o una pérdida de **cross-entropy**, según el tipo de dato. En la formulación probabilística, el entrenamiento puede escribirse como la minimización de:  $$\large-\mathbb{E}_{x\sim \hat{p}_{\text{data}}(x)} \mathbb{E}_{\tilde{x}\sim C(\tilde{x}\mid x)} \log p_{\text{decoder}}(x \mid h=f(\tilde{x}))$$
+> La pérdida se define comparando la reconstrucción con la entrada limpia, no con la entrada corrupta. En las diapositivas aparece, por ejemplo: $$\mathcal{L} = |x-\hat{x}|^2$$o una pérdida de **cross-entropy**, según el tipo de dato. En la formulación probabilística, el entrenamiento puede escribirse como la minimización de:  $$\large-\mathbb{E}_{x\sim \hat{p}_{\text{data}}(x)} \mathbb{E}_{\tilde{x}\sim C(\tilde{x}\mid x)} \log p_{\text{decoder}}(x \mid h=f(\tilde{x}))$$![[Pasted image 20260325174703.png]]
+> 
 > El procedimiento de entrenamiento sigue esta secuencia:
 > _1._ Se toma una muestra limpia $x$ del conjunto de entrenamiento.
 > _2._ Se genera una versión corrupta $\tilde{x}$.
@@ -67,7 +71,7 @@
 > 
 > En consecuencia, el encoder aprende un mapeo **localmente invariante** alrededor de los ejemplos de entrenamiento, capturando la estructura esencial del _manifold_ de datos y contrayendo las variaciones no relevantes.
 #### 4. Variational Auto-Encoders
-> Los **Variational Autoencoders (VAE)** son autoencoders con una formulación **probabilística y generativa**. En lugar de aprender una única representación latente determinista, aprenden una **distribución latente** a partir de la cual se pueden generar nuevas muestras de datos.
+> Los **Variational Autoencoders (VAE)** son autoencoders con una formulación **probabilística y generativa**. En lugar de aprender una única representación latente determinista, aprenden una **distribución latente** a partir de la cual se pueden generar nuevas muestras de datos. ![[Pasted image 20260325174946.png]]
 > 
 > El **encoder probabilístico** transforma la entrada $x$ en una distribución aproximada sobre la variable latente $z: q_\phi(z\mid x)$. Normalmente, esta distribución se modela como una gaussiana cuyos parámetros son calculados por la red: $$q_\phi(z\mid x)=\mathcal{N}(z;\mu(x),\sigma^2(x))$$Es decir, no devuelve directamente un código latente, sino su **media** $\mu(x)$ y su **varianza** $\sigma^2(x)$.
 > 
