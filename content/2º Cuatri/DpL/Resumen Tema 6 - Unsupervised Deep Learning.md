@@ -77,7 +77,7 @@
 > 
 > A partir de esa distribución, se obtiene una muestra latente $z$. Para permitir el entrenamiento mediante backpropagation, se usa el **reparameterization trick**:  $$z=\mu(x)+\sigma(x)\odot \epsilon, \qquad \epsilon\sim\mathcal{N}(0,I)$$De este modo, la parte aleatoria queda separada en $\epsilon$, mientras que $\mu(x)$ y $\sigma(x)$ siguen siendo diferenciables respecto a los parámetros del modelo.
 > 
-> El **decoder probabilístico** recibe la variable latente (z) y define una distribución de reconstrucción:  $$p_\theta(x\mid z)$$a partir de la cual se reconstruye la entrada. Por tanto, el flujo general del modelo es: $$x \rightarrow q_\phi(z\mid x) \rightarrow z \rightarrow p_\theta(x\mid z) \rightarrow x'$$con el objetivo de que la reconstrucción sea lo más parecida posible a la entrada original.
+> El **decoder probabilístico** recibe la variable latente $z$ y define una distribución de reconstrucción:  $$p_\theta(x\mid z)$$a partir de la cual se reconstruye la entrada. Por tanto, el flujo general del modelo es: $$x \rightarrow q_\phi(z\mid x) \rightarrow z \rightarrow p_\theta(x\mid z) \rightarrow x'$$con el objetivo de que la reconstrucción sea lo más parecida posible a la entrada original.
 > 
 > El entrenamiento de un VAE no minimiza solo un error de reconstrucción, sino que maximiza la **Evidence Lower Bound (ELBO)**: $$\mathcal{L}(\theta,\phi;x) = \mathbb{E}_{q_\phi(z\mid x)}[\log p_\theta(x\mid z)] - \mathrm{KL}\big(q_\phi(z\mid x)||p(z)\big)$$Esta función objetivo equilibra dos términos:
 > - **Calidad de reconstrucción**: el término  $\mathbb{E}_{q_\phi(z\mid x)}[\log p_\theta(x\mid z)]$  favorece que el decoder reconstruya bien la entrada.
