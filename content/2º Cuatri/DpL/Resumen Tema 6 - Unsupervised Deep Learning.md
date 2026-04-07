@@ -28,14 +28,15 @@
 
 ### II. Auto-Encoders
 #### 1. Sparse Autoencoders
-> Los **sparse autoencoders** introducen una restricción de **esparsidad** sobre la representación oculta. La motivación es que un autoencoder estándar, si no está suficientemente restringido, puede aprender representaciones triviales o demasiado distribuidas. Para evitarlo, se fuerza a que, para una entrada dada, **muchas neuronas de la capa oculta permanezcan inactivas** o con activación cercana a cero. ![[Pasted image 20260325174519.png]]
+> Los **sparse autoencoders** introducen una restricción de **esparsidad** sobre la representación oculta. La motivación es que un autoencoder estándar, si no está suficientemente restringido, puede aprender representaciones triviales o demasiado distribuidas. Para evitarlo, se fuerza a que, para una entrada dada, **muchas neuronas de la capa oculta permanezcan inactivas** o con activación cercana a cero. 
+> ![[Pasted image 20260325174519.png]]
 > 
 > La idea es que la red aprenda **características más selectivas y localizadas**, lo que suele mejorar la extracción de _features_, la interpretabilidad y reducir el _overfitting_. En este caso, la capa latente suele ser **más grande que la entrada**, de modo que la separación de características no depende de comprimir dimensionalmente, sino de imponer activaciones escasas.
 > 
 > Para imponer esta esparsidad, se añade un término de regularización a la función de pérdida:  $$L(x, g(f(x))) + \Omega(h)$$Dos formas de imponerla que aparecen en las diapositivas son:
 > - **Regularización L1**: se añade una penalización del tipo  $$\lambda \sum |w|  
     \quad \text{o} \quad  
-    \lambda \sum |h|$$para favorecer que los pesos o las activaciones sean pequeños.
+    \lambda \sum |h|$$para favorecer que los pesos o las activaciones sean pequeños, y así reducir el tamaño del espacio latente, tendiendo a poner muchos ceros para reducir esta métrica.
 > 
 > - **Penalización mediante divergencia KL**: se fija un nivel de activación media deseado $\rho$ para las neuronas ocultas, normalmente pequeño, y se compara con la activación media real $\hat{\rho}_j$ de cada neurona $j$. La penalización total es: $$\Omega = \sum_{j=1}^{H} \mathrm{KL}(\rho || \hat{\rho}_j)$$Aquí, $\rho$ es la activación media objetivo y $\hat{\rho}_j$ la activación media real de la neurona oculta $j$. Cuanto menor sea $\rho$, mayor es la esparsidad buscada.
 > 
