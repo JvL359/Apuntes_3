@@ -33,7 +33,7 @@
 > 
 > La idea es que la red aprenda **características más selectivas y localizadas**, lo que suele mejorar la extracción de _features_, la interpretabilidad y reducir el _overfitting_. En este caso, la capa latente suele ser **más grande que la entrada**, de modo que la separación de características no depende de comprimir dimensionalmente, sino de imponer activaciones escasas.
 > 
-> Para imponer esta esparsidad, se añade un término de regularización a la función de pérdida:  $$L(x, g(f(x))) + \Omega(h)$$Dos formas de imponerla que aparecen en las diapositivas son:
+> Para imponer esta esparsidad, se añade un término de regularización a la función de pérdida:  $$L(x, g(f(x))) + \Omega(h)$$Existen dos formas de imponerla:
 > - **Regularización L1**: se añade una penalización del tipo  $$\lambda \sum |w|  
     \quad \text{o} \quad  
     \lambda \sum |h|$$para favorecer que los pesos o las activaciones sean pequeños, y así reducir el tamaño del espacio latente, tendiendo a poner muchos ceros para reducir esta métrica.
@@ -44,7 +44,7 @@
 #### 2. Denoising Auto-Encoders
 > Un **Denoising Autoencoder (DAE)** se entrena para **eliminar ruido de una entrada corrupta** y reconstruir su versión limpia. La idea clave es que, al obligar al modelo a recuperar la señal original a partir de una versión degradada, aprende representaciones **más robustas** y captura mejor la estructura esencial de los datos.
 > 
-> La motivación es que los datos reales suelen contener ruido. En lugar de aprender simplemente a copiar la entrada, el DAE aprende a reconstruir la **entrada limpia** a partir de una versión alterada. Entre los tipos de corrupción mencionados en las diapositivas están el **ruido gaussiano**, el **masking noise** y **dropout**.
+> La motivación es que los datos reales suelen contener ruido. En lugar de aprender simplemente a copiar la entrada, el DAE aprende a reconstruir la **entrada limpia** a partir de una versión alterada. Ejemplos de los tipos de corrupción son el **ruido gaussiano**, el **masking noise** y **dropout**.
 > 
 > La estructura básica es la siguiente:
 > - Se parte de una entrada limpia $x$.
@@ -52,7 +52,7 @@
 > - El **encoder** recibe $\tilde{x}$ y produce una representación latente $h$.
 > - El **decoder** reconstruye una salida $\hat{x}$ a partir de $h$, intentando aproximar la entrada limpia original $x$.
 > 
-> La pérdida se define comparando la reconstrucción con la entrada limpia, no con la entrada corrupta. En las diapositivas aparece, por ejemplo: $$\mathcal{L} = |x-\hat{x}|^2$$o una pérdida de **cross-entropy**, según el tipo de dato. En la formulación probabilística, el entrenamiento puede escribirse como la minimización de:  $$\large-\mathbb{E}_{x\sim \hat{p}_{\text{data}}(x)} \mathbb{E}_{\tilde{x}\sim C(\tilde{x}\mid x)} \log p_{\text{decoder}}(x \mid h=f(\tilde{x}))$$![[Pasted image 20260325174703.png]]
+> La pérdida se define comparando la reconstrucción con la entrada limpia, no con la entrada corrupta: $$\mathcal{L} = |x-\hat{x}|^2$$o una pérdida de **cross-entropy**, según el tipo de dato. En la formulación probabilística, el entrenamiento puede escribirse como la minimización de:  $$\large-\mathbb{E}_{x\sim \hat{p}_{\text{data}}(x)} \mathbb{E}_{\tilde{x}\sim C(\tilde{x}\mid x)} \log p_{\text{decoder}}(x \mid h=f(\tilde{x}))$$![[Pasted image 20260325174703.png]]
 > 
 > El procedimiento de entrenamiento sigue esta secuencia:
 > _1._ Se toma una muestra limpia $x$ del conjunto de entrenamiento.
