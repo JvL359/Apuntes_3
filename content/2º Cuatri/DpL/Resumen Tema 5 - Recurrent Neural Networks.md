@@ -189,7 +189,7 @@
 > 
 > En inferencia, el decoder ya no dispone de la secuencia correcta, así que genera los tokens uno a uno usando sus propias predicciones previas.
 #### 4. Decoding Strategies
-> En tareas **sequence-to-sequence**, la salida debe generarse token a token, y por eso hacen falta estrategias de búsqueda para decidir qué secuencia producir. La opción más simple es **greedy search**, pero no siempre encuentra la mejor secuencia. En el extremo opuesto, **exhaustive search** evalúa todas las secuencias posibles y elige la de mayor probabilidad, aunque su coste crece como  $$O(|\mathcal{Y}|^{T'})$$donde $T'$ es la longitud de la secuencia y $\mathcal{Y}$ el vocabulario, por lo que resulta computacionalmente inviable.
+> En tareas **sequence-to-sequence**, la salida debe generarse token a token, y por eso hacen falta estrategias de búsqueda para decidir qué secuencia producir. La opción más simple es **greedy search**, pero no siempre encuentra la mejor secuencia. En el extremo opuesto, **exhaustive search** evalúa todas las secuencias posibles y elige la de mayor probabilidad, aunque su coste crece como  $O(|\mathcal{Y}|^{T'})$ donde $T'$ es la longitud de la secuencia y $\mathcal{Y}$ el vocabulario, por lo que resulta computacionalmente inviable.
 > 
 > En **greedy search**, en cada paso temporal $t'$ se selecciona el token con mayor probabilidad condicional:  $$y_{t'}=\arg\max_{y\in\mathcal{Y}} P(y\mid y_1,\ldots,y_{t'-1},c)$$El proceso continúa hasta generar el token especial de fin de secuencia **\<eos>**. Su ventaja es que es simple y rápido, pero su inconveniente es que una decisión localmente óptima en un paso puede impedir encontrar la mejor secuencia global.
 > 
