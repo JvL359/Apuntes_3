@@ -12,7 +12,7 @@
 > La idea básica del **gradient descent** parte de una aproximación de Taylor. En una dimensión, si queremos minimizar una función $f:\mathbb{R}\to\mathbb{R}$, actualizamos: $x \leftarrow x - \eta f'(x)$ donde $\eta$ es la **learning rate**. En varias dimensiones, para una función $f:\mathbb{R}^d\to\mathbb{R}$, la regla pasa a ser: $\mathbf{x} \leftarrow \mathbf{x} - \eta \nabla f(\mathbf{x})$ con: $$\nabla f(\mathbf{x})= \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_d} \right]^T$$El gradiente marca la dirección de máximo crecimiento, así que $-\nabla f(\mathbf{x})$ define la dirección de descenso más pronunciado.
 > 
 > El **learning rate** controla el tamaño del paso:
-> - Si es **demasiado pequeña**, la convergencia es muy lenta.
+> - Si es **demasiado pequeño**, la convergencia es muy lenta.
 > - Si es **demasiado grande**, el algoritmo puede oscilar o divergir.
 > - Si está bien ajustada, el descenso es estable y eficiente.
 > ![[Pasted image 20260319192713.png]]
