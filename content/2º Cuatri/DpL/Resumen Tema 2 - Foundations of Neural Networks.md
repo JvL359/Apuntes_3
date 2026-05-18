@@ -184,8 +184,8 @@
 > ![[Pasted image 20260317125838.png]]
 > 
 > Un aspecto clave es el **learning rate**:
-> - si es **demasiado pequeña**, la convergencia es muy lenta;
-> - si es **adecuada**, el entrenamiento converge de forma suave y estable;
+> - si es **demasiado pequeño**, la convergencia es muy lenta;
+> - si es **adecuado**, el entrenamiento converge de forma suave y estable;
 > - si es **demasiado grande**, puede producir oscilaciones, _overshooting_ o incluso divergencia.
 > ![[Pasted image 20260317125902.png]]
 > 
