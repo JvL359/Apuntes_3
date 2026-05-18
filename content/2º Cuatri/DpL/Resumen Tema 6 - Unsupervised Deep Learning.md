@@ -18,7 +18,8 @@
 > - extracción de características
 #### 2. Entrenamiento y visión probabilística
 > El entrenamiento clásico de un autoencoder busca minimizar la diferencia entre la entrada original y su reconstrucción. La función de pérdida más habitual es el **Mean Squared Error (MSE)**:  $$\mathcal{L}_{\text{MSE}} = |x - \hat{x}|^2$$Aquí, el encoder aprende la proyección $x \to h$ y el decoder la proyección $h \to \hat{x}$, tratando de que la reconstrucción sea lo más parecida posible a la entrada original.
-> Además de esta formulación determinista, también hay una **visión probabilística** en la que encoder y decoder se modelan como distribuciones:  $$p_{\text{encoder}}(h \mid x), \qquad p_{\text{decoder}}(x \mid h)$$En este caso, el modelo ya no produce una única representación o reconstrucción, sino una **distribución** sobre posibles valores. El objetivo pasa a expresarse como maximización de la probabilidad de reconstrucción:  $$\max_{\theta} \log p_{\text{decoder}}(x \mid h; \theta) \quad \Leftrightarrow \quad \min_{\theta} - \log p_{\text{decoder}}(x \mid h; \theta)$$Esta formulación estocástica permite:
+> Además de esta formulación determinista, también hay una **visión probabilística** en la que encoder y decoder se modelan como distribuciones:  $$p_{\text{encoder}}(h \mid x), \qquad p_{\text{decoder}}(x \mid h)$$![[Pasted image 20260518125515.png]]
+> En este caso, el modelo ya no produce una única representación o reconstrucción, sino una **distribución** sobre posibles valores. El objetivo pasa a expresarse como maximización de la probabilidad de reconstrucción:  $$\max_{\theta} \log p_{\text{decoder}}(x \mid h; \theta) \quad \Leftrightarrow \quad \min_{\theta} - \log p_{\text{decoder}}(x \mid h; \theta)$$Esta formulación estocástica permite:
 > - aprender espacios latentes más flexibles,
 > - introducir aleatoriedad beneficiosa durante entrenamiento o inferencia,
 > - mejorar la robustez frente a pequeñas perturbaciones,
