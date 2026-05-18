@@ -422,7 +422,8 @@
 > En **deep learning**, en cambio, se suelen obtener modelos diferentes mediante: **distintas inicializaciones aleatorias**, **data augmentation**, y la **convergencia hacia distintos mínimos locales**. En cuanto a su funcionamiento, cada modelo puede **sobreajustar de manera distinta**, el promedio entre modelos suele **reducir varianza**, normalmente puede aportar una mejora de 
 > **1–3% en accuracy**, pero a costa de un **tiempo de entrenamiento más largo**. Hay dos esquemas principales, **Bagging** que es una combinación en **paralelo** de varios modelos, y **Boosting** que es una combinación **secuencial** de modelos. ![[Pasted image 20260320114842.png]]
 > 
-> Los ensembles son útiles cuando se busca exprimir el rendimiento final del sistema, especialmente **cuando la capacidad computacional lo permite**, y **cuando es importante obtener el último extra de precisión**. ![[Pasted image 20260320115047.png]]
+> Los ensembles son útiles cuando se busca exprimir el rendimiento final del sistema, especialmente **cuando la capacidad computacional lo permite**, y **cuando es importante obtener el último extra de precisión**. 
+> ![[Pasted image 20260320115047.png]]
 > 
 > En resumen, un ensemble no cambia la arquitectura básica de cada red, sino que combina varias redes entrenadas de forma diferente para conseguir una predicción final más estable y con mejor capacidad de generalización.
 #### 8. Transfer Learning
