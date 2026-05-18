@@ -290,8 +290,6 @@ $$
 > **Idea clave:**  
 > La profundidad es útil y necesaria para aprender representaciones complejas, pero debe ir acompañada de buenas técnicas de entrenamiento y de estrategias que mejoren la robustez del modelo.
 
-
-
 ### VI. Other Types of Convolutions & Implementations
 #### 1. Up-Convolution
 > La **up-convolution** (también llamada **transposed convolution** o **deconvolution**) se utiliza para transformar un mapa de características pequeño en una salida de **mayor resolución espacial**.
