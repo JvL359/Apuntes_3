@@ -137,7 +137,7 @@
 >    - Actualizar parámetros: $\large x_t=x_{t-1}-\frac{\eta}{\sqrt{s_t}+\epsilon}\cdot g_t$ 
 > 3. Repetir hasta convergencia.
 > 
-> En resumen, Adagrad hace que la tasa de aprendizaje vaya decreciendo automáticamente en las direcciones donde ya se ha aprendido mucho. Por eso puede funcionar bien incluso con valores iniciales de $\eta$ relativamente grandes. No usa una única learning rate fija para todos los parámetros, sino que usa una learning rate adaptativa por coordenada basada en el historial acumulado de gradientes.
+> En resumen, Adagrad hace que la tasa de aprendizaje vaya decreciendo automáticamente en las direcciones donde ya se ha aprendido mucho. Por eso puede funcionar bien incluso con valores iniciales de $\eta$ relativamente grandes. No usa un único learning rate fijo para todos los parámetros, sino que usa un learning rate adaptativo por coordenada basado en el historial acumulado de gradientes.
 #### 7. RMSProp
 > **RMSProp** es un método de optimización adaptativo diseñado para corregir una limitación importante de Adagrad: en Adagrad, el estado acumulado crece sin límite y eso hace que la tasa de aprendizaje efectiva se vuelva demasiado pequeña con el paso de las iteraciones.
 > 
