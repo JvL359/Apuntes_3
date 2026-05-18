@@ -190,3 +190,5 @@
 > ![[Pasted image 20260317125902.png]]
 > 
 > En resumen, gradient descent busca minimizar la pérdida actualizando los parámetros paso a paso, y en la práctica suele usarse en su versión **mini-batch**, con especial cuidado en la elección de la **learning rate**.
+
+La sección de resúmenes continúa en [[Resumen Tema 3 - Convolutional NNs & Modern CNNs]]

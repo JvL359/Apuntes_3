@@ -456,3 +456,5 @@
 > Finalmente, se muestra una **taxonomía** del transfer learning: ![[Pasted image 20260320115811.png]]
 >
 > En resumen, el **transfer learning** reutiliza conocimiento aprendido previamente para reducir el coste de entrenamiento y mejorar el aprendizaje en nuevas tareas o dominios, especialmente cuando los datos son escasos o entrenar desde cero resulta demasiado caro.
+
+La sección de resúmenes continúa en [[Resumen Tema 5 - Recurrent Neural Networks]]

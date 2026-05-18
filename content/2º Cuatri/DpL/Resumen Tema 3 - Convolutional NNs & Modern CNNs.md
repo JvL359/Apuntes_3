@@ -395,3 +395,5 @@ $$
 > - `output_size`: tamaño espacial objetivo de la reconstrucción.
 > 
 > En resumen, `unfold` y `fold` son herramientas útiles para implementar convoluciones de forma explícita, manipular parches de imagen y entender cómo una CNN procesa localmente la información espacial.
+
+La sección de resúmenes continúa en [[Resumen Tema 4 - Optimization & Regularization]]

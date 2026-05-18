@@ -231,3 +231,5 @@
 > Después, el **estado oculto final** se actualiza combinando el estado anterior y el estado candidato:  $$H_t=Z_t\odot H_{t-1}+(1-Z_t)\odot \tilde{H}_t$$Así, la **update gate** decide cuánto del pasado se mantiene y cuánto se reemplaza por la nueva información.
 > 
 > En conjunto, las GRUs simplifican la arquitectura de las LSTM, pero siguen permitiendo controlar qué información pasada se conserva y cuánto contenido nuevo se incorpora al estado oculto.
+
+La sección de resúmenes continúa en [[Resumen Tema 6 - Unsupervised Deep Learning]]
