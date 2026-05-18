@@ -65,7 +65,7 @@
 >
 > El ruido actúa además como una forma de **regularización**, ya que fuerza al modelo a aprender características **estables** e **invariantes frente a pequeñas perturbaciones**. Por eso, los DAEs no solo sirven para limpiar datos corruptos, sino también para aprender representaciones más útiles que las de un autoencoder entrenado únicamente a copiar la entrada.
 #### 3. Contractive Auto-Encoders
-> Los **Contractive Autoencoders (CAE)** buscan aprender representaciones **robustas frente a pequeñas perturbaciones** en la entrada. La idea central es imponer que el encoder $f(x)$ sea **contractivo** en el entorno de los datos de entrenamiento, es decir, que pequeños cambios en la entrada produzcan cambios pequeños en la representación oculta.
+> Los **Contractive Autoencoders (CAEs)** buscan aprender representaciones **robustas frente a pequeñas perturbaciones** en la entrada. La idea central es imponer que el encoder $f(x)$ sea **contractivo** en el entorno de los datos de entrenamiento, es decir, que pequeños cambios en la entrada produzcan cambios pequeños en la representación oculta.
 > 
 > Esta propiedad introduce una **invarianza local**: se preservan las variaciones esenciales de los datos, mientras que se suprimen las variaciones irrelevantes. Como resultado, las características aprendidas son menos sensibles al ruido y reflejan mejor la estructura intrínseca de los datos. A diferencia de los _denoising autoencoders_, que fuerzan robustez a través de la reconstrucción de entradas corruptas, los CAE **penalizan directamente la sensibilidad de la representación oculta** ante cambios en la entrada.
 > 
