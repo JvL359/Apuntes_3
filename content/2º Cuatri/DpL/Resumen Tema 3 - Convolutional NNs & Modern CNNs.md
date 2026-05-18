@@ -110,7 +110,7 @@ $$
 #### 4. Pipeline Completo de la CNN
 > El pipeline típico de una **CNN** comienza con una **imagen de entrada**, sobre la que se aplican sucesivamente varias capas de **convolución + activación** (normalmente ReLU). Estas capas se encargan de extraer características locales de la imagen, como bordes, texturas y patrones cada vez más complejos.
 > 
-> Entre bloques convolucionales se suelen introducir capas de **pooling**, que reducen la dimensión espacial de los mapas de características. Esto permite disminuir el coste computacional, conservar la información más relevante y hacer que la representación sea más compacta.
+> Entre bloques convolucionales se suelen introducir capas de **pooling**, que reducen la dimensión espacial de los feature maps. Esto permite disminuir el coste computacional, conservar la información más relevante y hacer que la representación sea más compacta.
 > 
 > Tras varios bloques de **convolución + activación + pooling**, la red obtiene una representación de alto nivel de la imagen. Esa representación se transforma en un vector mediante la operación de **flatten**, que prepara la salida convolucional para las capas finales de clasificación.
 > 
