@@ -4,7 +4,7 @@
 > ![[Pasted image 20260325174402.png]]
 > Un autoencoder se compone de tres partes:
 > - **Encoder**: transforma la entrada $x$ en una representación latente $h$.
-> - **Latent layer**: contiene una representación comprimida del dato, normalmente de menor dimensión que la entrada.
+> - **Latent layer**: contiene una representación comprimida del input, normalmente de menor dimensión que la entrada.
 > - **Decoder**: reconstruye la entrada a partir de la representación latente.
 > 
 > De forma general:  $h = f(x), \qquad r = g(h), \qquad r \approx x$
