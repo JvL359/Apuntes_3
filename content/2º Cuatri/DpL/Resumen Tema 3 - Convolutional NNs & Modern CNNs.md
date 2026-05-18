@@ -123,7 +123,7 @@ $$
 > El **pooling** es una operación de **submuestreo** que reduce el tamaño espacial de los **feature maps** sin cambiar la naturaleza del objeto representado. La idea es que una imagen o un patrón relevante puede seguir reconociéndose aunque se represente con menos resolución.
 > 
 > Sus dos funciones principales son:
-> - **Reducir el tamaño** de los mapas de características, disminuyendo el coste computacional.
+> - **Reducir el tamaño** de los feature maps, disminuyendo el coste computacional.
 > - **Agregar información local**, ayudando a construir características más globales.
 > 
 > Un operador de pooling consiste en una **ventana de tamaño fijo** que recorre el mapa de entrada y produce un único valor por cada región visitada. A diferencia de una convolución, **no tiene parámetros aprendibles**: no hay kernel ni pesos que entrenar. Es una operación determinista que aplica una regla simple sobre cada ventana.
