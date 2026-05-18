@@ -1,6 +1,6 @@
 ### I. Introduction
 #### 1. Idea y Contexto
-> Las **CNNs** surgen porque las redes **fully connected** no son la mejor opción para trabajar con imágenes. En una imagen, los patrones visuales suelen ser **locales** y pueden aparecer en distintas posiciones, mientras que una MLP trata todas las entradas como independientes y no aprovecha esa estructura espacial. Por eso, las fully connected no son naturalmente **invariantes o equivariantes** a cambios de posición, y además requieren muchos parámetros.
+> Las **CNNs** surgen porque las redes **fully connected** no son la mejor opción para trabajar con imágenes. En una imagen, los patrones visuales suelen ser **locales** y pueden aparecer en distintas posiciones, mientras que un MLP trata todas las entradas como independientes y no aprovecha esa estructura espacial. Por eso, las fully connected no son naturalmente **invariantes o equivariantes** a cambios de posición, y además requieren muchos parámetros.
 > 
 > La idea central es que en imágenes no hace falta aprender un detector distinto para cada posición: el **mismo patrón** puede reaparecer en muchos lugares, así que conviene **compartir parámetros** y buscar patrones locales con un número mucho menor de pesos. Esto permite detectar características pequeñas (bordes, texturas o partes de objetos) y reutilizarlas en toda la imagen.
 > 
