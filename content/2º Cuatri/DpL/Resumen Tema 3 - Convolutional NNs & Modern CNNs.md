@@ -46,16 +46,7 @@
 #### 4. Convolución como Multiplicación Matricial
 > Aunque la convolución se suele entender como un **kernel que se desliza** sobre la entrada, también puede verse como una **multiplicación matricial estructurada**. La diferencia con la multiplicación matricial usual es que esta combina filas y columnas completas, mientras que la convolución trabaja sobre **ventanas locales** y realiza productos elemento a elemento dentro de cada región.
 > 
-> En una dimensión, la convolución puede escribirse como una multiplicación entre el vector de entrada y una **matriz de Toeplitz**, es decir, una matriz cuyas diagonales son constantes. Si $h$ es el kernel y $x$ la entrada, entonces:  $$y = h * x$$puede representarse matricialmente usando una matriz construida a partir de copias desplazadas del kernel. De forma equivalente, también puede escribirse como: $$
-y^{T} = [h_1\ h_2\ \cdots\ h_m]
-\begin{bmatrix}
-x_1 & x_2 & x_3 & \cdots & x_n & 0 & \cdots & 0 \\
-0 & x_1 & x_2 & \cdots & x_{n-1} & x_n & \cdots & 0 \\
-\vdots & \ddots & \ddots & \ddots & \ddots & \ddots & \ddots & \vdots \\
-0 & \cdots & 0 & x_1 & x_2 & \cdots & x_{n-1} & x_n
-\end{bmatrix}
-$$  
-> lo que muestra que la convolución puede interpretarse como una operación lineal.
+> En una dimensión, la convolución puede escribirse como una multiplicación entre el vector de entrada y una **matriz de Toeplitz**, es decir, una matriz cuyas diagonales son constantes. Si $h$ es el kernel y $x$ la entrada, entonces:  $$y = h * x$$puede representarse matricialmente usando una matriz construida a partir de copias desplazadas del kernel. De forma equivalente, también puede escribirse como: $$y^{T} = [h_1\ h_2\ \cdots\ h_m] \begin{bmatrix} x_1 & x_2 & x_3 & \cdots & x_n & 0 & \cdots & 0 \\ 0 & x_1 & x_2 & \cdots & x_{n-1} & x_n & \cdots & 0 \\ \vdots & \ddots & \ddots & \ddots & \ddots & \ddots & \ddots & \vdots \\ 0 & \cdots & 0 & x_1 & x_2 & \cdots & x_{n-1} & x_n \end{bmatrix}$$lo que muestra que la convolución puede interpretarse como una operación lineal.
 > 
 > En dos dimensiones, la misma idea se mantiene. Si $A$ es la imagen de entrada y $K$ el kernel, la convolución $A*K$ puede representarse como:  $Mv^T = v'$ donde:
 > - $v$ es la imagen $A$ vectorizada fila a fila
