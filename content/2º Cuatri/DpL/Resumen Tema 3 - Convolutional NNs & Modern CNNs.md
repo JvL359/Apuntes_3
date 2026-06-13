@@ -248,7 +248,7 @@
 > 
 > **Resumen rápido**
 > - **LeNet-5**: CNN clásica y simple; muy útil para entender la estructura base.
-> - **AlexNet**: CNN más profunda y potente; marca un gran avance en visión por computador.
+> - **AlexNet**: CNN más profunda y potente; marca un gran avance en visión por ordenador.
 > - **VGGNet**: arquitectura muy profunda y regular, basada en bloques repetidos y convoluciones pequeñas.
 > 
 > En conjunto, estos modelos muestran la evolución típica de las CNN: más profundidad, más canales, bloques más estructurados y mejores representaciones jerárquicas.
