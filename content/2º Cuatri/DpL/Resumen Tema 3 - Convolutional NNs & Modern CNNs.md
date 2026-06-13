@@ -71,7 +71,7 @@
 > 
 > - **Dilation** (o _atrous convolution_) separa los elementos del kernel, aumentando su campo receptivo sin incrementar el número de parámetros. Su objetivo es capturar contexto más amplio, aunque puede perder detalle local fino. Para un factor de dilatación $d$, la convolución se escribe como: $$H_{i,j}=\sum_{a=-\Delta}^{\Delta}\sum_{b=-\Delta}^{\Delta}V_{a,b},X_{i+da,;j+db}$$Aquí, $d$ separa las posiciones del kernel y hace que este “vea” una región mayor de la entrada.
 > 
-> En la fórmula general, combinando **padding**, **stride** y **dilation**, el tamaño de salida queda: $$o_h=\left[ \frac{n_h+2p_h-d,(k_h-1)-1}{s_h}\right]+1, \quad o_w=\left[ \frac{n_w+2p_w-d,(k_w-1)-1}{s_w}\right]+1$$![[Pasted image 20260318113229.png]]
+> En la fórmula general, combinando **padding**, **stride** y **dilation**, el tamaño de salida queda: $$o_h=\left[ \frac{n_h+2p_h-d(k_h-1)-1}{s_h}\right]+1, \quad o_w=\left[ \frac{n_w+2p_w-d(k_w-1)-1}{s_w}\right]+1$$![[Pasted image 20260318113229.png]]
 > 
 > En resumen:
 > - **Padding** controla la pérdida de borde y puede mantener el tamaño espacial.
