@@ -396,7 +396,7 @@
 > 
 > En conjunto una buena planificación del learning rate mejora la **convergencia** y la **estabilidad**, evita que una tasa demasiado alta produzca **oscilaciones o divergencia**, y evita que una tasa demasiado baja provoque **convergencia lenta**.
 > 
-> En resumen, los schedulers permiten controlar la evolución temporal de el learning rate para adaptar mejor el proceso de optimización a las distintas fases del entrenamiento: exploración inicial, estabilización y refinamiento final.
+> En resumen, los schedulers permiten controlar la evolución temporal del learning rate para adaptar mejor el proceso de optimización a las distintas fases del entrenamiento: exploración inicial, estabilización y refinamiento final.
 #### 6. Regularization
 > La **regularización** añade una penalización a la función objetivo para controlar la complejidad del modelo a través de sus parámetros, mediante las **normas $L_p$** que miden el tamaño de un vector: $$L_p(x)=|x|_p=\left(\sum_{i=1}^{n}|x|^p\right)^{1/p}$$![[Pasted image 20260320114505.png]]
 > La idea es tomar como referencia la función más simple y medir cuán compleja es una solución observando la magnitud de sus pesos.
