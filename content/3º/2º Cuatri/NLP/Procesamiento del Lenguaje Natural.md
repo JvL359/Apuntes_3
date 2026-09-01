@@ -2,5 +2,5 @@
 - [[Tema 2 - Text Classification I]]
 - [[Tema 3 - Word Embeddings]]
 - [[Tema 4 - Neural Language Models]]
-- [[2º Cuatri/NLP/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
+- [[3º/2º Cuatri/NLP/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
 - [[Guía Docente - NLP]]

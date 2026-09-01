@@ -9,14 +9,14 @@
 - [[Tema 1 - Frameworks]]
 - [[Tema 2 - Neural Networks]]
 - [[Tema 3 - Convolutional Neural Networks]]
-- [[2º Cuatri/DpL/Clase/Tema 4 - Optimization & Regularization|Tema 4 - Optimization & Regularization]]
-- [[2º Cuatri/DpL/Clase/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
+- [[3º/2º Cuatri/DpL/Clase/Tema 4 - Optimization & Regularization|Tema 4 - Optimization & Regularization]]
+- [[3º/2º Cuatri/DpL/Clase/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
 
 ### III. Syllabus
 - [[Tema 1 - Frameworks & Technologies]]
 - [[Tema 2 - Foundations of Neural Networks]]
 - [[Tema 3 - Convolutional NNs & Modern CNNs]]
-- [[2º Cuatri/DpL/Syllabus/Tema 4 - Optimization & Regularization|Tema 4 - Optimization & Regularization]]
-- [[2º Cuatri/DpL/Syllabus/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
+- [[3º/2º Cuatri/DpL/Syllabus/Tema 4 - Optimization & Regularization|Tema 4 - Optimization & Regularization]]
+- [[3º/2º Cuatri/DpL/Syllabus/Tema 5 - Recurrent Neural Networks|Tema 5 - Recurrent Neural Networks]]
 ### IV. Guía
 - [[Guía Docente - DpL]]

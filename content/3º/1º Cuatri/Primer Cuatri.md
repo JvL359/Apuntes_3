@@ -1,4 +1,4 @@
-- [[1º Cuatri/BD/Big Data]]
+- [[Big Data]]
 - [[Computer Vision]]
 - [[ForeCasting]]
 - [[Geometría Computacional]]
