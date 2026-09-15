@@ -1,0 +1,7 @@
+interface:
+  display_name: "Apuntes ICAI"
+  short_description: "Redacta apuntes de ICAI desde materiales"
+  default_prompt: "Usa $apuntes-icai en modo crear para redactar un tema con la asignatura, los materiales ordenados y el archivo de destino que indicaré."
+
+policy:
+  allow_implicit_invocation: false
