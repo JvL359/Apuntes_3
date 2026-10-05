@@ -9,3 +9,6 @@ tsconfig.tsbuildinfo
 private/
 .replit
 replit.nix
+
+# Materiales docentes: conservar únicamente en local
+**/_materiales/
