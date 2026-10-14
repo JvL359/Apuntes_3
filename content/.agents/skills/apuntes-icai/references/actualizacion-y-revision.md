@@ -4,6 +4,8 @@
 
 Lee la nota completa antes de editarla. Conserva su información válida, estructura útil, enlaces e imágenes. Limita el cambio a lo pedido y a inconsistencias del mismo tema que sea necesario corregir para integrar el material.
 
+Antes de escribir, ejecuta `audit_notes.py snapshot` con la carpeta de la asignatura. Esa línea base temporal registra incluso cambios previos del usuario y permite atribuir a esta ejecución solo los cambios posteriores. No exige un repositorio limpio ni sustituye la revisión semántica.
+
 No uses una actualización como oportunidad para reescribir toda la nota. No uses una revisión para imponer un estilo uniforme a costa de contenido correcto o matices útiles.
 
 ## Modo actualizar
@@ -44,3 +46,5 @@ Si la nota no tiene frontmatter, añádelo al comienzo. Si ya existe:
 Antes de aplicar un cambio, comprueba que no esté ya representado con otras palabras. No dupliques definiciones, ejemplos, fórmulas, fragmentos de código ni conclusiones.
 
 Al terminar una actualización, razona cómo se comportaría una segunda ejecución inmediata con las mismas entradas: debería detectar cobertura completa y producir cero cambios.
+
+Para verificar una actualización sin novedades, ejecuta el auditor con `--baseline` y `--expect-no-change`, omitiendo `--mode` para conservar el estado anterior. Reutiliza las imágenes antiguas; los nuevos recortes generan nombres estables. Un hash de PDF distinto invalida su preparación temporal, pero no demuestra por sí solo que haya contenido nuevo: compara las páginas afectadas antes de editar.

@@ -2,12 +2,15 @@
 
 Realiza esta segunda pasada después de redactar y antes de comunicar la finalización. Corrige directamente los fallos seguros que encuentres y vuelve a comprobar las partes afectadas.
 
+Empieza con `audit_notes.py check`, usando la línea base y el mapa temporal cuando estén disponibles; consulta [herramientas.md](herramientas.md) para la sintaxis. El script verifica YAML, estado, fences, encabezados, referencias de imágenes, cobertura registrada y alcance de cambios. Los errores seguros deben resolverse; los avisos de numeración, matemáticas, resumen y carga visual requieren inspección. Que termine sin errores no demuestra cobertura ni corrección conceptual.
+
 ## 1. Cobertura y fidelidad
 
 - Contrasta el mapa de cobertura con todos los materiales y páginas indicados.
 - Comprueba que ningún apartado relevante, condición, excepción, demostración, procedimiento o interpretación haya quedado fuera.
 - Confirma que las repeticiones entre fuentes se hayan fusionado sin perder matices.
 - Busca afirmaciones, ejemplos, resultados o conclusiones no respaldados por los materiales o por una aclaración externa de alta confianza.
+- Aplica la distinción entre error, hipótesis omitida y convención explicada en [algoritmos-y-errores.md](algoritmos-y-errores.md).
 - Confirma que no aparezcan citas ni referencias visibles, salvo en callouts de corrección manifiesta.
 - Verifica que una contradicción no resuelta haya provocado una consulta al usuario y no una elección silenciosa.
 
@@ -46,9 +49,10 @@ Realiza esta segunda pasada después de redactar y antes de comunicar la finaliz
 ## 6. Alcance e idempotencia
 
 - Inspecciona el diff final cuando esté disponible.
+- Contrasta también el snapshot temporal con los archivos finales. Esto funciona aunque Git incluya cambios anteriores o no permita leer `HEAD`.
 - Confirma que solo hayan cambiado la nota solicitada, las imágenes estrictamente necesarias y, si faltaba, la carpeta `imgs/`.
 - Confirma que `_materiales/`, el índice y otros temas sigan intactos.
-- En modo `actualizar`, si no había novedades, el diff debe estar vacío.
+- En modo `actualizar`, si no había novedades, los cambios atribuibles a esta ejecución deben estar vacíos, aunque hubiera cambios anteriores del usuario.
 - Evalúa una repetición inmediata con las mismas entradas: no debería añadir, reordenar ni reformular nada.
 - No prepares commits ni alteres el área de staging.
 
